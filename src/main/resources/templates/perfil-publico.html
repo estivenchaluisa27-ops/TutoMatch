@@ -7,7 +7,7 @@
 <head>
 <body>
     <th:block layout:fragment="content">
-        <div class="row">
+        <div class="row stagger-fade stagger-fade-1">
             <div class="col-12 mb-4">
                 <a th:href="@{/buscar}" class="text-decoration-none text-muted">
                     <i class="bi bi-arrow-left me-1"></i>Volver a resultados
@@ -18,14 +18,14 @@
             <div class="col-lg-4 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-body text-center">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 96px; height: 96px; font-size: 2.5rem; font-weight: bold;">
+                        <div class="avatar-circle avatar-circle-lg mx-auto mb-3">
                             <span th:text="${#strings.substring(tutor.usuario.nombreCompleto, 0, 1)}">I</span>
                         </div>
                         <h4 class="fw-bold" th:text="${tutor.usuario.nombreCompleto}">Nombre</h4>
                         <p class="text-muted small mb-2">
                             <i class="bi bi-mortarboard me-1"></i>Semestre <span th:text="${tutor.semestre}">5</span>
                         </p>
-                        <div class="mb-3">
+                        <div class="mb-3 star-rating">
                             <i class="bi bi-star-fill text-warning"></i>
                             <span class="fw-bold fs-5 ms-1" th:text="${promedio}">5.0</span>
                             <span class="text-muted" th:text="'(' + ${totalResenas} + ' reseña' + (${totalResenas} == 1 ? '' : 's') + ')'">(0 reseñas)</span>
@@ -149,7 +149,7 @@
                                     <span class="fw-semibold small" th:text="${r.reserva.solicitante.nombreCompleto}">Estudiante</span>
                                     <span class="small text-muted" th:text="${#temporals.format(r.fecha, 'dd/MM/yyyy')}">01/01/2026</span>
                                 </div>
-                                <div class="mb-1">
+                                <div class="mb-1 star-rating">
                                     <th:block th:each="i : ${#numbers.sequence(1, 5)}">
                                         <i th:if="${i <= r.calificacion}" class="bi bi-star-fill text-warning small"></i>
                                         <i th:unless="${i <= r.calificacion}" class="bi bi-star text-warning small"></i>
@@ -162,10 +162,10 @@
                 </div>
 
                 <!-- CTA -->
-                <div th:if="${not authenticated}" class="card shadow-sm mt-3 bg-primary text-white">
-                    <div class="card-body text-center">
+                <div th:if="${not authenticated}" class="card shadow-sm mt-3" style="background: linear-gradient(135deg, var(--brand) 0%, #1e3a5f 100%); border: none;">
+                    <div class="card-body text-center text-white">
                         <h5 class="card-title fw-bold">¿Te interesa este tutor?</h5>
-                        <p class="card-text mb-3">Reg&iacute;strate o inicia sesi&oacute;n para solicitar una tutor&iacute;a.</p>
+                        <p class="card-text mb-3 opacity-90">Reg&iacute;strate o inicia sesi&oacute;n para solicitar una tutor&iacute;a.</p>
                         <a th:href="@{/auth/registro}" class="btn btn-light me-2">Registrarse</a>
                         <a th:href="@{/auth/login}" class="btn btn-outline-light">Iniciar sesi&oacute;n</a>
                     </div>

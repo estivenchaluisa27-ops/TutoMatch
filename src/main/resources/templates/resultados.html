@@ -7,7 +7,7 @@
 <head>
 <body>
     <th:block layout:fragment="content">
-        <div class="row">
+        <div class="row stagger-fade stagger-fade-1">
             <div class="col-12 mb-4">
                 <h1 class="fw-bold">
                     <i class="bi bi-search me-2"></i>Buscar Tutores
@@ -15,9 +15,9 @@
             </div>
 
             <!-- Filtros -->
-            <div class="col-lg-3 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold">
+            <div class="col-lg-3 mb-4 stagger-fade stagger-fade-2">
+                <div class="card">
+                    <div class="card-header fw-bold">
                         <i class="bi bi-funnel me-2"></i>Filtros
                     </div>
                     <div class="card-body">
@@ -61,8 +61,8 @@
             </div>
 
             <!-- Resultados -->
-            <div class="col-lg-9">
-                <div th:if="${#lists.isEmpty(resultados)}" class="card shadow-sm">
+            <div class="col-lg-9 stagger-fade stagger-fade-3">
+                <div th:if="${#lists.isEmpty(resultados)}" class="card">
                     <div class="card-body text-center text-muted py-5">
                         <i class="bi bi-inbox fs-1 d-block mb-3"></i>
                         <p class="mb-0">No se encontraron tutores con los filtros seleccionados.</p>
@@ -76,11 +76,11 @@
                         <span th:text="${#lists.size(resultados)}">0</span> tutor(es) encontrado(s)
                     </p>
                     <div class="row row-cols-1 row-cols-md-2 g-3">
-                        <div th:each="t : ${resultados}" class="col">
-                            <div class="card h-100 shadow-sm">
+                        <div th:each="t : ${resultados}" class="col card-fade-in" th:style="'animation-delay: ' + (${t.id} * 0.04) + 's'">
+                            <div class="card h-100">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center mb-2">
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; font-size: 1.2rem; font-weight: bold;">
+                                        <div class="avatar-circle me-3">
                                             <span th:text="${#strings.substring(t.usuario.nombreCompleto, 0, 1)}">I</span>
                                         </div>
                                         <div>
@@ -89,7 +89,7 @@
                                         </div>
                                     </div>
                                     <p class="card-text small text-muted mb-2" th:text="${#strings.abbreviate(t.descripcion, 80)}">Descripción</p>
-                                    <div class="d-flex align-items-center mb-2">
+                                    <div class="d-flex align-items-center mb-2 star-rating">
                                         <span>
                                             <i class="bi bi-star-fill text-warning"></i>
                                             <span class="fw-semibold ms-1" th:text="${t.calificacionPromedio}">5.0</span>
