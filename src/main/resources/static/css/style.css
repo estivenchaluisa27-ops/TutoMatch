@@ -6,6 +6,12 @@
 
 /* ---------- Color System ---------- */
 :root {
+    /* Bootstrap variable overrides */
+    --bs-primary: #0d9488;
+    --bs-primary-rgb: 13, 148, 136;
+    --bs-link-color: #0d9488;
+    --bs-link-hover-color: #0f766e;
+
     --bg-primary: #f8f6f1;
     --bg-card: #ffffff;
     --bg-elevated: #ffffff;
@@ -13,9 +19,9 @@
     --text-secondary: #5b5349;
     --text-muted: #8a8076;
 
-    --brand: #1e40af;
-    --brand-light: #3b82f6;
-    --brand-dark: #1e3a5f;
+    --brand: #0d9488;
+    --brand-light: #14b8a6;
+    --brand-dark: #0f766e;
     --accent: #f59e0b;
     --accent-light: #fbbf24;
 
@@ -52,7 +58,7 @@ body {
     color: var(--text-primary);
     background-color: var(--bg-primary);
     background-image:
-        radial-gradient(ellipse 60% 50% at 50% -10%, rgba(30, 64, 175, 0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 50% -10%, rgba(13, 148, 136, 0.04) 0%, transparent 60%),
         radial-gradient(ellipse 40% 40% at 80% 110%, rgba(245, 158, 11, 0.04) 0%, transparent 60%),
         url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
     -webkit-font-smoothing: antialiased;
@@ -64,7 +70,6 @@ body {
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: var(--text-primary);
 }
 
 h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
@@ -143,12 +148,12 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
 .btn-primary:hover {
     background-color: var(--brand-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
 
 .btn-primary:active {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(30, 64, 175, 0.2);
+    box-shadow: 0 2px 6px rgba(13, 148, 136, 0.2);
 }
 
 .btn-outline-primary {
@@ -160,7 +165,7 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
     background-color: var(--brand);
     border-color: var(--brand);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
 }
 
 .btn-light {
@@ -194,7 +199,7 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
 }
 
 .form-control:focus, .form-select:focus {
-    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
     border-color: var(--brand);
     background: #ffffff;
 }
@@ -208,7 +213,7 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
 .hero-section {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--brand) 0%, #1e3a5f 100%);
+    background: linear-gradient(135deg, var(--brand) 0%, #0f766e 100%);
 }
 
 .hero-section::before {
@@ -216,7 +221,7 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(20, 184, 166, 0.2) 0%, transparent 60%),
         radial-gradient(ellipse 40% 40% at 80% 20%, rgba(245, 158, 11, 0.1) 0%, transparent 60%);
     pointer-events: none;
 }
@@ -267,8 +272,8 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
 
 /* ---------- Icon Cards (Materias) ---------- */
 .card-icon {
-    width: 52px;
-    height: 52px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -276,9 +281,20 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
                 filter 0.3s ease;
 }
 
-.card-icon svg {
+.card-icon > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
+}
+
+.card-icon svg {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 40px;
+    max-height: 40px;
+    display: block;
     fill: currentColor;
     transition: transform 0.35s var(--ease-bounce),
                 filter 0.3s ease;
@@ -399,21 +415,21 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
     font-size: 1.2rem;
     color: #fff;
     background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
-    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.2);
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.2);
     flex-shrink: 0;
     transition: transform 0.3s var(--ease-bounce), box-shadow 0.3s ease;
 }
 
 .card:hover .avatar-circle {
     transform: scale(1.05);
-    box-shadow: 0 4px 16px rgba(30, 64, 175, 0.3);
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.3);
 }
 
 .avatar-circle-lg {
     width: 96px;
     height: 96px;
     font-size: 2.5rem;
-    box-shadow: 0 4px 16px rgba(30, 64, 175, 0.25);
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.25);
 }
 
 /* ---------- Badges ---------- */
@@ -452,7 +468,7 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
 }
 
 .list-group-item:hover {
-    background: rgba(30, 64, 175, 0.02);
+    background: rgba(13, 148, 136, 0.02);
     padding-left: 1.25rem;
 }
 
@@ -476,7 +492,7 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
 }
 
 .table tbody tr:hover {
-    background: rgba(30, 64, 175, 0.02);
+    background: rgba(13, 148, 136, 0.02);
 }
 
 /* ---------- Footer ---------- */
@@ -515,7 +531,7 @@ footer p {
 .input-group-lg .form-control:focus {
     background: #ffffff;
     border-color: var(--brand);
-    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
 }
 
 .input-group-lg .btn {
@@ -527,6 +543,7 @@ footer p {
 .text-muted { color: var(--text-muted) !important; }
 .bg-light { background-color: #f0ede7 !important; }
 .bg-primary { background-color: var(--brand) !important; }
+.border-primary { border-color: var(--brand) !important; }
 
 a {
     color: var(--brand);

@@ -46,7 +46,7 @@
                                         <th>Icono</th>
                                         <th>Nombre</th>
                                         <th>Categor&iacute;a</th>
-                                        <th>Semestre Ref.</th>
+                                        <th>Descripci&oacute;n</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -72,10 +72,7 @@
                                             <td>
                                                 <span class="badge bg-info" th:text="${m.categoria}">Categor&iacute;a</span>
                                             </td>
-                                            <td>
-                                                <span th:if="${m.semestreReferencial != null}" th:text="${m.semestreReferencial}">5</span>
-                                                <span th:unless="${m.semestreReferencial != null}" class="text-muted">—</span>
-                                            </td>
+                                            <td class="small" th:text="${m.descripcion}">Descripci&oacute;n</td>
                                             <td>
                                                 <button type="button" class="btn btn-outline-primary btn-sm"
                                                         data-bs-toggle="modal"

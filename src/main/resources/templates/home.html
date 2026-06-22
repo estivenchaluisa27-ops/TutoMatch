@@ -59,7 +59,7 @@
                                         <i th:if="${m.icono == null}" class="bi bi-book fs-3" th:style="'color: var(--categoria-' + ${#strings.toLowerCase(m.categoria)} + ')'"></i>
                                     </div>
                                     <h6 class="card-title fw-semibold mb-1" th:text="${m.nombre}">Materia</h6>
-                                    <small class="text-muted" th:text="'Semestre ' + ${m.semestreReferencial}">Semestre</small>
+                                    <small class="text-muted text-truncate d-block" th:text="${m.descripcion}">Descripción</small>
                                 </div>
                             </div>
                         </a>
