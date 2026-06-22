@@ -29,8 +29,8 @@
                         </a>
                     </li>
 
-                    <!-- Usuario autenticado -->
-                    <li th:if="${authenticated}" class="nav-item dropdown">
+                    <!-- Usuario autenticado (NO admin) -->
+                    <li th:if="${authenticated && !isAdmin}" class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle fs-4"></i>
                             <span class="d-none d-md-inline">Mi Cuenta</span>
@@ -41,8 +41,23 @@
                             <li><a class="dropdown-item" href="/tutor/mi-perfil"><i class="bi bi-eye me-2"></i>Ver Mi Perfil</a></li>
                             <li><a class="dropdown-item" href="/tutor/perfil"><i class="bi bi-person-badge me-2"></i>Editar Perfil</a></li>
                             <li><a class="dropdown-item" href="/tutor/disponibilidad"><i class="bi bi-calendar-week me-2"></i>Disponibilidad</a></li>
-                            <li th:if="${isAdmin}"><hr class="dropdown-divider"></li>
-                            <li th:if="${isAdmin}"><a class="dropdown-item" href="/admin"><i class="bi bi-shield-lock me-2"></i>Panel de Administración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button id="logoutBtn" class="dropdown-item text-danger" aria-label="Cerrar sesión">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                </button>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Usuario autenticado (admin) -->
+                    <li th:if="${authenticated && isAdmin}" class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-shield-lock fs-4"></i>
+                            <span class="d-none d-md-inline">Administrador</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="/admin"><i class="bi bi-speedometer2 me-2"></i>Panel de Administración</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <button id="logoutBtn" class="dropdown-item text-danger" aria-label="Cerrar sesión">

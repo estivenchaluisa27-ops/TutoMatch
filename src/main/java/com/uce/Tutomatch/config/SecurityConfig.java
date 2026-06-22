@@ -1,6 +1,7 @@
 package com.uce.Tutomatch.config;
 
 import com.uce.Tutomatch.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,12 +29,18 @@ public class SecurityConfig {
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint((request, response, authException) ->
                     response.sendRedirect("/auth/login"))
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                    response.sendRedirect("/auth/login"))
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/buscar").permitAll()
-                .requestMatchers("/tutor/*").permitAll()
+                .requestMatchers("/tutor/{id}").permitAll()
+                .requestMatchers("/tutor/mi-perfil").hasAnyRole("TUTOR", "SOLICITANTE")
+                .requestMatchers("/tutor/perfil", "/tutor/perfil/**", "/tutor/disponibilidad", "/tutor/disponibilidad/**").hasRole("TUTOR")
+                .requestMatchers("/reservas/**").hasAnyRole("SOLICITANTE", "TUTOR")
+                .requestMatchers("/resenas/**").hasAnyRole("SOLICITANTE", "TUTOR")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
