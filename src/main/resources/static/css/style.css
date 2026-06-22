@@ -317,6 +317,30 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
     100% { transform: scale(1.18) rotate(-4deg); }
 }
 
+/* ---------- Admin panel: iconos compactos, sin animaciones ---------- */
+.table .card-icon {
+    width: 24px;
+    height: 24px;
+    transition: none;
+}
+
+.table .card-icon > span {
+    width: 24px;
+    height: 24px;
+}
+
+.table .card-icon svg {
+    max-width: 24px;
+    max-height: 24px;
+}
+
+.table .card-icon:hover svg,
+.table .card-icon:active svg {
+    transform: none;
+    animation: none;
+    filter: none;
+}
+
 /* ---------- Categoria Icon Colors ---------- */
 [data-categoria="Informática"] svg,
 [data-categoria="Programación"] svg {
