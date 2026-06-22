@@ -29,6 +29,29 @@
                         </a>
                     </li>
 
+                    <!-- Campana de notificaciones (solo usuarios no admin) -->
+                    <li th:if="${authenticated && !isAdmin}" class="nav-item position-relative">
+                        <button class="notif-bell" id="notifBell" aria-label="Notificaciones">
+                            <i class="bi bi-bell"></i>
+                            <span th:if="${notificacionesNoLeidas > 0}"
+                                  class="notif-badge"
+                                  id="notifBadge"
+                                  th:text="${notificacionesNoLeidas}">0</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end notif-dropdown" id="notifDropdown" aria-labelledby="notifBell">
+                            <div class="notif-header">
+                                <h6>Notificaciones</h6>
+                                <button class="btn btn-link btn-sm" id="marcarLeidasBtn" onclick="marcarTodasLeidas()">Marcar todas le&iacute;das</button>
+                            </div>
+                            <div id="notifList">
+                                <div class="notif-empty">
+                                    <i class="bi bi-bell-slash"></i>
+                                    <p>Cargando...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
                     <!-- Usuario autenticado (NO admin) -->
                     <li th:if="${authenticated && !isAdmin}" class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

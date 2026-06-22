@@ -23,7 +23,142 @@
                         }
                     });
                 }
+
+                setupNotificaciones();
             });
+
+            function setupNotificaciones() {
+                var bell = document.getElementById('notifBell');
+                if (!bell) return;
+
+                var dropdown = document.getElementById('notifDropdown');
+
+                bell.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var isOpen = dropdown.classList.contains('show');
+                    if (!isOpen) {
+                        cargarNotificaciones();
+                        dropdown.classList.add('show');
+                    } else {
+                        dropdown.classList.remove('show');
+                    }
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (dropdown && dropdown.classList.contains('show') &&
+                        !dropdown.contains(e.target) && e.target !== bell && !bell.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+            }
+
+            function formatearFecha(dateStr) {
+                var date = new Date(dateStr);
+                var ahora = new Date();
+                var diffMs = ahora - date;
+                var diffMin = Math.floor(diffMs / 60000);
+                if (diffMin < 1) return 'Ahora';
+                if (diffMin < 60) return 'Hace ' + diffMin + ' min';
+                var diffHoras = Math.floor(diffMin / 60);
+                if (diffHoras < 24) return 'Hace ' + diffHoras + ' h';
+                var diffDias = Math.floor(diffHoras / 24);
+                if (diffDias < 7) return 'Hace ' + diffDias + ' d';
+                return date.toLocaleDateString('es-EC', { day: 'numeric', month: 'short' });
+            }
+
+            function iconoTipo(tipo) {
+                switch (tipo) {
+                    case 'RESERVA_CREADA': return '<i class="bi bi-plus-circle"></i>';
+                    case 'RESERVA_CONFIRMADA': return '<i class="bi bi-check-circle"></i>';
+                    case 'RESERVA_CANCELADA': return '<i class="bi bi-x-circle"></i>';
+                    case 'RESERVA_FINALIZADA': return '<i class="bi bi-flag"></i>';
+                    default: return '<i class="bi bi-bell"></i>';
+                }
+            }
+
+            function claseIcono(tipo) {
+                switch (tipo) {
+                    case 'RESERVA_CREADA': return 'creada';
+                    case 'RESERVA_CONFIRMADA': return 'confirmada';
+                    case 'RESERVA_CANCELADA': return 'cancelada';
+                    case 'RESERVA_FINALIZADA': return 'finalizada';
+                    default: return '';
+                }
+            }
+
+            async function cargarNotificaciones() {
+                var list = document.getElementById('notifList');
+                if (!list) return;
+                list.innerHTML = '<div class="notif-empty"><i class="bi bi-hourglass-split"></i><p>Cargando...</p></div>';
+
+                try {
+                    var res = await fetch('/api/notificaciones');
+                    if (!res.ok) throw new Error('Error');
+                    var notis = await res.json();
+
+                    if (notis.length === 0) {
+                        list.innerHTML = '<div class="notif-empty"><i class="bi bi-bell-slash"></i><p>No tienes notificaciones</p></div>';
+                        return;
+                    }
+
+                    list.innerHTML = '';
+                    notis.slice(0, 10).forEach(function (n) {
+                        var item = document.createElement('div');
+                        item.className = 'notif-item' + (n.leida ? '' : ' no-leida');
+                        item.setAttribute('data-id', n.id);
+                        item.onclick = function () { marcarLeida(n.id); };
+                        item.innerHTML = '<div class="notif-icon ' + claseIcono(n.tipo) + '">' + iconoTipo(n.tipo) + '</div>' +
+                            '<div class="notif-content">' +
+                            '<p class="notif-text">' + n.mensaje + '</p>' +
+                            '<span class="notif-time">' + formatearFecha(n.fecha) + '</span>' +
+                            '</div>';
+                        list.appendChild(item);
+                    });
+                } catch (e) {
+                    list.innerHTML = '<div class="notif-empty"><i class="bi bi-exclamation-triangle"></i><p>Error al cargar</p></div>';
+                }
+            }
+
+            async function marcarLeida(id) {
+                try {
+                    await fetch('/api/notificaciones/' + id + '/leer', { method: 'POST' });
+                    var item = document.querySelector('.notif-item[data-id="' + id + '"]');
+                    if (item) {
+                        item.classList.remove('no-leida');
+                    }
+                    actualizarBadge();
+                } catch (e) {}
+            }
+
+            async function marcarTodasLeidas() {
+                try {
+                    await fetch('/api/notificaciones/leer-todas', { method: 'POST' });
+                    document.querySelectorAll('.notif-item.no-leida').forEach(function (el) {
+                        el.classList.remove('no-leida');
+                    });
+                    actualizarBadge();
+                } catch (e) {}
+            }
+
+            async function actualizarBadge() {
+                try {
+                    var res = await fetch('/api/notificaciones/contar');
+                    var data = await res.json();
+                    var badge = document.getElementById('notifBadge');
+                    if (badge) {
+                        if (data.noLeidas > 0) {
+                            badge.textContent = data.noLeidas;
+                            badge.style.display = 'flex';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            if (document.getElementById('notifBell')) {
+                setInterval(actualizarBadge, 30000);
+            }
         </script>
 
         <th:block layout:fragment="scripts-extra"/>

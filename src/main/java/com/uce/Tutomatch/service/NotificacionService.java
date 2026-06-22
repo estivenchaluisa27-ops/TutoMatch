@@ -41,4 +41,9 @@ public class NotificacionService {
                     notificacionRepository.save(n);
                 });
     }
+
+    @Transactional
+    public void marcarTodasLeidas(Long usuarioId) {
+        notificacionRepository.marcarTodasLeidasPorUsuario(usuarioId);
+    }
 }
