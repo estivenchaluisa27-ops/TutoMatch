@@ -12,6 +12,10 @@ public class MateriaDTO {
 
     private Integer semestreReferencial;
 
+    private String descripcion;
+
+    private String icono;
+
     public MateriaDTO() {}
 
     public String getNombre() { return nombre; }
@@ -20,4 +24,8 @@ public class MateriaDTO {
     public void setCategoria(String categoria) { this.categoria = categoria; }
     public Integer getSemestreReferencial() { return semestreReferencial; }
     public void setSemestreReferencial(Integer semestreReferencial) { this.semestreReferencial = semestreReferencial; }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getIcono() { return icono; }
+    public void setIcono(String icono) { this.icono = icono; }
 }

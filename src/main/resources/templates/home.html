@@ -46,7 +46,12 @@
                         <a th:href="@{/buscar(materia=${m.nombre})}" class="text-decoration-none">
                             <div class="card h-100 shadow-sm text-center border-0 bg-light">
                                 <div class="card-body">
-                                    <i class="bi bi-book fs-2 text-primary mb-2 d-block"></i>
+                                    <div class="card-icon mx-auto mb-3" th:attr="data-categoria=${m.categoria}">
+                                        <th:block th:if="${m.icono != null}">
+                                            <span th:utext="${m.icono}"></span>
+                                        </th:block>
+                                        <i th:if="${m.icono == null}" class="bi bi-book fs-3"></i>
+                                    </div>
                                     <h6 class="card-title fw-semibold mb-1" th:text="${m.nombre}">Materia</h6>
                                     <small class="text-muted" th:text="'Semestre ' + ${m.semestreReferencial}">Semestre</small>
                                 </div>
@@ -77,13 +82,12 @@
                                     </div>
                                 </div>
                                 <p class="card-text small text-muted mb-2" th:text="${#strings.abbreviate(t.descripcion, 100)}">Descripción</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                     <span>
-                                         <i class="bi bi-star-fill text-warning"></i>
-                                         <span class="fw-semibold ms-1" th:text="${t.calificacionPromedio}">5.0</span>
-                                     </span>
-                                     <span class="text-primary fw-semibold" th:text="${not #lists.isEmpty(t.materias)} ? ('$' + ${t.materias[0].tarifaHora} + '/h') : 'N/A'">$5.00/h</span>
-                                 </div>
+                                 <div class="d-flex justify-content-between align-items-center">
+                                      <span>
+                                          <i class="bi bi-star-fill text-warning"></i>
+                                          <span class="fw-semibold ms-1" th:text="${t.calificacionPromedio}">5.0</span>
+                                      </span>
+                                  </div>
                                 <a th:href="@{/tutor/{id}(id=${t.id})}" class="btn btn-outline-primary btn-sm w-100 mt-3">
                                     Ver perfil
                                 </a>

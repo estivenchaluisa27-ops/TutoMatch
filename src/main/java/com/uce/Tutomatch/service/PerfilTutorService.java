@@ -52,7 +52,7 @@ public class PerfilTutorService {
     }
 
     @Transactional
-    public TutorMateria agregarMateria(Long usuarioId, Long materiaId, BigDecimal tarifaHora) {
+    public TutorMateria agregarMateria(Long usuarioId, Long materiaId) {
         PerfilTutor perfil = obtenerPorUsuarioId(usuarioId);
         Materia materia = materiaRepository.findById(materiaId)
                 .orElseThrow(() -> new IllegalArgumentException("Materia no encontrada"));
@@ -63,7 +63,7 @@ public class PerfilTutorService {
             throw new IllegalArgumentException("Ya tienes registrada esta materia");
         }
 
-        TutorMateria tutorMateria = new TutorMateria(perfil, materia, tarifaHora);
+        TutorMateria tutorMateria = new TutorMateria(perfil, materia);
         perfil.getMaterias().add(tutorMateria);
         perfilTutorRepository.save(perfil);
         return tutorMateria;
@@ -112,20 +112,20 @@ public class PerfilTutorService {
 
     @Transactional(readOnly = true)
     public List<PerfilTutor> buscarTutores(String materia, String categoria,
-                                           BigDecimal maxPrecio, BigDecimal minCalificacion,
+                                           BigDecimal minCalificacion,
                                            Integer semestre) {
         String pattern = materia != null ? "%" + materia.toLowerCase() + "%" : null;
         return perfilTutorRepository.buscarTutores(
-                pattern, categoria, maxPrecio, minCalificacion, semestre);
+                pattern, categoria, minCalificacion, semestre);
     }
 
     @Transactional(readOnly = true)
     public Page<PerfilTutor> buscarTutores(String materia, String categoria,
-                                           BigDecimal maxPrecio, BigDecimal minCalificacion,
+                                           BigDecimal minCalificacion,
                                            Integer semestre, Pageable pageable) {
         String pattern = materia != null ? "%" + materia.toLowerCase() + "%" : null;
         return perfilTutorRepository.buscarTutores(
-                pattern, categoria, maxPrecio, minCalificacion, semestre, pageable);
+                pattern, categoria, minCalificacion, semestre, pageable);
     }
 
     @Transactional(readOnly = true)

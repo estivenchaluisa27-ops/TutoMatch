@@ -34,10 +34,6 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="maxPrecio" class="form-label fw-semibold">Precio m&aacute;ximo ($)</label>
-                                <input type="number" id="maxPrecio" name="maxPrecio" class="form-control" th:value="${maxPrecio}" step="0.50" min="0" placeholder="Ej: 10">
-                            </div>
-                            <div class="mb-3">
                                 <label for="minCalificacion" class="form-label fw-semibold">Calificaci&oacute;n m&iacute;nima</label>
                                 <select id="minCalificacion" name="minCalificacion" class="form-select">
                                     <option value="">Cualquiera</option>
@@ -93,12 +89,11 @@
                                         </div>
                                     </div>
                                     <p class="card-text small text-muted mb-2" th:text="${#strings.abbreviate(t.descripcion, 80)}">Descripción</p>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center mb-2">
                                         <span>
                                             <i class="bi bi-star-fill text-warning"></i>
                                             <span class="fw-semibold ms-1" th:text="${t.calificacionPromedio}">5.0</span>
                                         </span>
-                                        <span class="text-primary fw-semibold" th:if="${not #lists.isEmpty(t.materias)}" th:text="'$' + ${t.materias[0].tarifaHora} + '/h'">$5.00/h</span>
                                     </div>
                                     <a th:href="@{/tutor/{id}(id=${t.id})}" class="btn btn-outline-primary btn-sm w-100">
                                         Ver perfil completo

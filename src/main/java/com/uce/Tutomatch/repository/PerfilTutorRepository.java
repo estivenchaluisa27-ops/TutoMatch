@@ -32,12 +32,10 @@ public interface PerfilTutorRepository extends JpaRepository<PerfilTutor, Long> 
            "WHERE pt.verificado = true AND pt.visible = true " +
            "AND (:nombre IS NULL OR LOWER(m.nombre) LIKE :nombre OR LOWER(m.categoria) LIKE :nombre) " +
            "AND (:categoria IS NULL OR m.categoria = :categoria) " +
-           "AND (:maxPrecio IS NULL OR tm.tarifaHora <= :maxPrecio) " +
            "AND (:minCalificacion IS NULL OR pt.calificacionPromedio >= :minCalificacion) " +
            "AND (:semestre IS NULL OR pt.semestre = :semestre)")
     List<PerfilTutor> buscarTutores(@Param("nombre") String nombre,
                                     @Param("categoria") String categoria,
-                                    @Param("maxPrecio") BigDecimal maxPrecio,
                                     @Param("minCalificacion") BigDecimal minCalificacion,
                                     @Param("semestre") Integer semestre);
 
@@ -48,12 +46,10 @@ public interface PerfilTutorRepository extends JpaRepository<PerfilTutor, Long> 
            "WHERE pt.verificado = true AND pt.visible = true " +
            "AND (:nombre IS NULL OR LOWER(m.nombre) LIKE :nombre OR LOWER(m.categoria) LIKE :nombre) " +
            "AND (:categoria IS NULL OR m.categoria = :categoria) " +
-           "AND (:maxPrecio IS NULL OR tm.tarifaHora <= :maxPrecio) " +
            "AND (:minCalificacion IS NULL OR pt.calificacionPromedio >= :minCalificacion) " +
            "AND (:semestre IS NULL OR pt.semestre = :semestre)")
     Page<PerfilTutor> buscarTutores(@Param("nombre") String nombre,
                                     @Param("categoria") String categoria,
-                                    @Param("maxPrecio") BigDecimal maxPrecio,
                                     @Param("minCalificacion") BigDecimal minCalificacion,
                                     @Param("semestre") Integer semestre,
                                     Pageable pageable);

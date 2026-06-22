@@ -51,12 +51,10 @@ class ReservaServiceTest {
 
         materia = new Materia("Matemáticas", "Ciencias", 3);
         materia.setId(100L);
-        materia.setTarifaHora(java.math.BigDecimal.valueOf(10));
 
         tutorMateria = new TutorMateria();
         tutorMateria.setPerfilTutor(perfilTutor);
         tutorMateria.setMateria(materia);
-        tutorMateria.setTarifaHora(java.math.BigDecimal.valueOf(10));
         perfilTutor.getMaterias().add(tutorMateria);
 
         bloque = new Disponibilidad(perfilTutor, 1, LocalTime.of(8, 0), LocalTime.of(10, 0));

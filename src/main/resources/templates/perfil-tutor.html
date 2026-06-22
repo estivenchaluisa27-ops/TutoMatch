@@ -12,7 +12,7 @@
                 <h1 class="fw-bold">
                     <i class="bi bi-person-badge me-2"></i>Perfil de Tutor
                 </h1>
-                <p class="text-muted">Gestiona tu perfil como tutor. Completa tu descripci&oacute;n, selecciona tus materias y define tus tarifas.</p>
+                <p class="text-muted">Gestiona tu perfil como tutor. Completa tu descripci&oacute;n y selecciona tus materias.</p>
             </div>
 
             <div class="col-lg-6 mb-4">
@@ -66,7 +66,7 @@
             <div class="col-lg-6 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white fw-bold">
-                        <i class="bi bi-book me-2"></i>Materias y Tarifas
+                        <i class="bi bi-book me-2"></i>Materias
                     </div>
                     <div class="card-body">
                         <form th:action="@{/tutor/perfil/materias}" method="post" class="mb-3">
@@ -82,10 +82,6 @@
                                         </optgroup>
                                     </th:block>
                                 </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tarifaHora" class="form-label fw-semibold">Tarifa por Hora ($)</label>
-                                <input type="number" id="tarifaHora" name="tarifaHora" class="form-control" step="0.50" min="1" max="100" required placeholder="Ej: 5.00">
                             </div>
                             <button type="submit" class="btn btn-success w-100">
                                 <i class="bi bi-plus-circle me-1"></i>Agregar Materia
@@ -103,10 +99,14 @@
 
                         <div th:unless="${#lists.isEmpty(materias)}" class="list-group">
                             <div th:each="tm : ${materias}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                <div>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2" th:attr="data-categoria=${tm.materia.categoria}">
+                                        <th:block th:if="${tm.materia.icono != null}">
+                                            <span th:utext="${tm.materia.icono}"></span>
+                                        </th:block>
+                                        <i th:if="${tm.materia.icono == null}" class="bi bi-book fs-5"></i>
+                                    </span>
                                     <span class="fw-semibold" th:text="${tm.materia.nombre}">Materia</span>
-                                    <br>
-                                    <small class="text-muted" th:text="'$' + ${#numbers.formatDecimal(tm.tarifaHora, 1, 2)} + ' / hora'">$5.00 / hora</small>
                                 </div>
                                 <form th:action="@{/tutor/perfil/materias/{id}/eliminar(id=${tm.materia.id})}" method="post" style="display:inline;" onsubmit="return confirm('Eliminar esta materia?')">
                                     <button type="submit" class="btn btn-outline-danger btn-sm" aria-label="Eliminar materia">

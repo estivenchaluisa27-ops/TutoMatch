@@ -44,9 +44,14 @@
                             No ha registrado materias.
                         </div>
                         <ul th:unless="${#lists.isEmpty(tutor.materias)}" class="list-group list-group-flush">
-                            <li th:each="tm : ${tutor.materias}" class="list-group-item d-flex justify-content-between align-items-center">
-                                <span th:text="${tm.materia.nombre}">Matemáticas</span>
-                                <span class="badge bg-primary rounded-pill" th:text="'$' + ${tm.tarifaHora} + '/h'">$5.00/h</span>
+                            <li th:each="tm : ${tutor.materias}" class="list-group-item d-flex align-items-center">
+                                <span class="me-2" th:attr="data-categoria=${tm.materia.categoria}">
+                                    <th:block th:if="${tm.materia.icono != null}">
+                                        <span th:utext="${tm.materia.icono}"></span>
+                                    </th:block>
+                                    <i th:if="${tm.materia.icono == null}" class="bi bi-book fs-5"></i>
+                                </span>
+                                <span class="fw-semibold" th:text="${tm.materia.nombre}">Matemáticas</span>
                             </li>
                         </ul>
                     </div>
@@ -103,8 +108,8 @@
                                     <option value="">Selecciona una materia...</option>
                                     <option th:each="tm : ${tutor.materias}"
                                             th:value="${tm.materia.id}"
-                                            th:text="${tm.materia.nombre} + ' ($' + ${tm.tarifaHora} + '/h)'">
-                                        Matemáticas ($5.00/h)
+                                            th:text="${tm.materia.nombre}">
+                                        Matemáticas
                                     </option>
                                 </select>
                             </div>

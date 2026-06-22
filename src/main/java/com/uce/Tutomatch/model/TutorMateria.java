@@ -1,7 +1,6 @@
 package com.uce.Tutomatch.model;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "tutor_materias")
@@ -19,16 +18,12 @@ public class TutorMateria {
     @JoinColumn(name = "materia_id", nullable = false)
     private Materia materia;
 
-    @Column(name = "tarifa_hora", precision = 10, scale = 2, nullable = false)
-    private BigDecimal tarifaHora;
-
     public TutorMateria() {
     }
 
-    public TutorMateria(PerfilTutor perfilTutor, Materia materia, BigDecimal tarifaHora) {
+    public TutorMateria(PerfilTutor perfilTutor, Materia materia) {
         this.perfilTutor = perfilTutor;
         this.materia = materia;
-        this.tarifaHora = tarifaHora;
     }
 
     public Long getId() {
@@ -53,13 +48,5 @@ public class TutorMateria {
 
     public void setMateria(Materia materia) {
         this.materia = materia;
-    }
-
-    public BigDecimal getTarifaHora() {
-        return tarifaHora;
-    }
-
-    public void setTarifaHora(BigDecimal tarifaHora) {
-        this.tarifaHora = tarifaHora;
     }
 }

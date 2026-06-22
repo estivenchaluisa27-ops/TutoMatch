@@ -97,7 +97,7 @@ public class AdminController {
         Page<PerfilTutor> tutoresPage;
 
         if (filtro != null && !filtro.isBlank()) {
-            tutoresPage = perfilTutorService.buscarTutores(filtro, null, null, null, null, pageable);
+            tutoresPage = perfilTutorService.buscarTutores(filtro, null, null, null, pageable);
         } else {
             tutoresPage = perfilTutorService.listarTodos(pageable);
         }
@@ -152,7 +152,8 @@ public class AdminController {
         if (result.hasErrors()) return "redirect:/admin/materias?error=verifica_los_campos";
 
         try {
-            Materia materia = new Materia(dto.getNombre(), dto.getCategoria(), dto.getSemestreReferencial());
+            Materia materia = new Materia(dto.getNombre(), dto.getCategoria(),
+                    dto.getSemestreReferencial(), dto.getDescripcion(), dto.getIcono());
             materiaRepository.save(materia);
             return "redirect:/admin/materias?success=materia_creada";
         } catch (Exception e) {
@@ -165,7 +166,9 @@ public class AdminController {
                                  @PathVariable Long id,
                                  @RequestParam String nombre,
                                  @RequestParam String categoria,
-                                 @RequestParam(required = false) Integer semestreReferencial) {
+                                 @RequestParam(required = false) Integer semestreReferencial,
+                                 @RequestParam(required = false) String descripcion,
+                                 @RequestParam(required = false) String icono) {
         if (!verificarAdmin(auth)) return "redirect:/auth/login?error=credenciales";
 
         try {
@@ -174,6 +177,8 @@ public class AdminController {
             materia.setNombre(nombre);
             materia.setCategoria(categoria);
             materia.setSemestreReferencial(semestreReferencial);
+            materia.setDescripcion(descripcion);
+            materia.setIcono(icono);
             materiaRepository.save(materia);
             return "redirect:/admin/materias?success=materia_editada";
         } catch (Exception e) {

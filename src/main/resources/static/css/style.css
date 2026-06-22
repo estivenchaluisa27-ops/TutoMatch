@@ -84,3 +84,34 @@ h1, h2, h3, h4, h5, h6 {
 .bi {
     vertical-align: middle;
 }
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+[data-categoria="Informática"] svg,
+[data-categoria="Programación"] svg {
+    color: #2563eb;
+}
+
+[data-categoria="Matemáticas"] svg {
+    color: #dc2626;
+}
+
+[data-categoria="Ciencias"] svg {
+    color: #059669;
+}
+
+[data-categoria="Administración"] svg {
+    color: #7c3aed;
+}

@@ -46,7 +46,6 @@ public class SearchController {
     @GetMapping("/buscar")
     public String buscarTutores(@RequestParam(required = false) String materia,
                                 @RequestParam(required = false) String categoria,
-                                @RequestParam(required = false) String maxPrecio,
                                 @RequestParam(required = false) String minCalificacion,
                                 @RequestParam(required = false) String semestre,
                                 @RequestParam(defaultValue = "0") int page,
@@ -57,10 +56,6 @@ public class SearchController {
 
         String materiaFilter = (materia != null && !materia.isBlank()) ? materia : null;
         String categoriaFilter = (categoria != null && !categoria.isBlank()) ? categoria : null;
-        BigDecimal precioFilter = null;
-        if (maxPrecio != null && !maxPrecio.isBlank()) {
-            try { precioFilter = new BigDecimal(maxPrecio); } catch (NumberFormatException ignored) {}
-        }
         BigDecimal calificacionFilter = null;
         if (minCalificacion != null && !minCalificacion.isBlank()) {
             try { calificacionFilter = new BigDecimal(minCalificacion); } catch (NumberFormatException ignored) {}
@@ -72,12 +67,11 @@ public class SearchController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<PerfilTutor> resultadosPage = perfilTutorService.buscarTutores(
-                materiaFilter, categoriaFilter, precioFilter, calificacionFilter, semestreFilter, pageable);
+                materiaFilter, categoriaFilter, calificacionFilter, semestreFilter, pageable);
         model.addAttribute("resultados", resultadosPage.getContent());
         model.addAttribute("page", resultadosPage);
         model.addAttribute("materia", materiaFilter);
         model.addAttribute("categoria", categoriaFilter);
-        model.addAttribute("maxPrecio", precioFilter);
         model.addAttribute("minCalificacion", calificacionFilter);
         model.addAttribute("semestre", semestreFilter);
 

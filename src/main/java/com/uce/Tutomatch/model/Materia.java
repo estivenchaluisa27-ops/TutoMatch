@@ -3,7 +3,6 @@ package com.uce.Tutomatch.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "materias")
@@ -21,8 +20,11 @@ public class Materia {
     @Column(name = "semestre_referencial")
     private Integer semestreReferencial;
 
-    @Column(name = "tarifa_hora")
-    private BigDecimal tarifaHora;
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
+
+    @Column(name = "icono", columnDefinition = "TEXT")
+    private String icono;
 
     @OneToMany(mappedBy = "materia")
     private List<TutorMateria> tutorMaterias = new ArrayList<>();
@@ -34,6 +36,14 @@ public class Materia {
         this.nombre = nombre;
         this.categoria = categoria;
         this.semestreReferencial = semestreReferencial;
+    }
+
+    public Materia(String nombre, String categoria, Integer semestreReferencial, String descripcion, String icono) {
+        this.nombre = nombre;
+        this.categoria = categoria;
+        this.semestreReferencial = semestreReferencial;
+        this.descripcion = descripcion;
+        this.icono = icono;
     }
 
     public Long getId() {
@@ -68,6 +78,22 @@ public class Materia {
         this.semestreReferencial = semestreReferencial;
     }
 
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getIcono() {
+        return icono;
+    }
+
+    public void setIcono(String icono) {
+        this.icono = icono;
+    }
+
     public List<TutorMateria> getTutorMaterias() {
         return tutorMaterias;
     }
@@ -76,13 +102,6 @@ public class Materia {
         this.tutorMaterias = tutorMaterias;
     }
 
-    public BigDecimal getTarifaHora() {
-        return tarifaHora;
-    }
-
-    public void setTarifaHora(BigDecimal tarifaHora) {
-        this.tarifaHora = tarifaHora;
-    }
     @Override
     public String toString() {
         return "Materia{" +
@@ -90,7 +109,7 @@ public class Materia {
                 ", nombre='" + nombre + '\'' +
                 ", categoria='" + categoria + '\'' +
                 ", semestreReferencial=" + semestreReferencial +
-                ", tarifaHora=" + tarifaHora +
+                ", descripcion='" + descripcion + '\'' +
                 '}';
     }
 

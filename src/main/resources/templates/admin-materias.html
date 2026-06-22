@@ -43,6 +43,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>ID</th>
+                                        <th>Icono</th>
                                         <th>Nombre</th>
                                         <th>Categor&iacute;a</th>
                                         <th>Semestre Ref.</th>
@@ -52,13 +53,21 @@
                                 <tbody>
                                     <th:block th:each="entry : ${materiasPorCategoria}">
                                         <tr class="table-secondary">
-                                            <td colspan="5" class="fw-bold small">
+                                            <td colspan="6" class="fw-bold small">
                                                 <i class="bi bi-folder me-1"></i>
                                                 <span th:text="${entry.key}">Categor&iacute;a</span>
                                             </td>
                                         </tr>
                                         <tr th:each="m : ${entry.value}">
                                             <td th:text="${m.id}">1</td>
+                                            <td>
+                                                <div class="card-icon" th:attr="data-categoria=${m.categoria}">
+                                                    <th:block th:if="${m.icono != null}">
+                                                        <span th:utext="${m.icono}"></span>
+                                                    </th:block>
+                                                    <i th:if="${m.icono == null}" class="bi bi-book fs-5"></i>
+                                                </div>
+                                            </td>
                                             <td th:text="${m.nombre}">Matem&aacute;ticas</td>
                                             <td>
                                                 <span class="badge bg-info" th:text="${m.categoria}">Categor&iacute;a</span>
@@ -75,6 +84,8 @@
                                                         th:data-nombre="${m.nombre}"
                                                         th:data-categoria="${m.categoria}"
                                                         th:data-semestre="${m.semestreReferencial}"
+                                                        th:data-descripcion="${m.descripcion}"
+                                                        th:data-icono="${m.icono}"
                                                         aria-label="Editar materia">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
@@ -127,6 +138,15 @@
                                 <input type="number" min="1" max="12" class="form-control" id="semestreReferencial" name="semestreReferencial">
                                 <div class="form-text">Opcional. Indica en qu&eacute; semestre se cursa t&iacute;picamente esta materia.</div>
                             </div>
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripci&oacute;n</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="icono" class="form-label">Icono (SVG inline)</label>
+                                <textarea class="form-control" id="icono" name="icono" rows="3" placeholder="&lt;svg viewBox=...&gt;&lt;/svg&gt;"></textarea>
+                                <div class="form-text">Opcional. Pega el c&oacute;digo SVG completo del icono.</div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -167,6 +187,14 @@
                                 <label for="editSemestre" class="form-label">Semestre referencial</label>
                                 <input type="number" min="1" max="12" class="form-control" id="editSemestre" name="semestreReferencial">
                             </div>
+                            <div class="mb-3">
+                                <label for="editDescripcion" class="form-label">Descripci&oacute;n</label>
+                                <textarea class="form-control" id="editDescripcion" name="descripcion" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editIcono" class="form-label">Icono (SVG inline)</label>
+                                <textarea class="form-control" id="editIcono" name="icono" rows="3"></textarea>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -192,6 +220,8 @@
                     document.getElementById('editNombre').value = nombre;
                     document.getElementById('editCategoria').value = categoria;
                     document.getElementById('editSemestre').value = semestre || '';
+                    document.getElementById('editDescripcion').value = button.getAttribute('data-descripcion') || '';
+                    document.getElementById('editIcono').value = button.getAttribute('data-icono') || '';
                 });
             });
         </script>
