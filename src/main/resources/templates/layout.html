@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es">
+<head>
+    <th:block th:replace="~{fragments/head :: head(title=${pageTitle})}"/>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Navbar -->
+    <th:block th:replace="~{fragments/navbar :: navbar(authenticated=${authenticated}, isAdmin=${isAdmin})}"/>
+
+    <!-- Main Content -->
+    <main class="flex-fill" role="main">
+        <div class="container py-4">
+            <!-- Flash Messages -->
+            <th:block th:replace="~{fragments/flash-messages :: flash-messages}"/>
+
+            <!-- Page Content -->
+            <th:block layout:fragment="content"/>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <th:block th:replace="~{fragments/footer :: footer}"/>
+
+    <!-- Scripts -->
+    <th:block th:replace="~{fragments/scripts :: scripts}"/>
+</body>
+</html>

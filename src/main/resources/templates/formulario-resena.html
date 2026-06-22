@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es"
+      layout:decorate="~{layout}"
+      th:with="pageTitle='Calificar Tutoría'">
+<head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white fw-bold">
+                        <i class="bi bi-star me-2"></i>Calificar Tutoría
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/resenas/guardar}" method="post" class="row g-3">
+                            <input type="hidden" name="reservaId" th:value="${reservaId}" />
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Calificación</label>
+                                <div class="star-rating d-flex gap-2 fs-1" id="starRating" role="radiogroup" aria-label="Calificaci\u00f3n">
+                                    <i class="bi bi-star text-warning" data-value="1" role="radio" aria-checked="false" aria-label="1 estrella" tabindex="0" style="cursor:pointer;"></i>
+                                    <i class="bi bi-star text-warning" data-value="2" role="radio" aria-checked="false" aria-label="2 estrellas" tabindex="0" style="cursor:pointer;"></i>
+                                    <i class="bi bi-star text-warning" data-value="3" role="radio" aria-checked="false" aria-label="3 estrellas" tabindex="0" style="cursor:pointer;"></i>
+                                    <i class="bi bi-star text-warning" data-value="4" role="radio" aria-checked="false" aria-label="4 estrellas" tabindex="0" style="cursor:pointer;"></i>
+                                    <i class="bi bi-star text-warning" data-value="5" role="radio" aria-checked="false" aria-label="5 estrellas" tabindex="0" style="cursor:pointer;"></i>
+                                </div>
+                                <input type="hidden" name="calificacion" id="calificacionInput" required />
+                                <div class="form-text">Selecciona una calificación del 1 al 5</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="comentario" class="form-label fw-semibold">Comentario (opcional)</label>
+                                <textarea id="comentario" name="comentario" class="form-control" rows="4" placeholder="Comparte tu experiencia con este tutor..."></textarea>
+                            </div>
+
+                            <div class="col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-1"></i>Guardar Calificación
+                                </button>
+                                <a th:href="@{/reservas/mis-tutorias}" class="btn btn-outline-secondary">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block layout:fragment="scripts-extra">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const container = document.getElementById('starRating');
+                const stars = container.querySelectorAll('i');
+                const input = document.getElementById('calificacionInput');
+                let selected = 0;
+
+                function updateStars(val) {
+                    stars.forEach(s => {
+                        const sv = parseInt(s.dataset.value);
+                        const filled = sv <= val;
+                        s.className = filled ? 'bi bi-star-fill text-warning' : 'bi bi-star text-warning';
+                        s.setAttribute('aria-checked', filled ? 'true' : 'false');
+                    });
+                }
+
+                function setRating(val) {
+                    selected = val;
+                    input.value = selected;
+                    updateStars(selected);
+                }
+
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        setRating(parseInt(this.dataset.value));
+                    });
+                    star.addEventListener('mouseenter', function() {
+                        updateStars(parseInt(this.dataset.value));
+                    });
+                    star.addEventListener('mouseleave', function() {
+                        updateStars(selected);
+                    });
+                    star.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setRating(parseInt(this.dataset.value));
+                        }
+                    });
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html>

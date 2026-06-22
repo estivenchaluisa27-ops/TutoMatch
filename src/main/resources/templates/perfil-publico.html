@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es"
+      layout:decorate="~{layout}"
+      th:with="pageTitle=${tutor.usuario.nombreCompleto}">
+<head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <a th:href="@{/buscar}" class="text-decoration-none text-muted">
+                    <i class="bi bi-arrow-left me-1"></i>Volver a resultados
+                </a>
+            </div>
+
+            <!-- Información principal -->
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 96px; height: 96px; font-size: 2.5rem; font-weight: bold;">
+                            <span th:text="${#strings.substring(tutor.usuario.nombreCompleto, 0, 1)}">I</span>
+                        </div>
+                        <h4 class="fw-bold" th:text="${tutor.usuario.nombreCompleto}">Nombre</h4>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-mortarboard me-1"></i>Semestre <span th:text="${tutor.semestre}">5</span>
+                        </p>
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <span class="fw-bold fs-5 ms-1" th:text="${promedio}">5.0</span>
+                            <span class="text-muted" th:text="'(' + ${totalResenas} + ' reseña' + (${totalResenas} == 1 ? '' : 's') + ')'">(0 reseñas)</span>
+                        </div>
+                        <p class="card-text text-start" th:text="${tutor.descripcion}">Descripción del tutor</p>
+                    </div>
+                </div>
+
+                <!-- Materias -->
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header bg-white fw-bold">
+                        <i class="bi bi-book me-2"></i>Materias
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(tutor.materias)}" class="text-muted small">
+                            No ha registrado materias.
+                        </div>
+                        <ul th:unless="${#lists.isEmpty(tutor.materias)}" class="list-group list-group-flush">
+                            <li th:each="tm : ${tutor.materias}" class="list-group-item d-flex justify-content-between align-items-center">
+                                <span th:text="${tm.materia.nombre}">Matemáticas</span>
+                                <span class="badge bg-primary rounded-pill" th:text="'$' + ${tm.tarifaHora} + '/h'">$5.00/h</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disponibilidad -->
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white fw-bold">
+                        <i class="bi bi-calendar-week me-2"></i>Disponibilidad
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${bloquesPorDia.isEmpty()}" class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                            <p class="mb-0">Este tutor no tiene horarios disponibles actualmente.</p>
+                        </div>
+
+                        <div th:unless="${bloquesPorDia.isEmpty()}" class="table-responsive">
+                            <table class="table table-bordered table-hover" aria-label="Disponibilidad del tutor">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>D&iacute;a</th>
+                                        <th>Horarios</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="diaEntry : ${bloquesPorDia}">
+                                        <td class="fw-semibold align-middle" th:text="${dias[diaEntry.key - 1]}">Lunes</td>
+                                        <td>
+                                            <span th:each="bloque : ${diaEntry.value}" class="badge bg-primary me-1 mb-1 d-inline-block" style="font-size:0.85rem;">
+                                                <span th:text="${bloque.horaInicio}">08:00</span>
+                                                -
+                                                <span th:text="${bloque.horaFin}">10:00</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solicitar tutoría -->
+                <div th:if="${authenticated and not esMiPerfil}" class="card shadow-sm mt-3">
+                    <div class="card-header bg-white fw-bold">
+                        <i class="bi bi-send me-2"></i>Solicitar Tutoría
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/reservas/crear}" method="post" class="row g-3">
+                            <div class="col-md-5">
+                                <label for="materiaId" class="form-label">Materia</label>
+                                <select id="materiaId" name="materiaId" class="form-select" required>
+                                    <option value="">Selecciona una materia...</option>
+                                    <option th:each="tm : ${tutor.materias}"
+                                            th:value="${tm.materia.id}"
+                                            th:text="${tm.materia.nombre} + ' ($' + ${tm.tarifaHora} + '/h)'">
+                                        Matemáticas ($5.00/h)
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="disponibilidadId" class="form-label">Bloque horario</label>
+                                <select id="disponibilidadId" name="disponibilidadId" class="form-select" required>
+                                    <option value="">Selecciona un bloque...</option>
+                                    <option th:each="bloque : ${bloquesLista}"
+                                            th:value="${bloque.id}"
+                                            th:text="${dias[bloque.diaSemana - 1]} + ' ' + ${bloque.horaInicio} + ' - ' + ${bloque.horaFin}">
+                                        Lunes 08:00 - 10:00
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-send me-1"></i>Solicitar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Reseñas -->
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header bg-white fw-bold">
+                        <i class="bi bi-star me-2"></i>Reseñas <span class="badge bg-secondary rounded-pill ms-1" th:text="${totalResenas}">0</span>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(resenas)}" class="text-center text-muted py-4">
+                            <i class="bi bi-chat-square-text fs-1 d-block mb-2"></i>
+                            <p class="mb-0">Este tutor aún no tiene reseñas.</p>
+                        </div>
+                        <div th:unless="${#lists.isEmpty(resenas)}" class="list-group list-group-flush">
+                            <div th:each="r : ${resenas}" class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold small" th:text="${r.reserva.solicitante.nombreCompleto}">Estudiante</span>
+                                    <span class="small text-muted" th:text="${#temporals.format(r.fecha, 'dd/MM/yyyy')}">01/01/2026</span>
+                                </div>
+                                <div class="mb-1">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i th:if="${i <= r.calificacion}" class="bi bi-star-fill text-warning small"></i>
+                                        <i th:unless="${i <= r.calificacion}" class="bi bi-star text-warning small"></i>
+                                    </th:block>
+                                </div>
+                                <p class="mb-0 small text-muted" th:if="${not #strings.isEmpty(r.comentario)}" th:text="${r.comentario}">Comentario</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <div th:if="${not authenticated}" class="card shadow-sm mt-3 bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title fw-bold">¿Te interesa este tutor?</h5>
+                        <p class="card-text mb-3">Reg&iacute;strate o inicia sesi&oacute;n para solicitar una tutor&iacute;a.</p>
+                        <a th:href="@{/auth/registro}" class="btn btn-light me-2">Registrarse</a>
+                        <a th:href="@{/auth/login}" class="btn btn-outline-light">Iniciar sesi&oacute;n</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

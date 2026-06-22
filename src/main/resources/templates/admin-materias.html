@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es"
+      layout:decorate="~{layout}"
+      th:with="pageTitle='Catálogo de Materias'">
+<head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin" class="text-decoration-none">Panel</a></li>
+                        <li class="breadcrumb-item active">Materias</li>
+                    </ol>
+                </nav>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="fw-bold mb-0">
+                            <i class="bi bi-book me-2"></i>Cat&aacute;logo de Materias
+                        </h1>
+                        <p class="text-muted">Administra las materias disponibles en la plataforma.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarMateriaModal">
+                        <i class="bi bi-plus-lg me-1"></i>Nueva Materia
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <div th:if="${materiasPorCategoria.isEmpty()}" class="text-center text-muted py-5">
+                            <i class="bi bi-book fs-1 d-block mb-2"></i>
+                            <p class="mb-0">No hay materias registradas.</p>
+                        </div>
+
+                        <div th:unless="${materiasPorCategoria.isEmpty()}" class="table-responsive">
+                            <table class="table table-hover mb-0" aria-label="Cat\u00e1logo de materias">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Categor&iacute;a</th>
+                                        <th>Semestre Ref.</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <th:block th:each="entry : ${materiasPorCategoria}">
+                                        <tr class="table-secondary">
+                                            <td colspan="5" class="fw-bold small">
+                                                <i class="bi bi-folder me-1"></i>
+                                                <span th:text="${entry.key}">Categor&iacute;a</span>
+                                            </td>
+                                        </tr>
+                                        <tr th:each="m : ${entry.value}">
+                                            <td th:text="${m.id}">1</td>
+                                            <td th:text="${m.nombre}">Matem&aacute;ticas</td>
+                                            <td>
+                                                <span class="badge bg-info" th:text="${m.categoria}">Categor&iacute;a</span>
+                                            </td>
+                                            <td>
+                                                <span th:if="${m.semestreReferencial != null}" th:text="${m.semestreReferencial}">5</span>
+                                                <span th:unless="${m.semestreReferencial != null}" class="text-muted">—</span>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-outline-primary btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#editarMateriaModal"
+                                                        th:data-id="${m.id}"
+                                                        th:data-nombre="${m.nombre}"
+                                                        th:data-categoria="${m.categoria}"
+                                                        th:data-semestre="${m.semestreReferencial}"
+                                                        aria-label="Editar materia">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <form th:action="@{/admin/materias/{id}/eliminar(id=${m.id})}" method="post" style="display:inline;"
+                                                      onsubmit="return confirm('¿Eliminar esta materia? Los tutores que la tengan registrada perderán la referencia.')">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" aria-label="Eliminar materia">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </th:block>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Agregar Materia -->
+        <div class="modal fade" id="agregarMateriaModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Nueva Materia</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/admin/materias/agregar}" method="post">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre de la materia</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="categoria" class="form-label">Categor&iacute;a</label>
+                                <select class="form-select" id="categoria" name="categoria" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Matemáticas">Matem&aacute;ticas</option>
+                                    <option value="Programación">Programaci&oacute;n</option>
+                                    <option value="Ciencias">Ciencias</option>
+                                    <option value="Ingeniería">Ingenier&iacute;a</option>
+                                    <option value="Administración">Administraci&oacute;n</option>
+                                    <option value="Idiomas">Idiomas</option>
+                                    <option value="General">General</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="semestreReferencial" class="form-label">Semestre referencial</label>
+                                <input type="number" min="1" max="12" class="form-control" id="semestreReferencial" name="semestreReferencial">
+                                <div class="form-text">Opcional. Indica en qu&eacute; semestre se cursa t&iacute;picamente esta materia.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Editar Materia -->
+        <div class="modal fade" id="editarMateriaModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Editar Materia</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/admin/materias/{id}/editar(id=${materiaId})}" method="post" id="editarMateriaForm">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="editNombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="editNombre" name="nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editCategoria" class="form-label">Categor&iacute;a</label>
+                                <select class="form-select" id="editCategoria" name="categoria" required>
+                                    <option value="Matemáticas">Matem&aacute;ticas</option>
+                                    <option value="Programación">Programaci&oacute;n</option>
+                                    <option value="Ciencias">Ciencias</option>
+                                    <option value="Ingeniería">Ingenier&iacute;a</option>
+                                    <option value="Administración">Administraci&oacute;n</option>
+                                    <option value="Idiomas">Idiomas</option>
+                                    <option value="General">General</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editSemestre" class="form-label">Semestre referencial</label>
+                                <input type="number" min="1" max="12" class="form-control" id="editSemestre" name="semestreReferencial">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var editarModal = document.getElementById('editarMateriaModal');
+                editarModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var id = button.getAttribute('data-id');
+                    var nombre = button.getAttribute('data-nombre');
+                    var categoria = button.getAttribute('data-categoria');
+                    var semestre = button.getAttribute('data-semestre');
+
+                    var form = document.getElementById('editarMateriaForm');
+                    form.action = '/admin/materias/' + id + '/editar';
+                    document.getElementById('editNombre').value = nombre;
+                    document.getElementById('editCategoria').value = categoria;
+                    document.getElementById('editSemestre').value = semestre || '';
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html>

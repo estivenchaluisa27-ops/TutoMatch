@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Flash Messages Fragment -->
+    <div th:fragment="flash-messages" class="flash-messages-container">
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert" aria-live="assertive">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${error}">Error</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert" aria-live="polite">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${success}">Operación exitosa</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert" aria-live="assertive">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:switch="${param.error}">
+                <span th:case="'credenciales'">Correo o contraseña incorrectos</span>
+                <span th:case="'email_existe'">El correo ya está registrado</span>
+                <span th:case="'no_tutor'">Debes registrarte como tutor primero</span>
+                <span th:case="'valor_invalido'">El valor ingresado no es un número válido</span>
+                <span th:case="*" th:text="${param.error[0]}">Ha ocurrido un error</span>
+            </span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert" aria-live="polite">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:switch="${param.success}">
+                <span th:case="'registro'">Registro exitoso. ¡Bienvenido a TutoMatch!</span>
+                <span th:case="'logout'">Has cerrado sesión correctamente</span>
+                <span th:case="'descripcion'">Descripción actualizada</span>
+                <span th:case="'semestre'">Semestre actualizado</span>
+                <span th:case="'materia'">Materia agregada correctamente</span>
+                <span th:case="'materia_eliminada'">Materia eliminada</span>
+                <span th:case="'bloque'">Bloque horario agregado</span>
+                <span th:case="'bloque_eliminado'">Bloque eliminado</span>
+                <span th:case="'reserva_creada'">Tutoría solicitada exitosamente</span>
+                <span th:case="'reserva_confirmada'">Tutoría confirmada exitosamente</span>
+                <span th:case="'reserva_cancelada'">Tutoría cancelada</span>
+                <span th:case="'tutoria_finalizada'">Tutoría finalizada exitosamente</span>
+                <span th:case="'verificado'">Tutor verificado exitosamente</span>
+                <span th:case="'revocado'">Verificación revocada</span>
+                <span th:case="'config'">Configuración actualizada exitosamente</span>
+                <span th:case="'materia_creada'">Materia creada exitosamente</span>
+                <span th:case="'materia_editada'">Materia actualizada exitosamente</span>
+                <span th:case="'materia_eliminada'">Materia eliminada</span>
+                <span th:case="'resena_eliminada'">Reseña eliminada</span>
+                <span th:case="*">Operación exitosa</span>
+            </span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    </div>
+</body>
+</html>

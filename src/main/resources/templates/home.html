@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es"
+      layout:decorate="~{layout}"
+      th:with="pageTitle='Inicio'">
+<head>
+<body>
+    <th:block layout:fragment="content">
+        <!-- Hero Section -->
+        <section class="bg-primary text-white py-5 mb-5">
+            <div class="container py-5 text-center">
+                <h1 class="display-4 fw-bold mb-3">Domina tus materias con TutoMatch</h1>
+                <p class="lead mb-4">Conecta con tutores de la UCE y alcanza tu m&aacute;ximo potencial acad&eacute;mico.</p>
+                <div th:if="${not authenticated}" class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a th:href="@{/auth/registro}" class="btn btn-light btn-lg px-4 gap-3">Empezar ahora</a>
+                    <a th:href="@{/auth/login}" class="btn btn-outline-light btn-lg px-4">Iniciar sesi&oacute;n</a>
+                </div>
+                <div th:if="${authenticated}" class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a th:href="@{/buscar}" class="btn btn-light btn-lg px-4">Buscar tutores</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Barra de búsqueda rápida -->
+        <section class="container mb-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <form th:action="@{/buscar}" method="get" class="input-group input-group-lg shadow-sm">
+                        <input type="text" name="materia" class="form-control" placeholder="Busca una materia o categor&iacute;a..." aria-label="Buscar tutores">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-1"></i>Buscar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categorías / Materias -->
+        <section class="container mb-5">
+            <h2 class="text-center mb-4 fw-bold">Materias por Categor&iacute;a</h2>
+            <div th:each="entry : ${materiasPorCategoria}" class="mb-4">
+                <h4 class="fw-semibold text-primary mb-3" th:text="${entry.key}">Categoría</h4>
+                <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3">
+                    <div th:each="m : ${entry.value}" class="col">
+                        <a th:href="@{/buscar(materia=${m.nombre})}" class="text-decoration-none">
+                            <div class="card h-100 shadow-sm text-center border-0 bg-light">
+                                <div class="card-body">
+                                    <i class="bi bi-book fs-2 text-primary mb-2 d-block"></i>
+                                    <h6 class="card-title fw-semibold mb-1" th:text="${m.nombre}">Materia</h6>
+                                    <small class="text-muted" th:text="'Semestre ' + ${m.semestreReferencial}">Semestre</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tutores Recomendados -->
+        <section th:if="${not #lists.isEmpty(recomendados)}" class="bg-light py-5">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-4">
+                    <i class="bi bi-star-fill text-warning me-2"></i>Tutores Recomendados
+                </h2>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div th:each="t : ${recomendados}" class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; font-size: 1.2rem; font-weight: bold;">
+                                        <span th:text="${#strings.substring(t.usuario.nombreCompleto, 0, 1)}">I</span>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0" th:text="${t.usuario.nombreCompleto}">Nombre</h6>
+                                        <small class="text-muted" th:text="'Semestre ' + ${t.semestre}">Semestre</small>
+                                    </div>
+                                </div>
+                                <p class="card-text small text-muted mb-2" th:text="${#strings.abbreviate(t.descripcion, 100)}">Descripción</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                     <span>
+                                         <i class="bi bi-star-fill text-warning"></i>
+                                         <span class="fw-semibold ms-1" th:text="${t.calificacionPromedio}">5.0</span>
+                                     </span>
+                                     <span class="text-primary fw-semibold" th:text="${not #lists.isEmpty(t.materias)} ? ('$' + ${t.materias[0].tarifaHora} + '/h') : 'N/A'">$5.00/h</span>
+                                 </div>
+                                <a th:href="@{/tutor/{id}(id=${t.id})}" class="btn btn-outline-primary btn-sm w-100 mt-3">
+                                    Ver perfil
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </th:block>
+</body>
+</html>

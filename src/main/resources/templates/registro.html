@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro | TutoMatch</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <a href="/" class="text-decoration-none">
+                                <i class="bi bi-mortarboard-fill fs-1 text-primary"></i>
+                                <h1 class="h3 fw-bold text-primary mt-2">TutoMatch</h1>
+                            </a>
+                            <p class="text-muted">Únete a la comunidad</p>
+                        </div>
+
+                        <form id="registroForm" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="nombreCompleto" class="form-label fw-semibold">Nombre Completo</label>
+                                <input type="text" name="nombreCompleto" class="form-control" id="nombreCompleto" 
+                                       placeholder="Ej. Juan Pérez" required>
+                                <div class="invalid-feedback">El nombre completo es obligatorio</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="correoInstitucional" class="form-label fw-semibold">Correo Institucional (@uce.edu.ec)</label>
+                                <input type="email" name="correoInstitucional" class="form-control" id="correoInstitucional" 
+                                       placeholder="usuario@uce.edu.ec" required>
+                                <div class="invalid-feedback">Debes ingresar un correo institucional válido</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label fw-semibold">Contraseña</label>
+                                <input type="password" name="password" class="form-control" id="password" 
+                                       placeholder="Mínimo 6 caracteres" required minlength="6">
+                                <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold d-block">¿Cómo quieres participar?</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="rolSolicitante" id="rolSolicitante" value="true" checked>
+                                    <label class="form-check-label" for="rolSolicitante">Busco tutorías</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="rolTutor" id="rolTutor" value="true">
+                                    <label class="form-check-label" for="rolTutor">Soy tutor</label>
+                                </div>
+                                <div id="rolError" class="form-text text-danger d-none">Selecciona al menos un rol.</div>
+                            </div>
+
+                            <div id="registroError" class="alert alert-danger d-none" role="alert"></div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-person-plus me-2"></i>Registrarme
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="text-muted mb-0">¿Ya tienes una cuenta?</p>
+                            <a href="/auth/login" class="text-primary text-decoration-none fw-semibold">Inicia sesión aquí</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registroForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            if (!this.checkValidity()) { this.classList.add('was-validated'); return; }
+
+            const formData = new FormData(this);
+            const data = {
+                correoInstitucional: formData.get('correoInstitucional'),
+                password: formData.get('password'),
+                nombreCompleto: formData.get('nombreCompleto'),
+                rolSolicitante: formData.get('rolSolicitante') === 'true',
+                rolTutor: formData.get('rolTutor') === 'true'
+            };
+
+            if (!data.rolSolicitante && !data.rolTutor) {
+                document.getElementById('rolError').classList.remove('d-none');
+                return;
+            }
+            document.getElementById('rolError').classList.add('d-none');
+
+            const errorDiv = document.getElementById('registroError');
+            try {
+                const response = await fetch('/auth/registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    const result = await response.json();
+                    if (result.error) {
+                        errorDiv.textContent = result.error;
+                    } else {
+                        errorDiv.textContent = Object.values(result).join(', ') || 'Error al registrarse';
+                    }
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    </script>
+</body>
+</html>

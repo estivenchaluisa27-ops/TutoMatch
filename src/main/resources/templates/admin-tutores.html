@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es"
+      layout:decorate="~{layout}"
+      th:with="pageTitle='Gestión de Tutores'">
+<head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h1 class="fw-bold">
+                    <i class="bi bi-shield-lock me-2"></i>Panel de Administración
+                </h1>
+                <p class="text-muted">Gestión de tutores registrados en la plataforma.</p>
+            </div>
+
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">
+                            <i class="bi bi-people me-2"></i>Tutores Registrados
+                            <span class="badge bg-primary ms-2" th:text="${page?.totalElements ?: #lists.size(tutores)}">0</span>
+                        </span>
+                        <span th:if="${pendientes > 0}" class="badge bg-warning text-dark fs-6">
+                            <i class="bi bi-clock me-1"></i><span th:text="${pendientes}">0</span> pendiente(s)
+                        </span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div th:if="${#lists.isEmpty(tutores)}" class="text-center text-muted py-5">
+                            <i class="bi bi-people fs-1 d-block mb-2"></i>
+                            <p class="mb-0">No hay tutores registrados aún.</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(tutores)}" class="table-responsive">
+                            <table class="table table-hover mb-0" aria-label="Tutores registrados">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tutor</th>
+                                        <th>Email</th>
+                                        <th>Semestre</th>
+                                        <th>Materias</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="t : ${tutores}">
+                                        <td th:text="${t.id}">1</td>
+                                        <td th:text="${t.usuario.nombreCompleto}">Nombre</td>
+                                        <td th:text="${t.usuario.correoInstitucional}" class="small">email@uce.edu.ec</td>
+                                        <td th:text="${t.semestre}">5</td>
+                                        <td th:text="${#lists.size(t.materias)}">3</td>
+                                        <td>
+                                            <span th:if="${t.verificado}" class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>Verificado
+                                            </span>
+                                            <span th:unless="${t.verificado}" class="badge bg-warning text-dark">
+                                                <i class="bi bi-clock me-1"></i>Pendiente
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <form th:action="@{/admin/tutores/{id}/verificar(id=${t.id})}" method="post" style="display:inline;">
+                                                <input type="hidden" name="verificado" th:value="${not t.verificado}">
+                                                <button th:if="${not t.verificado}" type="submit" class="btn btn-success btn-sm">
+                                                    <i class="bi bi-check-lg me-1"></i>Verificar
+                                                </button>
+                                                <button th:if="${t.verificado}" type="submit" class="btn btn-outline-warning btn-sm">
+                                                    <i class="bi bi-x-lg me-1"></i>Revocar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="col-12" th:if="${page != null and page.totalPages > 1}">
+                <nav aria-label="Paginación de tutores">
+                    <ul class="pagination justify-content-center mt-4">
+                        <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/tutores(page=0, size=${page.size}, filtro=${filtro})}" aria-label="Primera">««</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/tutores(page=${page.number - 1}, size=${page.size}, filtro=${filtro})}" aria-label="Anterior">«</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}" th:classappend="${page.number == i} ? 'active' : ''">
+                            <a class="page-link" th:href="@{/admin/tutores(page=${i}, size=${page.size}, filtro=${filtro})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/tutores(page=${page.number + 1}, size=${page.size}, filtro=${filtro})}" aria-label="Siguiente">»</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/tutores(page=${page.totalPages - 1}, size=${page.size}, filtro=${filtro})}" aria-label="Última">»»</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center text-muted small mt-2">
+                    <span th:text="'Página ' + (page.number + 1) + ' de ' + page.totalPages + ' (' + page.totalElements + ' totales)'">Página 1 de 1</span>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>
