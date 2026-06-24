@@ -3,9 +3,9 @@
 > **Documento vivo** — se actualiza con cada fase completada, decisiones técnicas, errores encontrados y correcciones aplicadas.
 >
 > **Fecha de inicio:** 13/06/2026  
-> **Última actualización:** 21/06/2026  
-> **Versión del plan:** 4.0.0  
-> **Estado general:** 🟢 En Desarrollo (Fases 0-4, 6-7 completadas, Fase 5 eliminada, app funcionando en localhost:8080)
+> **Última actualización:** 22/06/2026  
+> **Versión del plan:** 5.0.0  
+> **Estado general:** 🟢 En Desarrollo — Funcionalidad core completa + Rediseño UI/UX integral (iconos SVG, glass navbar, circuit board, hero con física 2D, sistema notificaciones funcional)
 
 ---
 
@@ -44,6 +44,7 @@ Es el **plan maestro** del proyecto TutoMatch. Contiene el alcance completo, las
 
 ### Documentos de referencia
 - `Especificaciones.md`: Documento fuente con definiciones detalladas de RF, datos de encuesta y prototipos. Consultar solo si se necesita el detalle original de algún requerimiento.
+- `PLAN-ICONOS-MATERIAS.md`: Plano completo del sistema de iconos SVG por materia (constantes, backend, frontend, bugs conocidos).
 - ~~`Arquitectura.md`: Eliminado — su propósito era educativo y el patrón de capas ya está documentado en la Sección 2.~~
 
 ### Regla de oro
@@ -506,6 +507,80 @@ Solicitante                    Sistema                        Tutor
 
 ---
 
+### ✅ FASE 8 — Sistema de Iconos SVG por Materia
+> **Estado Actual:** Completado  
+> **Prioridad:** Media (mejora visual + funcional)  
+> **Commits:** `397fee2`, `a931839`, `2168388`
+
+| Tarea | Estado | Notas |
+|-------|--------|-------|
+| Campo `icono` (TEXT) en entidad `Materia` | ✅ Completado | Almacena SVG inline por materia |
+| Campo `descripcion` en `Materia` | ✅ Completado | Descripción textual de cada materia |
+| 7 constantes SVG en `DbSeed.java` (code, calculator, database, physics, flask, chart, matrix) | ✅ Completado | Usan `currentColor` para heredar color CSS por categoría |
+| Seed de 12 materias con iconos y descripciones | ✅ Completado | Mapeo por nombre de materia → constante SVG |
+| CRUD admin de materias con campo icono | ✅ Completado | Modal Bootstrap en `admin-materias.html`, SVG inline renderizado con `th:utext` |
+| Renderizado de iconos en templates (home, perfiles, resultados) | ✅ Completado | Patrón `th:utext` con fallback a `bi bi-book` |
+| Colores por categoría vía `data-categoria` + CSS `[attr]` selectors | ✅ Completado | Informática → azul, Matemáticas → rojo, Ciencias → verde, Administración → púrpura |
+
+**Decisiones:**
+- Todos los SVG usan `currentColor` para heredar el color por categoría desde CSS
+- Fallback a Bootstrap Icons (`bi bi-book`) cuando `icono == null`
+- Admin puede pegar cualquier SVG manualmente en el campo icono del CRUD
+
+---
+
+### ✅ FASE 9 — Rediseño Estético Integral (UI/UX)
+> **Estado Actual:** Completado  
+> **Prioridad:** Alta (identidad visual del producto)  
+> **Commits:** `3af18d3`, `a931839`, `2168388`, `d6e9dee`, `03ae84f`, `84229d5`, `a7ce472`
+
+| Tarea | Estado | Notas |
+|-------|--------|-------|
+| Paleta de color vibrante basada en turquesa/teal (`#0d9488`) | ✅ Completado | Variables CSS: `--brand`, `--brand-light`, `--brand-dark` |
+| Hero section con gradiente turquesa + iconos flotantes animados (CSS keyframes) | ✅ Completado | 4 iconos SVG (graduación, plus, globo, chat) con `float-icon` animation |
+| Animaciones stagger-fade en secciones del home | ✅ Completado | `@keyframes stagger-fade-up` con delays escalonados |
+| Animaciones card-fade-in en tarjetas de materias y tutores | ✅ Completado | `@keyframes card-fade-in` con scale + opacity |
+| Glass navbar con efecto blur y bordes semitransparentes | ✅ Completado | `backdrop-filter: blur(12px)` + `border-bottom` sutil |
+| Fondo con patrón circuit board + gradientes + noise textura | ✅ Completado | SVG pattern repetido, radial gradients, pseudo-elemento noise |
+| Escalado y responsividad de iconos SVG en cards | ✅ Completado | `width: 3em; height: 3em` con hover scale |
+| Admin compacto: iconos 24px sin animaciones | ✅ Completado | CSS específico para `.card-icon` en admin |
+| Cache-buster para CSS (`?v=` + timestamp) | ✅ Completado | Forza recarga de estilos tras cambios |
+| Seguridad por roles refinada + navbar admin sin enlaces usuario | ✅ Completado | Admin solo ve enlaces del panel |
+| Notificaciones funcionales con campana y dropdown | ✅ Completado | Fragmento `scripts.html` con polling cada 30s, badge contador, marcar leídas |
+| Navbar glass tintado + patrón circuit | ✅ Completado | Efecto glass mejorado con patrón de fondo |
+
+**Decisiones:**
+- Diseño mobile-first con Bootstrap 5, animaciones degradan graceful en mobile
+- Las animaciones CSS se habilitan vía clases `.stagger-fade` y `.card-fade-in` — no afectan rendimiento en pantallas pequeñas
+- Notificaciones: poll cada 30s al backend, sin WebSockets (MVP)
+- Cache-buster con timestamp de compilación para evitar estilos cacheados
+
+---
+
+### ✅ FASE 10 — Hero con Física 2D (Colisiones Realistas)
+> **Estado Actual:** Completado  
+> **Prioridad:** Baja (embellecimiento)  
+> **Commits:** No commiteado aún (última sesión)
+
+| Tarea | Estado | Notas |
+|-------|--------|-------|
+| Motor de físicas JavaScript con `requestAnimationFrame` | ✅ Completado | `static/js/hero-physics.js` — 96 líneas |
+| 10 iconos SVG totales (4 originales + 6 de materias) | ✅ Completado | Code `<>`, calculadora, base de datos, átomo, matraz, gráfica |
+| Posición inicial aleatoria, velocidad, tamaño (32-56px) y rotación | ✅ Completado | Cada icono es único en trayectoria |
+| Rebote contra bordes del contenedor `.hero-section` | ✅ Completado | Inversión de velocidad en colisión con pared |
+| Colisiones elásticas entre íconos | ✅ Completado | Detección por distancia, corrección de superposición, intercambio de momento |
+| Rotación suave variable por icono | ✅ Completado | `rotSpeed` aleatorio |
+| Oculto en mobile (< 768px) | ✅ Completado | `display: none` en media query |
+| Reemplazo de animación CSS anterior (`@keyframes float-icon`) | ✅ Completado | Se eliminaron nth-child rules + keyframes |
+
+**Decisiones:**
+- DOM-based (no Canvas) para mantener los SVG inline y su semántica
+- Colisiones elásticas 2D con masas proporcionales al tamaño del icono
+- `will-change: transform` en CSS para optimizar rendering
+
+---
+
+
 ## 8. Seguimiento de RF y RNF
 
 ### Requerimientos Funcionales (RF)
@@ -612,16 +687,21 @@ Solicitante                    Sistema                        Tutor
 
 | Métrica | Valor |
 |---------|-------|
-| Fases Completadas | **7 / 7** (100%) — Fase 5 (Pagos) eliminada |
+| Fases Completadas | **10 / 10** (Fase 5 Pagos eliminada, reemplazada por Fases 8-10 UI) |
 | RF Implementadas | **10 / 10** (RF10-RF14 eliminados) |
 | RNF Cumplidos | **13 / 21** (RNF13 eliminado) |
-| Tests Pasando | **26 / 26** ✅ Todos pasando (PagoService eliminado) |
+| Tests Pasando | **26 / 26** ✅ Todos pasando |
 | Bugs Abiertos | 0 |
-| Última Actualización | 21/06/2026 — Fase 5 (Pagos) eliminada del proyecto |
+| Última Actualización | 22/06/2026 — Fases 8-10 UI completadas |
+| Identidad Visual | ✅ Sistema de iconos SVG por materia + paleta teal turquesa |
+| Animaciones | ✅ Hero con física 2D (colisiones + rebotes) + stagger-fade + card-fade-in |
+| Navbar | ✅ Glass efecto blur + patrón circuit board |
+| Background | ✅ Circuit board pattern + gradientes + noise textura |
+| Notificaciones | ✅ Sistema funcional con campana, dropdown y badge contador |
 | Seguridad | ✅ "Cierre Híbrido" — ADMIN protegido, redirección al login en 403 |
 | Performance | ✅ JOIN FETCH en todos los repositorios de listado (N+1 eliminado) |
 | Accesibilidad | ✅ aria-label en tablas/icon-buttons, keyboard en rating, for/id en filtros |
-| Localhost:8080 | ✅ App funcionando — Dashboard Admin, Gestión Materias, Optimización |
+| Localhost:8080 | ✅ App funcionando — UI rediseñada, Dashboard Admin, Gestión Materias |
 | Base de datos | ✅ PostgreSQL con seed automático en cada arranque |
 
 ---
@@ -668,5 +748,9 @@ Solicitante                    Sistema                        Tutor
 | 14/06/2026 | Implementación Fase 5 (completa) | Entidad `Pago` con enums y campos completos (`comision_calculada`, `referencia_pasarela`). `Reserva` con `metodo_pago`. `PagoService` con lógica de comisión/límite desde `configuracion_sistema`, liquidación de deuda. `PagoController` con endpoints: `POST /pagos/digital/{id}` (mock), `POST /pagos/efectivo/{id}` (finalizar + comisión), `POST /pagos/liquidar`. Templates: `liquidacion.html`. Flujo completo: CONFIRMADA → PAGADA (digital) o CONFIRMADA → FINALIZADA (efectivo + comisión). Navbar actualizado con enlace Liquidar Deuda. Plan actualizado a v2.8.0. |
 | 14/06/2026 | Implementación Fase 6 (completa) | Entidad `Resena` (1:1 con Reserva, calificación 1-5). Servicio con validación (solo FINALIZADA, una por reserva, solo solicitante). Cálculo automático de promedio vía `AVG()` + actualización en `PerfilTutor`. Controlador con crear y eliminar (admin). Template `formulario-resena.html` con estrellas interactivas. Botón Calificar en `mis-tutorias.html` (solo FINALIZADA sin reseña). Reseñas visibles en `perfil-publico.html`. Moderación admin via `POST /resenas/eliminar/{id}`. PLAN.md v2.9.0. |
 | 14/06/2026 | Implementación Fase 7 (Panel Admin) | **Cierre Híbrido de Seguridad:** `SecurityConfig.java` reestructurado — reemplazado `permitAll()` general por matriz de acceso (público/autenticado/admin). Agregado `AuthenticationEntryPoint` para redirigir al login (resuelve conflicto de 403 en modo STATELESS). **Dashboard de Control:** Nuevo endpoint `GET /admin` con KPIs en `admin-dashboard.html` (usuarios, tutores, deuda, reservas hoy). Nuevas consultas agregadas en `PerfilTutorRepository` y `ReservaRepository`. **Configuración del Sistema:** Formulario para comisión % y límite de crédito en `admin-configuracion.html`. **Reporte de Deudas:** Listado de tutores morosos en `admin-deudas.html`. **CRUD Materias:** Modal Bootstrap con crear/editar/eliminar en `admin-materias.html` — catálogo expandible sin redeploy. **Moderación Reseñas:** Listado completo con eliminación en `admin-resenas.html`. Navbar actualizado con enlace a `/admin`. Mensajes flash agregados en `layout.html`. Métricas y tracking de RF/RNF actualizados. PLAN.md v3.0.0. |
-| 14/06/2026 | Implementación Fase 8 (Optimización, Testing, Pulido) | **8.2 Layout Maestro:** 5 fragmentos Thymeleaf, 15 templates convertidos con `th:with="pageTitle"`. **8.3 Validaciones:** 8 DTOs con `@Valid` + `BindingResult` en 4 controladores. **8.4 GlobalExceptionHandler:** Logging, AccessDeniedException, DataIntegrityViolationException. **8.5 Perfiles Spring:** `application-dev.properties` (defaults inline) + `application-prod.properties` (env vars fail-fast). **8.6-8.8 Tests:** 33 tests (ReservaService 16, PagoService 7, UsuarioService 9, context 1). Todos pasando. **8.9 Accesibilidad:** `aria-label` en tablas/icon-buttons, keyboard + role en rating, `for`/`id` en filtros. **8.10 Performance:** N+1 eliminado — `JOIN FETCH` en PerfilTutorRepository, ReservaRepository, ResenaRepository. Última fase. Proyecto completo. |
+| 14/06/2026 | Implementación Fase 8 (Optimización, Testing, Pulido) | **Layout Maestro:** 5 fragmentos Thymeleaf, 15 templates convertidos. **Validaciones:** 8 DTOs con `@Valid` + `BindingResult`. **GlobalExceptionHandler:** Logging, AccessDeniedException, DataIntegrityViolationException. **Perfiles Spring:** `application-dev.properties` + `application-prod.properties`. **Tests:** 33 tests. **Accesibilidad:** aria-label, keyboard en rating. **Performance:** JOIN FETCH (N+1 eliminado). |
+| 22/06/2026 | Fase 8 (real) — Sistema de Iconos SVG por Materia | Campo `icono` (TEXT) + `descripcion` en entidad `Materia`. 7 constantes SVG en `DbSeed.java`. Seed de 12 materias con iconos. CRUD admin con campo icono. Renderizado en todos los templates con `th:utext` + fallback Bootstrap Icons. Colores por categoría vía `[data-categoria]`. Commits: `397fee2`, `a931839`, `2168388`. |
+| 22/06/2026 | Fase 9 — Rediseño Estético Integral | Paleta teal turquesa (`#0d9488`). Hero con gradiente + 4 iconos flotantes CSS. Animaciones stagger-fade y card-fade-in. Glass navbar con backdrop-filter. Fondo circuit board + gradientes + noise. Escalado responsive de iconos SVG. Admin compacto sin animaciones. Cache-buster CSS. Seguridad por roles refinada. Commits: `3af18d3`, `a931839`, `2168388`, `d6e9dee`, `03ae84f`, `84229d5`, `a7ce472`. |
+| 22/06/2026 | Fase 9 — Notificaciones + Navbar glass | Sistema de notificaciones funcional con campana y dropdown (`scripts.html`). Polling cada 30s, badge contador, marcar leídas. Navbar glass tintado con patrón circuit. Commit: `a7ce472`. |
+| 22/06/2026 | Fase 10 — Hero con Física 2D | Motor de físicas JavaScript (`hero-physics.js`). 10 iconos con posición/velocidad/masa/rotación aleatorias. Colisiones elásticas entre iconos + rebote en bordes. Reemplazo de animación CSS `@keyframes float-icon`. Oculto en mobile. |
 

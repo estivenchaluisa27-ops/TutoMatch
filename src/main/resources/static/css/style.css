@@ -206,6 +206,17 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
     font-size: 1.05rem;
 }
 
+/* Color para el botón seleccionado */
+.btn-check:checked + .btn-outline-primary {
+    background-color: var(--bs-primary) !important;
+    color: #ffffff !important;
+    border-color: var(--bs-primary) !important;
+}
+
+/* Efecto al pasar el mouse por los botones */
+.btn-outline-primary:hover {
+    background-color: rgba(13, 148, 136, 0.05);
+}
 /* ---------- Forms ---------- */
 .form-control, .form-select {
     padding: 0.75rem 1rem;
@@ -254,37 +265,9 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
 .hero-icon {
     position: absolute;
     opacity: 0.1;
-    width: 48px;
-    height: 48px;
-}
-
-.hero-icon:nth-child(1) {
-    top: 15%;
-    left: 8%;
-    animation: float-icon 6s ease-in-out infinite;
-}
-
-.hero-icon:nth-child(2) {
-    top: 65%;
-    left: 5%;
-    animation: float-icon 8s ease-in-out 1s infinite;
-}
-
-.hero-icon:nth-child(3) {
-    top: 25%;
-    right: 10%;
-    animation: float-icon 7s ease-in-out 0.5s infinite;
-}
-
-.hero-icon:nth-child(4) {
-    top: 70%;
-    right: 5%;
-    animation: float-icon 9s ease-in-out 2s infinite;
-}
-
-@keyframes float-icon {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-16px) rotate(5deg); }
+    top: 0;
+    left: 0;
+    will-change: transform;
 }
 
 /* ---------- Icon Cards (Materias) ---------- */
