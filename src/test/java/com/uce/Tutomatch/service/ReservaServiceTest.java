@@ -24,6 +24,7 @@ class ReservaServiceTest {
     @Mock private MateriaRepository materiaRepository;
     @Mock private PerfilTutorRepository perfilTutorRepository;
     @Mock private UsuarioRepository usuarioRepository;
+    @Mock private NotificacionService notificacionService;
 
     private ReservaService reservaService;
     private Usuario solicitante;
@@ -36,7 +37,7 @@ class ReservaServiceTest {
     @BeforeEach
     void setUp() {
         reservaService = new ReservaService(reservaRepository, disponibilidadRepository,
-                materiaRepository, perfilTutorRepository, usuarioRepository);
+                materiaRepository, perfilTutorRepository, usuarioRepository, notificacionService);
 
         solicitante = new Usuario("alumno@uce.edu.ec", "pass", "Alumno Test", true, false, false);
         solicitante.setId(1L);

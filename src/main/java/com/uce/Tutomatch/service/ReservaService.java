@@ -17,17 +17,24 @@ public class ReservaService {
     private final MateriaRepository materiaRepository;
     private final PerfilTutorRepository perfilTutorRepository;
     private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
     public ReservaService(ReservaRepository reservaRepository,
                           DisponibilidadRepository disponibilidadRepository,
                           MateriaRepository materiaRepository,
                           PerfilTutorRepository perfilTutorRepository,
-                          UsuarioRepository usuarioRepository) {
+                          UsuarioRepository usuarioRepository,
+                          NotificacionService notificacionService) {
         this.reservaRepository = reservaRepository;
         this.disponibilidadRepository = disponibilidadRepository;
         this.materiaRepository = materiaRepository;
         this.perfilTutorRepository = perfilTutorRepository;
         this.usuarioRepository = usuarioRepository;
+        this.notificacionService = notificacionService;
+    }
+
+    private String diaSemanaNombre(Integer dia) {
+        return List.of("Lunes", "Martes", "Mi\u00e9rcoles", "Jueves", "Viernes", "S\u00e1bado", "Domingo").get(dia - 1);
     }
 
     @Transactional
@@ -68,7 +75,22 @@ public class ReservaService {
         disponibilidadRepository.save(bloque);
 
         Reserva reserva = new Reserva(solicitante, bloque, materia);
-        return reservaRepository.save(reserva);
+        reserva = reservaRepository.save(reserva);
+
+        notificacionService.crear(solicitante,
+                Notificacion.TipoNotificacion.RESERVA_CREADA,
+                "Solicitaste una tutor\u00eda de " + materia.getNombre()
+                        + " para el " + diaSemanaNombre(bloque.getDiaSemana())
+                        + " " + bloque.getHoraInicio() + "-" + bloque.getHoraFin());
+
+        notificacionService.crear(perfilTutor.getUsuario(),
+                Notificacion.TipoNotificacion.RESERVA_CREADA,
+                solicitante.getNombreCompleto() + " solicit\u00f3 una tutor\u00eda de "
+                        + materia.getNombre()
+                        + " para el " + diaSemanaNombre(bloque.getDiaSemana())
+                        + " " + bloque.getHoraInicio() + "-" + bloque.getHoraFin());
+
+        return reserva;
     }
 
     @Transactional
@@ -86,7 +108,17 @@ public class ReservaService {
         }
 
         reserva.setEstado(Reserva.EstadoReserva.CONFIRMADA);
-        return reservaRepository.save(reserva);
+        reserva = reservaRepository.save(reserva);
+
+        notificacionService.crear(reserva.getSolicitante(),
+                Notificacion.TipoNotificacion.RESERVA_CONFIRMADA,
+                "Tu tutor\u00eda de " + reserva.getMateria().getNombre()
+                        + " con " + reserva.getDisponibilidad().getPerfilTutor().getUsuario().getNombreCompleto()
+                        + " ha sido confirmada para el "
+                        + diaSemanaNombre(reserva.getDisponibilidad().getDiaSemana())
+                        + " " + reserva.getDisponibilidad().getHoraInicio() + "-" + reserva.getDisponibilidad().getHoraFin());
+
+        return reserva;
     }
 
     @Transactional
@@ -104,7 +136,21 @@ public class ReservaService {
         }
 
         reserva.setEstado(Reserva.EstadoReserva.FINALIZADA);
-        return reservaRepository.save(reserva);
+        reserva = reservaRepository.save(reserva);
+
+        notificacionService.crear(reserva.getSolicitante(),
+                Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
+                "Tu tutor\u00eda de " + reserva.getMateria().getNombre()
+                        + " con " + reserva.getDisponibilidad().getPerfilTutor().getUsuario().getNombreCompleto()
+                        + " ha finalizado.");
+
+        notificacionService.crear(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
+                Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
+                "La tutor\u00eda de " + reserva.getMateria().getNombre()
+                        + " con " + reserva.getSolicitante().getNombreCompleto()
+                        + " ha finalizado.");
+
+        return reserva;
     }
 
     @Transactional
@@ -138,6 +184,15 @@ public class ReservaService {
         Disponibilidad bloque = reserva.getDisponibilidad();
         bloque.setEstado(Disponibilidad.EstadoDisponibilidad.LIBRE);
         disponibilidadRepository.save(bloque);
+
+        notificacionService.crear(reserva.getSolicitante(),
+                Notificacion.TipoNotificacion.RESERVA_CANCELADA,
+                "Tu tutor\u00eda de " + reserva.getMateria().getNombre() + " fue cancelada.");
+
+        notificacionService.crear(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
+                Notificacion.TipoNotificacion.RESERVA_CANCELADA,
+                "La tutor\u00eda de " + reserva.getMateria().getNombre()
+                        + " con " + reserva.getSolicitante().getNombreCompleto() + " fue cancelada.");
 
         return reserva;
     }

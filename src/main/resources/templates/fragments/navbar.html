@@ -33,10 +33,10 @@
                     <li th:if="${authenticated && !isAdmin}" class="nav-item position-relative">
                         <button class="notif-bell" id="notifBell" aria-label="Notificaciones">
                             <i class="bi bi-bell"></i>
-                            <span th:if="${notificacionesNoLeidas > 0}"
-                                  class="notif-badge"
+                            <span class="notif-badge"
                                   id="notifBadge"
-                                  th:text="${notificacionesNoLeidas}">0</span>
+                                  th:text="${notificacionesNoLeidas}"
+                                  th:style="${notificacionesNoLeidas > 0} ? '' : 'display:none'">0</span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end notif-dropdown" id="notifDropdown" aria-labelledby="notifBell">
                             <div class="notif-header">

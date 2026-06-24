@@ -55,6 +55,11 @@ public class NotificacionController {
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(401).build();
         }
+        Long usuarioId = obtenerUsuarioId(auth);
+        var notificacion = notificacionService.obtenerPorId(id);
+        if (notificacion == null || !notificacion.getUsuario().getId().equals(usuarioId)) {
+            return ResponseEntity.status(403).build();
+        }
         notificacionService.marcarLeida(id);
         return ResponseEntity.ok().build();
     }

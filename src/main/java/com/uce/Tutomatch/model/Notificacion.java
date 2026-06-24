@@ -1,5 +1,6 @@
 package com.uce.Tutomatch.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -20,6 +21,7 @@ public class Notificacion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonIgnore
     private Usuario usuario;
 
     @Enumerated(EnumType.STRING)
@@ -55,6 +57,7 @@ public class Notificacion {
         this.id = id;
     }
 
+    @JsonIgnore
     public Usuario getUsuario() {
         return usuario;
     }

@@ -33,6 +33,11 @@ public class NotificacionService {
         return notificacionRepository.countByUsuarioIdAndLeidaFalse(usuarioId);
     }
 
+    @Transactional(readOnly = true)
+    public Notificacion obtenerPorId(Long notificacionId) {
+        return notificacionRepository.findById(notificacionId).orElse(null);
+    }
+
     @Transactional
     public void marcarLeida(Long notificacionId) {
         notificacionRepository.findById(notificacionId)

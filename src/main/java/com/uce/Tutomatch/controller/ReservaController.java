@@ -1,12 +1,8 @@
 package com.uce.Tutomatch.controller;
 
 import com.uce.Tutomatch.dto.CrearReservaDTO;
-import com.uce.Tutomatch.model.Disponibilidad;
-import com.uce.Tutomatch.model.PerfilTutor;
 import com.uce.Tutomatch.model.Reserva;
-import com.uce.Tutomatch.model.Usuario;
 import com.uce.Tutomatch.repository.UsuarioRepository;
-import com.uce.Tutomatch.service.NotificacionService;
 import com.uce.Tutomatch.service.PerfilTutorService;
 import com.uce.Tutomatch.service.ResenaService;
 import com.uce.Tutomatch.service.ReservaService;
@@ -21,7 +17,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/reservas")
@@ -30,18 +25,15 @@ public class ReservaController {
     private final ReservaService reservaService;
     private final UsuarioRepository usuarioRepository;
     private final PerfilTutorService perfilTutorService;
-    private final NotificacionService notificacionService;
     private final ResenaService resenaService;
 
     public ReservaController(ReservaService reservaService,
                              UsuarioRepository usuarioRepository,
                              PerfilTutorService perfilTutorService,
-                             NotificacionService notificacionService,
                              ResenaService resenaService) {
         this.reservaService = reservaService;
         this.usuarioRepository = usuarioRepository;
         this.perfilTutorService = perfilTutorService;
-        this.notificacionService = notificacionService;
         this.resenaService = resenaService;
     }
 
@@ -102,24 +94,7 @@ public class ReservaController {
 
         try {
             Long usuarioId = obtenerUsuarioId(auth);
-            Reserva reserva = reservaService.crear(usuarioId, dto.getDisponibilidadId(), dto.getMateriaId());
-
-            Usuario solicitante = reserva.getSolicitante();
-            Usuario tutor = reserva.getDisponibilidad().getPerfilTutor().getUsuario();
-
-            notificacionService.crear(solicitante,
-                    com.uce.Tutomatch.model.Notificacion.TipoNotificacion.RESERVA_CREADA,
-                    "Solicitaste una tutoría de " + reserva.getMateria().getNombre()
-                            + " para el " + diaSemanaNombre(reserva.getDisponibilidad().getDiaSemana())
-                            + " " + reserva.getDisponibilidad().getHoraInicio() + "-" + reserva.getDisponibilidad().getHoraFin());
-
-            notificacionService.crear(tutor,
-                    com.uce.Tutomatch.model.Notificacion.TipoNotificacion.RESERVA_CREADA,
-                    solicitante.getNombreCompleto() + " solicitó una tutoría de "
-                            + reserva.getMateria().getNombre()
-                            + " para el " + diaSemanaNombre(reserva.getDisponibilidad().getDiaSemana())
-                            + " " + reserva.getDisponibilidad().getHoraInicio() + "-" + reserva.getDisponibilidad().getHoraFin());
-
+            reservaService.crear(usuarioId, dto.getDisponibilidadId(), dto.getMateriaId());
             return "redirect:/reservas?success=reserva_creada";
         } catch (Exception e) {
             return "redirect:/reservas?error=" + e.getMessage();
@@ -135,16 +110,7 @@ public class ReservaController {
 
         try {
             Long usuarioId = obtenerUsuarioId(auth);
-            Reserva reserva = reservaService.confirmar(id, usuarioId);
-
-            notificacionService.crear(reserva.getSolicitante(),
-                    com.uce.Tutomatch.model.Notificacion.TipoNotificacion.RESERVA_CONFIRMADA,
-                    "Tu tutoría de " + reserva.getMateria().getNombre()
-                            + " con " + reserva.getDisponibilidad().getPerfilTutor().getUsuario().getNombreCompleto()
-                            + " ha sido confirmada para el "
-                            + diaSemanaNombre(reserva.getDisponibilidad().getDiaSemana())
-                            + " " + reserva.getDisponibilidad().getHoraInicio() + "-" + reserva.getDisponibilidad().getHoraFin());
-
+            reservaService.confirmar(id, usuarioId);
             return "redirect:/reservas?success=reserva_confirmada";
         } catch (Exception e) {
             return "redirect:/reservas?error=" + e.getMessage();
@@ -159,20 +125,7 @@ public class ReservaController {
         }
         try {
             Long usuarioId = obtenerUsuarioId(auth);
-            Reserva reserva = reservaService.finalizar(id, usuarioId);
-
-            notificacionService.crear(reserva.getSolicitante(),
-                    com.uce.Tutomatch.model.Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
-                    "Tu tutoría de " + reserva.getMateria().getNombre()
-                            + " con " + reserva.getDisponibilidad().getPerfilTutor().getUsuario().getNombreCompleto()
-                            + " ha finalizado.");
-
-            notificacionService.crear(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
-                    com.uce.Tutomatch.model.Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
-                    "La tutoría de " + reserva.getMateria().getNombre()
-                            + " con " + reserva.getSolicitante().getNombreCompleto()
-                            + " ha finalizado.");
-
+            reservaService.finalizar(id, usuarioId);
             return "redirect:/reservas?success=tutoria_finalizada";
         } catch (Exception e) {
             return "redirect:/reservas?error=" + e.getMessage();
@@ -188,24 +141,12 @@ public class ReservaController {
 
         try {
             Long usuarioId = obtenerUsuarioId(auth);
-            Reserva reserva = reservaService.cancelar(id, usuarioId, false);
-
-            notificacionService.crear(reserva.getSolicitante(),
-                    com.uce.Tutomatch.model.Notificacion.TipoNotificacion.RESERVA_CANCELADA,
-                    "Tu tutoría de " + reserva.getMateria().getNombre() + " fue cancelada.");
-
-            notificacionService.crear(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
-                    com.uce.Tutomatch.model.Notificacion.TipoNotificacion.RESERVA_CANCELADA,
-                    "La tutoría de " + reserva.getMateria().getNombre()
-                            + " con " + reserva.getSolicitante().getNombreCompleto() + " fue cancelada.");
-
+            reservaService.cancelar(id, usuarioId, false);
             return "redirect:/reservas?success=reserva_cancelada";
         } catch (Exception e) {
             return "redirect:/reservas?error=" + e.getMessage();
         }
     }
 
-    private String diaSemanaNombre(Integer dia) {
-        return List.of("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo").get(dia - 1);
-    }
+
 }
