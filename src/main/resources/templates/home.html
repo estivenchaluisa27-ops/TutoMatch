@@ -53,16 +53,16 @@
     <!-- DESKTOP: Layout Dividido (> lg) -->
     <section class="pb-4 pt-0 d-none d-lg-block">
         <div class="row main-layout g-4">
-            <!-- Izquierda: Materias (75%) -->
-            <div class="col-lg-9 panel-scrollable pt-4">
-                <h2 class="mb-4 fw-bold">Materias por Categor&iacute;a</h2>
-                <th:block th:replace="~{fragments/subject-cards :: subject-cards(columnClass='row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3')}"/>
-            </div>
-
-            <!-- Derecha: Tutores (25%) -->
+            <!-- Izquierda: Tutores (25%) -->
             <div th:if="${not #lists.isEmpty(recomendados)}" class="col-lg-3 panel-scrollable tutor-sidebar pt-4">
                 <h5 class="fw-bold mb-3">Tutores Recomendados</h5>
                 <th:block th:replace="~{fragments/tutor-cards :: tutor-cards(columnClass='g-2', avatarClass='avatar-circle avatar-circle-sm me-2', descLen=80)}"/>
+            </div>
+
+            <!-- Derecha: Materias (75%) -->
+            <div class="col-lg-9 panel-scrollable pt-4">
+                <h2 class="mb-4 fw-bold">Materias por Categor&iacute;a</h2>
+                <th:block th:replace="~{fragments/subject-cards :: subject-cards(columnClass='row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3')}"/>
             </div>
         </div>
     </section>

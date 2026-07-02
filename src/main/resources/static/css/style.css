@@ -577,9 +577,11 @@ h6 { font-size: 0.875rem; }
 }
 
 /* Prevent CSS card animation inside scrollable panels (GSAP handles reveal) */
-.panel-scrollable .card-fade-in {
-    animation: none;
-    opacity: 0;
+@media (prefers-reduced-motion: no-preference) {
+    .panel-scrollable .card-fade-in {
+        animation: none;
+        opacity: 0;
+    }
 }
 
 /* ---------- Badges ---------- */
@@ -1396,6 +1398,14 @@ hr {
 
 [data-theme="dark"] .tutor-sidebar {
     border-color: var(--border-white);
+}
+
+[data-theme="dark"] .panel-scrollable::-webkit-scrollbar-thumb {
+    background: var(--border-white);
+}
+
+[data-theme="dark"] .panel-scrollable {
+    scrollbar-color: var(--border-white) transparent;
 }
 
 /* ---------- Buttons ---------- */
