@@ -270,28 +270,39 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     let heroContainer = document.querySelector('.hero-icons');
     if (heroContainer) {
         let icons = heroContainer.querySelectorAll('.hero-icon');
-        if (icons.length && window.innerWidth >= 768) {
-            let rect = heroContainer.getBoundingClientRect();
-            icons.forEach((icon, i) => {
-                let size = 32 + Math.random() * 24;
-                icon.style.width = size + 'px';
-                icon.style.height = size + 'px';
-                icon.style.top = '0';
-                icon.style.left = '0';
-                let xStart = Math.random() * (rect.width - size);
-                let yStart = Math.random() * (rect.height - size);
-                gsap.set(icon, { x: xStart, y: yStart, rotation: Math.random() * 360 });
-                gsap.to(icon, {
-                    x: `+=${-60 + Math.random() * 120}`,
-                    y: `+=${-60 + Math.random() * 120}`,
-                    rotation: `+=${-20 + Math.random() * 40}`,
-                    duration: 4 + Math.random() * 4,
-                    repeat: -1,
-                    yoyo: true,
-                    ease: "sine.inOut",
-                    delay: i * 0.3
+        if (icons.length) {
+            let initIcons = function () {
+                let rect = heroContainer.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) {
+                    requestAnimationFrame(initIcons);
+                    return;
+                }
+                icons.forEach((icon, i) => {
+                    let size = 32 + Math.random() * 24;
+                    icon.style.width = size + 'px';
+                    icon.style.height = size + 'px';
+                    icon.style.top = '0';
+                    icon.style.left = '0';
+                    let xStart = Math.random() * (rect.width - size);
+                    let yStart = Math.random() * (rect.height - size);
+                    gsap.set(icon, { x: xStart, y: yStart, rotation: Math.random() * 360 });
+                    gsap.to(icon, {
+                        x: `+=${-60 + Math.random() * 120}`,
+                        y: `+=${-60 + Math.random() * 120}`,
+                        rotation: `+=${-20 + Math.random() * 40}`,
+                        duration: 4 + Math.random() * 4,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "sine.inOut",
+                        delay: i * 0.3 + 0.5
+                    });
                 });
-            });
+            };
+            if (document.readyState === 'complete') {
+                initIcons();
+            } else {
+                window.addEventListener('load', initIcons);
+            }
         }
     }
 
