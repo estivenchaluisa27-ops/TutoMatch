@@ -330,6 +330,8 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         timer: null,
         canvas: null,
         ctx: null,
+        orbitConfigs: null,
+        orbitAngles: [],
     };
 
     // ── Hat coordinates — 22 pts (viewBox 24×24) ──
@@ -418,7 +420,9 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         S.particles.forEach(p => tl.to(p.el, { opacity: p.isClone ? 0.06 : 0.12, duration: 0.6, ease: "power2.out" }, 0));
 
         ensureCanvas(r);
+        S.orbitConfigs = buildOrbitConfigs(r);
         enterPhaseA();
+        scheduleTransitions();
     }
 
     // ════════════════════════════════════════════════════════════
@@ -502,16 +506,133 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     }
 
     // ════════════════════════════════════════════════════════════
-    // FASE B — scaffold (commit 2)
+    // FASE B — Órbitas elípticas + anillos en canvas
     // ════════════════════════════════════════════════════════════
-    function enterPhaseB() {}
-    function orbitTick() {}
+    function buildOrbitConfigs(r) {
+        const cx = r.width / 2, cy = r.height * 0.45;
+        return [
+            { rx: r.width * 0.12, ry: r.height * 0.08, speed: 0.008, count: 5 },
+            { rx: r.width * 0.22, ry: r.height * 0.15, speed: 0.006, count: 6 },
+            { rx: r.width * 0.32, ry: r.height * 0.22, speed: 0.0045, count: 6 },
+            { rx: r.width * 0.42, ry: r.height * 0.30, speed: 0.003, count: 5 },
+        ];
+    }
+
+    function assignOrbits(particles, configs) {
+        const angles = [];
+        let idx = 0;
+        configs.forEach(cfg => {
+            for (let i = 0; i < cfg.count && idx < particles.length; i++, idx++) {
+                angles.push({
+                    angle: (i / cfg.count) * Math.PI * 2,
+                    rx: cfg.rx, ry: cfg.ry, speed: cfg.speed,
+                    cx: particles[0].x, cy: particles[0].y, // placeholder
+                });
+            }
+        });
+        return angles;
+    }
+
+    function enterPhaseB() {
+        S.phase = 'B';
+        S.transitioning = true;
+        gsap.ticker.remove(physicsTickA);
+
+        const r = S.rect;
+        const cx = r.width / 2, cy = r.height * 0.45;
+        S.orbitConfigs = buildOrbitConfigs(r);
+        S.orbitAngles = assignOrbits(S.particles, S.orbitConfigs);
+
+        // Fix center coordinates after we know them
+        S.orbitAngles.forEach(o => { o.cx = cx; o.cy = cy; });
+
+        // Migrate each particle to its orbital starting position
+        S.particles.forEach((p, i) => {
+            const orb = S.orbitAngles[i];
+            if (!orb) return;
+            const tx = orb.cx + Math.cos(orb.angle) * orb.rx - p.size / 2;
+            const ty = orb.cy + Math.sin(orb.angle) * orb.ry - p.size / 2;
+            gsap.to(p, {
+                x: tx, y: ty, duration: 2, ease: "power2.inOut",
+                onUpdate() { gsap.set(p.el, { x: p.x, y: p.y }); },
+            });
+            p.el.style.opacity = '0.18';
+        });
+
+        gsap.to(S.canvas, { opacity: 1, duration: 1, delay: 0.5 });
+
+        setTimeout(() => {
+            S.transitioning = false;
+            gsap.ticker.add(orbitTick);
+        }, 2500);
+    }
+
+    function orbitTick() {
+        if (S.transitioning) return;
+        const ctx = S.ctx, w = S.rect.width, h = S.rect.height;
+        ctx.clearRect(0, 0, w, h);
+
+        // Draw rings
+        const cx = w / 2, cy = h * 0.45;
+        ctx.strokeStyle = 'rgba(167,139,250,0.06)';
+        ctx.lineWidth = 1;
+        if (S.orbitConfigs) {
+            S.orbitConfigs.forEach(c => {
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, c.rx, c.ry, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+        }
+
+        // Move particles along orbits
+        S.particles.forEach((p, i) => {
+            const orb = S.orbitAngles[i];
+            if (!orb) return;
+            orb.angle += orb.speed;
+            p.x = orb.cx + Math.cos(orb.angle) * orb.rx - p.size / 2;
+            p.y = orb.cy + Math.sin(orb.angle) * orb.ry - p.size / 2;
+            gsap.set(p.el, { x: p.x, y: p.y });
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // Scheduler — A → B → C → A (C scaffolded, wired in commit 3)
+    // ════════════════════════════════════════════════════════════
+    function scheduleTransitions() {
+        function loop() {
+            S.timer = setTimeout(() => {
+                enterPhaseB();
+                S.timer = setTimeout(() => {
+                    enterPhaseC();
+                    S.timer = setTimeout(() => {
+                        resetToPhaseA();
+                        loop();
+                    }, 8000);
+                }, 10000);
+            }, 12000);
+        }
+        loop();
+    }
 
     // ════════════════════════════════════════════════════════════
     // FASE C — scaffold (commit 3)
     // ════════════════════════════════════════════════════════════
     function enterPhaseC() {}
-    function resetToPhaseA() { enterPhaseA(); }
+    function resetToPhaseA() {
+        gsap.ticker.remove(orbitTick);
+        S.particles.forEach(p => {
+            const pad = 15, w = S.rect.width, h = S.rect.height;
+            p.x = pad + Math.random() * (w - p.size - pad * 2);
+            p.y = pad + Math.random() * (h - p.size - pad * 2);
+            p.vx = (Math.random() - 0.5) * 1.2;
+            p.vy = (Math.random() - 0.5) * 1.2;
+            p.el.style.cssText += `opacity:${p.isClone ? 0.06 : 0.12};filter:none;`;
+            const sz = p.isClone ? 16 + Math.random() * 12 : 22 + Math.random() * 32;
+            p.size = sz;
+            p.el.style.cssText += `width:${sz}px;height:${sz}px;`;
+        });
+        enterPhaseA();
+    }
 
     // ── Bootstrap ──
     if (document.readyState === 'complete') init();
