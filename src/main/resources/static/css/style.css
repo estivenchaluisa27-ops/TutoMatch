@@ -526,6 +526,55 @@ h6 { font-size: 0.875rem; }
     box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
 }
 
+/* ---------- LinkedIn-Like Split Layout ---------- */
+.main-layout {
+    height: 70vh;
+}
+
+.panel-scrollable {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    scrollbar-width: thin;
+}
+
+.panel-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel-scrollable::-webkit-scrollbar-thumb {
+    background: var(--border-card);
+    border-radius: 3px;
+}
+
+.tutor-sidebar {
+    background: var(--bg-light-utility);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    border: 1px solid var(--border-card);
+}
+
+.tutor-sidebar .card {
+    border: none;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tutor-sidebar .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.avatar-circle-sm {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+}
+
 /* ---------- Badges ---------- */
 .badge {
     font-weight: 600;
