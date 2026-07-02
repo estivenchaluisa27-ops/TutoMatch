@@ -1,4 +1,4 @@
-gsap.registerPlugin();
+gsap.registerPlugin(ScrollTrigger);
 
 let mm = gsap.matchMedia();
 
