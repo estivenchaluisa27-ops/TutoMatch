@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <th:block th:fragment="subject-cards(columnClass)">
+        <div th:each="entry : ${materiasPorCategoria}" class="mb-4">
+            <h4 class="fw-semibold mb-3 section-header" th:text="${entry.key}">Categor&iacute;a</h4>
+            <div th:class="${columnClass}">
+                <div th:each="m : ${entry.value}" class="col card-fade-in" th:style="'animation-delay: ' + (${m.id} * 0.03) + 's'">
+                    <a th:href="@{/buscar(materia=${m.nombre})}" class="text-decoration-none">
+                        <div class="card h-100 text-center border-0">
+                            <div class="card-body">
+                                <div class="card-icon mx-auto mb-3" th:attr="data-categoria=${m.categoria}">
+                                    <th:block th:if="${m.icono != null}">
+                                        <span th:utext="${m.icono}"></span>
+                                    </th:block>
+                                    <i th:if="${m.icono == null}" class="bi bi-book fs-3" th:style="'color: var(--categoria-' + ${#strings.toLowerCase(m.categoria)} + ')'"></i>
+                                </div>
+                                <h6 class="card-title fw-semibold mb-1" th:text="${m.nombre}">Materia</h6>
+                                <small class="text-muted text-truncate d-block" th:text="${m.descripcion}">Descripci&oacute;n</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

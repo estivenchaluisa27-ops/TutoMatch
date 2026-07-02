@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <th:block th:fragment="tutor-cards(columnClass, avatarClass, descLen)">
+        <div th:each="t : ${recomendados}" class="col card-fade-in" th:style="'animation-delay: ' + (${t.id} * 0.05) + 's'">
+            <div class="card h-100">
+                <div class="card-body" th:classappend="${avatarClass.contains('avatar-circle-sm') ? 'p-3' : ''}">
+                    <div class="d-flex align-items-center mb-2">
+                        <div th:class="${avatarClass}">
+                            <span th:text="${#strings.substring(t.usuario.nombreCompleto, 0, 1)}">I</span>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 small" th:text="${t.usuario.nombreCompleto}">Nombre</h6>
+                            <small class="text-muted" th:text="'Semestre ' + ${t.semestre}">Semestre</small>
+                        </div>
+                    </div>
+                    <p class="card-text small text-muted mb-2" th:text="${#strings.abbreviate(t.descripcion, descLen)}">Descripci&oacute;n</p>
+                    <div class="d-flex justify-content-between align-items-center star-rating">
+                        <span>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <span class="fw-semibold ms-1 small" th:text="${t.calificacionPromedio}">5.0</span>
+                        </span>
+                    </div>
+                    <a th:href="@{/tutor/{id}(id=${t.id})}" class="btn btn-outline-primary btn-sm w-100 mt-2">
+                        Ver perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>
