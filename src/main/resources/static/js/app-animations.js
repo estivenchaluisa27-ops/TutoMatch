@@ -596,7 +596,7 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     }
 
     // ════════════════════════════════════════════════════════════
-    // Scheduler — A → B → C → A (C scaffolded, wired in commit 3)
+    // Scheduler — A → B → C → A (full cycle)
     // ════════════════════════════════════════════════════════════
     function scheduleTransitions() {
         function loop() {
@@ -615,9 +615,57 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     }
 
     // ════════════════════════════════════════════════════════════
-    // FASE C — scaffold (commit 3)
+    // FASE C — Formación del sombrero + contorno
     // ════════════════════════════════════════════════════════════
-    function enterPhaseC() {}
+    function enterPhaseC() {
+        S.phase = 'C';
+        S.transitioning = true;
+        gsap.ticker.remove(orbitTick);
+
+        S.particles.forEach((p, i) => {
+            const pos = mapHat(HAT[i], S.rect);
+            const tSize = i < 14 ? 16 + Math.random() * 6 : 12 + Math.random() * 4;
+
+            gsap.to(p, {
+                x: pos.x, y: pos.y,
+                duration: 1.5, ease: "power2.inOut",
+                onUpdate() { gsap.set(p.el, { x: p.x, y: p.y }); },
+                onComplete() {
+                    p.el.style.filter = 'drop-shadow(0 0 6px rgba(167,139,250,0.55))';
+                }
+            });
+
+            gsap.to(p.el, {
+                width: tSize, height: tSize,
+                opacity: 0.85,
+                duration: 1.2, ease: "power2.inOut",
+                delay: 0.3,
+            });
+            p.size = tSize;
+        });
+
+        setTimeout(drawHatContour, 1800);
+    }
+
+    function drawHatContour() {
+        const ctx = S.ctx, w = S.rect.width, h = S.rect.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const pts = HAT.map(p => mapHat(p, S.rect));
+        ctx.strokeStyle = 'rgba(167,139,250,0.18)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 5]);
+
+        ctx.beginPath();
+        pts.forEach((pt, i) => {
+            const cx = pt.x + S.particles[i].size / 2;
+            const cy = pt.y + S.particles[i].size / 2;
+            i === 0 ? ctx.moveTo(cx, cy) : ctx.lineTo(cx, cy);
+        });
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+    }
     function resetToPhaseA() {
         gsap.ticker.remove(orbitTick);
         S.particles.forEach(p => {
