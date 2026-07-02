@@ -331,6 +331,15 @@ h6 { font-size: 0.875rem; }
     will-change: transform, opacity;
 }
 
+/* Prevent FOUC: hide animated elements until GSAP removes the class */
+.gsap-loading .row.g-3.mb-4 .card,
+.gsap-loading #notifList .notif-item,
+.gsap-loading .flash-messages-container .alert,
+.gsap-loading .pagination,
+.gsap-loading .text-center.py-5 {
+    opacity: 0;
+}
+
 /* ---------- Icon Cards (Materias) ---------- */
 .card-icon {
     width: 40px;

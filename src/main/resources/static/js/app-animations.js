@@ -1,3 +1,5 @@
+document.body.classList.remove('gsap-loading');
+
 gsap.registerPlugin(ScrollTrigger);
 
 let mm = gsap.matchMedia();
@@ -308,4 +310,3 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
 
 });
 
-<｜｜DSML｜｜parameter name="description" string="true">Create app-animations.js
