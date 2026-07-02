@@ -268,6 +268,49 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         });
     });
 
+    // --- 15. Desktop split layout: panel scroll reveal (home.html) ---
+    let panelLeft = document.querySelector('.col-lg-9.panel-scrollable');
+    if (panelLeft) {
+        let leftCards = panelLeft.querySelectorAll('.card-fade-in');
+        if (leftCards.length) {
+            ScrollTrigger.batch(leftCards, {
+                onEnter: batch => gsap.from(batch, {
+                    autoAlpha: 0, y: 40, duration: 0.5, stagger: 0.06,
+                    ease: "back.out(1.2)", overwrite: true
+                }),
+                start: "top 88%",
+                scroller: panelLeft
+            });
+        }
+    }
+
+    let panelRight = document.querySelector('.tutor-sidebar');
+    if (panelRight) {
+        let rightCards = panelRight.querySelectorAll('.card-fade-in');
+        if (rightCards.length) {
+            ScrollTrigger.batch(rightCards, {
+                onEnter: batch => gsap.from(batch, {
+                    autoAlpha: 0, y: 30, duration: 0.5, stagger: 0.08,
+                    ease: "power2.out", overwrite: true
+                }),
+                start: "top 85%",
+                scroller: panelRight
+            });
+        }
+    }
+
+    // --- 16. Sidebar entrance animation (home.html desktop) ---
+    let sidebar = document.querySelector('.tutor-sidebar');
+    if (sidebar) {
+        gsap.from(sidebar, {
+            autoAlpha: 0,
+            x: 30,
+            duration: 0.6,
+            delay: 0.3,
+            ease: "power2.out"
+        });
+    }
+
 });
 
 // --- 15. Hero floating icons (physics-based, outside matchMedia to prevent context revert) ---
