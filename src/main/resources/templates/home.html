@@ -50,65 +50,34 @@
         </div>
     </section>
 
-    <!-- Categorías / Materias -->
-    <section class="container mb-5 stagger-fade stagger-fade-5">
-        <h2 class="text-center mb-4 fw-bold">Materias por Categor&iacute;a</h2>
-        <div th:each="entry : ${materiasPorCategoria}" class="mb-4">
-            <h4 class="fw-semibold mb-3 section-header" th:text="${entry.key}">Categoría</h4>
-            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3">
-                <div th:each="m : ${entry.value}" class="col card-fade-in" th:style="'animation-delay: ' + (${m.id} * 0.03) + 's'">
-                    <a th:href="@{/buscar(materia=${m.nombre})}" class="text-decoration-none">
-                        <div class="card h-100 text-center border-0">
-                            <div class="card-body">
-                                <div class="card-icon mx-auto mb-3" th:attr="data-categoria=${m.categoria}">
-                                    <th:block th:if="${m.icono != null}">
-                                        <span th:utext="${m.icono}"></span>
-                                    </th:block>
-                                    <i th:if="${m.icono == null}" class="bi bi-book fs-3" th:style="'color: var(--categoria-' + ${#strings.toLowerCase(m.categoria)} + ')'"></i>
-                                </div>
-                                <h6 class="card-title fw-semibold mb-1" th:text="${m.nombre}">Materia</h6>
-                                <small class="text-muted text-truncate d-block" th:text="${m.descripcion}">Descripción</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+    <!-- DESKTOP: Layout Dividido (> lg) -->
+    <section class="pb-4 pt-0 d-none d-lg-block">
+        <div class="row main-layout g-4">
+            <!-- Izquierda: Materias (75%) -->
+            <div class="col-lg-9 panel-scrollable pt-4">
+                <h2 class="mb-4 fw-bold">Materias por Categor&iacute;a</h2>
+                <th:block th:replace="~{fragments/subject-cards :: subject-cards(columnClass='row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3')}"/>
+            </div>
+
+            <!-- Derecha: Tutores (25%) -->
+            <div th:if="${not #lists.isEmpty(recomendados)}" class="col-lg-3 panel-scrollable tutor-sidebar pt-4">
+                <h5 class="fw-bold mb-3">Tutores Recomendados</h5>
+                <th:block th:replace="~{fragments/tutor-cards :: tutor-cards(columnClass='g-2', avatarClass='avatar-circle avatar-circle-sm me-2', descLen=80)}"/>
             </div>
         </div>
     </section>
 
-    <!-- Tutores Recomendados -->
-    <section th:if="${not #lists.isEmpty(recomendados)}" class="py-5" style="background: var(--bg-light-utility);">
+    <!-- MÓVIL: Materias primero (< lg) -->
+    <section class="mb-5 d-lg-none stagger-fade stagger-fade-5">
+        <h2 class="text-center mb-4 fw-bold">Materias por Categor&iacute;a</h2>
+        <th:block th:replace="~{fragments/subject-cards :: subject-cards(columnClass='row row-cols-1 row-cols-md-3 g-3')}"/>
+    </section>
+
+    <!-- MÓVIL: Tutores después (< lg) -->
+    <section th:if="${not #lists.isEmpty(recomendados)}" class="py-5 d-lg-none" style="background: var(--bg-light-utility);">
         <div class="container">
-            <h2 class="text-center fw-bold mb-4 stagger-fade stagger-fade-6">
-                Tutores Recomendados
-            </h2>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                <div th:each="t : ${recomendados}" class="col card-fade-in" th:style="'animation-delay: ' + (${t.id} * 0.05) + 's'">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="avatar-circle me-3">
-                                    <span th:text="${#strings.substring(t.usuario.nombreCompleto, 0, 1)}">I</span>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-0" th:text="${t.usuario.nombreCompleto}">Nombre</h6>
-                                    <small class="text-muted" th:text="'Semestre ' + ${t.semestre}">Semestre</small>
-                                </div>
-                            </div>
-                            <p class="card-text small text-muted mb-2" th:text="${#strings.abbreviate(t.descripcion, 100)}">Descripción</p>
-                            <div class="d-flex justify-content-between align-items-center star-rating">
-                                      <span>
-                                          <i class="bi bi-star-fill text-warning"></i>
-                                          <span class="fw-semibold ms-1" th:text="${t.calificacionPromedio}">5.0</span>
-                                      </span>
-                            </div>
-                            <a th:href="@{/tutor/{id}(id=${t.id})}" class="btn btn-outline-primary btn-sm w-100 mt-3">
-                                Ver perfil
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <h2 class="text-center fw-bold mb-4 stagger-fade stagger-fade-6">Tutores Recomendados</h2>
+            <th:block th:replace="~{fragments/tutor-cards :: tutor-cards(columnClass='row row-cols-1 row-cols-md-2 g-4', avatarClass='avatar-circle me-3', descLen=100)}"/>
         </div>
     </section>
 </th:block>

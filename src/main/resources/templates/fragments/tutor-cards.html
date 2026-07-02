@@ -5,7 +5,8 @@
 </head>
 <body>
     <th:block th:fragment="tutor-cards(columnClass, avatarClass, descLen)">
-        <div th:each="t : ${recomendados}" class="col card-fade-in" th:style="'animation-delay: ' + (${t.id} * 0.05) + 's'">
+        <div th:class="${columnClass}">
+            <div th:each="t : ${recomendados}" class="col card-fade-in" th:style="'animation-delay: ' + (${t.id} * 0.05) + 's'">
             <div class="card h-100">
                 <div class="card-body" th:classappend="${avatarClass.contains('avatar-circle-sm') ? 'p-3' : ''}">
                     <div class="d-flex align-items-center mb-2">
@@ -29,6 +30,7 @@
                     </a>
                 </div>
             </div>
+        </div>
         </div>
     </th:block>
 </body>
