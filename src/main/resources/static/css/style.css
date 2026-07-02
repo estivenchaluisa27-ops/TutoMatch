@@ -4,6 +4,14 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
+@font-face {
+    font-family: 'Mustasurma';
+    src: url('/fonts/Mustasurma.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* ---------- Color System ---------- */
 :root {
     /* Bootstrap variable overrides */
@@ -110,13 +118,21 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); }
     letter-spacing: -0.5px;
     font-weight: 800;
     font-size: 1.35rem;
-    color: var(--brand) !important;
+}
+
+.navbar-brand .nav-brand-tuto {
+    color: #ffffff;
+}
+
+.navbar-brand .nav-brand-match {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .navbar-brand i {
     font-size: 1.5rem;
     display: inline-block;
     transition: transform 0.3s var(--ease-bounce);
+    color: #ffffff;
 }
 
 .navbar-brand:hover i {
@@ -782,6 +798,361 @@ hr {
 .notif-empty p {
     font-size: 0.85rem;
     margin: 0;
+}
+
+/* =========================================================
+   TutoMatch — Chalkboard Theme (Auth Pages)
+   ========================================================= */
+
+:root {
+    --chalk-bg: #1a2e2a;
+    --chalk-text: rgba(255, 255, 255, 0.92);
+    --chalk-muted: rgba(255, 255, 255, 0.55);
+    --chalk-border: rgba(255, 255, 255, 0.15);
+}
+
+.chalk-body {
+    background-color: var(--chalk-bg);
+    background-image:
+        radial-gradient(ellipse 70% 50% at 30% 20%, rgba(13, 148, 136, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(245, 158, 11, 0.03) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='chalk'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23chalk)' opacity='0.04'/%3E%3C/svg%3E");
+    color: var(--chalk-text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ---------- Chalk Drawings (SVG animados) ---------- */
+.chalk-drawing {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.12;
+}
+
+.chalk-drawing svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.7);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    animation: chalk-draw 3s ease-out forwards;
+}
+
+.chalk-drawing svg.filled {
+    fill: rgba(255, 255, 255, 0.12);
+}
+
+.chalk-drawing:nth-child(1) svg { animation-delay: 0.1s; }
+.chalk-drawing:nth-child(2) svg { animation-delay: 0.4s; }
+.chalk-drawing:nth-child(3) svg { animation-delay: 0.7s; }
+.chalk-drawing:nth-child(4) svg { animation-delay: 1.0s; }
+.chalk-drawing:nth-child(5) svg { animation-delay: 1.3s; }
+.chalk-drawing:nth-child(6) svg { animation-delay: 1.6s; }
+
+@keyframes chalk-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* ---------- Chalk Dust Particles ---------- */
+.chalk-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.chalk-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    animation: chalk-float linear infinite;
+}
+
+.chalk-particle:nth-child(1) { left: 10%; top: 20%; animation-duration: 18s; animation-delay: 0s; width: 2px; height: 2px; }
+.chalk-particle:nth-child(2) { left: 25%; top: 60%; animation-duration: 22s; animation-delay: 2s; width: 3px; height: 3px; }
+.chalk-particle:nth-child(3) { left: 45%; top: 10%; animation-duration: 16s; animation-delay: 4s; width: 2px; height: 2px; }
+.chalk-particle:nth-child(4) { left: 65%; top: 70%; animation-duration: 20s; animation-delay: 1s; width: 4px; height: 4px; }
+.chalk-particle:nth-child(5) { left: 80%; top: 30%; animation-duration: 19s; animation-delay: 3s; width: 2px; height: 2px; }
+.chalk-particle:nth-child(6) { left: 15%; top: 85%; animation-duration: 24s; animation-delay: 5s; width: 3px; height: 3px; }
+.chalk-particle:nth-child(7) { left: 55%; top: 40%; animation-duration: 17s; animation-delay: 6s; width: 2px; height: 2px; }
+.chalk-particle:nth-child(8) { left: 90%; top: 55%; animation-duration: 21s; animation-delay: 7s; width: 3px; height: 3px; }
+.chalk-particle:nth-child(9) { left: 35%; top: 90%; animation-duration: 23s; animation-delay: 8s; width: 2px; height: 2px; }
+.chalk-particle:nth-child(10) { left: 72%; top: 15%; animation-duration: 15s; animation-delay: 9s; width: 4px; height: 4px; }
+
+@keyframes chalk-float {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.25; }
+    25% { opacity: 0.4; }
+    50% { transform: translateY(-60vh) translateX(30px) scale(1.5); opacity: 0.15; }
+    75% { opacity: 0.05; }
+    100% { transform: translateY(-120vh) translateX(-20px) scale(0); opacity: 0; }
+}
+
+/* ---------- Chalk Title ---------- */
+.chalk-title {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: clamp(3.5rem, 10vw, 5.5rem);
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    letter-spacing: -1px;
+    line-height: 1.1;
+}
+
+.chalk-subtitle {
+    font-family: 'Caveat', cursive;
+    font-weight: 400;
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+    max-width: 90%;
+}
+
+/* ---------- Auth Card ---------- */
+.auth-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--chalk-border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.auth-card:hover {
+    box-shadow: 0 24px 72px rgba(0,0,0,0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.auth-card h3 {
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+}
+
+/* ---------- Auth Form Controls ---------- */
+.auth-form .form-control {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1.5px solid var(--chalk-border) !important;
+    border-radius: 0;
+    color: #ffffff !important;
+    padding: 0.7rem 0;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease, padding-left 0.3s ease;
+}
+
+.auth-form .form-control:focus {
+    border-color: var(--brand) !important;
+    box-shadow: none !important;
+    padding-left: 4px;
+}
+
+.auth-form .form-control::placeholder {
+    color: var(--chalk-muted);
+    opacity: 1;
+}
+
+.auth-form .form-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.15rem;
+    letter-spacing: 0.01em;
+}
+
+/* ---------- Auth Role Toggle ---------- */
+.auth-form .btn-outline-light {
+    border-color: var(--chalk-border);
+    color: #ffffff;
+    transition: all 0.25s ease;
+}
+
+.auth-form .btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.auth-form .btn-check:checked + .btn-outline-light {
+    background-color: var(--brand) !important;
+    border-color: var(--brand) !important;
+    color: #ffffff !important;
+}
+
+/* ---------- Chalk Link ---------- */
+.chalk-link {
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 2px solid var(--brand);
+    transition: all 0.25s ease;
+}
+
+.chalk-link:hover {
+    color: var(--brand-light);
+    border-bottom-color: var(--brand-light);
+}
+
+/* ---------- Auth Flash ---------- */
+.auth-alert {
+    border-radius: 10px;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* ---------- Chalk Section Divider ---------- */
+.chalk-divider {
+    border: none;
+    border-top: 1px solid var(--chalk-border);
+    opacity: 0.5;
+    margin: 1.5rem 0;
+}
+
+/* ---------- Chalk Icon Wrapper ---------- */
+.chalk-icon-wrapper {
+    font-family: 'Caveat', cursive;
+    color: var(--brand);
+}
+
+/* ---------- Chalkboard Frame ---------- */
+.chalkboard {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.chalkboard-inner {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    min-height: calc(100vh - 40px);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 50px 60px 70px;
+    background:
+        radial-gradient(ellipse 60% 50% at 30% 30%, rgba(13, 148, 136, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 80% 70%, rgba(245, 158, 11, 0.03) 0%, transparent 60%),
+        var(--chalk-bg);
+    border-radius: 4px;
+    box-shadow:
+        /* outer wood frame */
+        0 0 0 12px #5c3a1e,
+        0 0 0 14px #3d2512,
+        /* inner shadow for depth */
+        inset 0 0 60px rgba(0,0,0,0.3),
+        inset 0 0 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+/* Chalk tray at the bottom */
+.chalkboard-tray {
+    position: absolute;
+    bottom: 0;
+    left: -14px;
+    right: -14px;
+    height: 28px;
+    background: linear-gradient(180deg, #5c3a1e 0%, #4a2e16 40%, #3d2512 100%);
+    border-top: 2px solid #6b4524;
+    box-shadow:
+        0 -2px 6px rgba(0,0,0,0.3),
+        inset 0 2px 4px rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 60px;
+    gap: 16px;
+}
+
+.chalkboard-tray::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.15) 100%);
+}
+
+/* Eraser SVG in tray */
+.tray-eraser svg {
+    width: 40px;
+    height: 18px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+}
+
+/* Chalk pieces in tray */
+.tray-chalk {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tray-chalk svg {
+    width: 28px;
+    height: 10px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+}
+
+/* Content layout inside chalkboard */
+.chalkboard-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 40px;
+    width: 100%;
+}
+
+.chalkboard-left {
+    flex: 0 0 auto;
+    max-width: 45%;
+    padding-right: 20px;
+}
+
+.chalkboard-right {
+    flex: 0 0 auto;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 992px) {
+    .chalkboard-inner {
+        padding: 30px 20px 70px;
+        justify-content: center;
+    }
+    .chalkboard-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .chalkboard-left {
+        max-width: 100%;
+        padding-right: 0;
+    }
+    .chalkboard-right {
+        max-width: 100%;
+    }
+    .chalkboard-tray {
+        padding: 0 20px;
+    }
 }
 
 /* ---------- Reduced Motion ---------- */

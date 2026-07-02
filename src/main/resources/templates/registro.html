@@ -4,275 +4,797 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro | TutoMatch</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Mustasurma';
+            src: url('/fonts/Mustasurma.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
-            --brand: #0d9488;
-            --bg-chalkboard: #234b3a;
+            --bg-deep: #16161a;
+            --bg-card: #1e1e24;
+            --brand-purple: #8b5cf6;
+            --brand-purple-light: #a78bfa;
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --border-subtle: rgba(255, 255, 255, 0.08);
         }
 
         body {
-            background-color: var(--bg-chalkboard);
-            /* Textura sutil simulando el polvo de la tiza en la pizarra */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E");
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-deep);
+            min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+            color: var(--text-primary);
         }
 
-        /* ===== DECORACIONES DE TIZA (MATERIAS) ===== */
-        .chalk-drawing {
-            position: absolute;
-            color: rgba(255, 255, 255, 0.12); /* Blanco semi-transparente como tiza borrosa */
-            pointer-events: none; /* Evita que estorben al hacer clic */
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
             z-index: 0;
+            background: url('/images/fondo2.png') center/cover no-repeat;
+            filter: blur(1px);
+            transform: scale(1.02);
         }
 
-        .fullscreen-wrapper {
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(135deg,
+                rgba(0, 0, 0, 0.85) 0%,
+                rgba(0, 0, 0, 0.35) 50%,
+                transparent 75%
+            );
+            pointer-events: none;
+        }
+
+        .registro-wrapper {
+            position: relative;
+            z-index: 10;
             min-height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 15px;
-            position: relative;
-            z-index: 1;
+            justify-content: space-between;
+            padding: 2rem 4rem;
+            max-width: 1440px;
+            margin: 0 auto;
         }
 
-        .content-layout {
-            max-width: 1200px;
-            width: 100%;
+        .branding-section {
+            flex: 1;
+            max-width: 500px;
+            margin-top: -60px;
         }
 
-        /* ===== ESTILOS DEL TEXTO ===== */
-        .text-column {
-            padding: 2rem 1rem 2rem 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-        }
-
-        .brand-title {
-            font-size: 4.5rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 1.5rem;
-            color: #ffffff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe Print', sans-serif;
-        }
-
-        .brand-phrase {
-            font-size: 1.25rem;
-            font-style: italic;
-            font-family: 'Georgia', serif;
-            color: rgba(255, 255, 255, 0.95);
-            line-height: 1.8;
-            max-width: 95%;
-        }
-
-        /* ===== ESTILOS DEL FORMULARIO ===== */
-        .form-column {
-            padding: 1rem 0;
+        .brand-header {
             display: flex;
             align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 3rem;
         }
 
-        .registration-card {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 16px;
-            padding: 3rem 2.5rem;
-            width: 100%;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
+        .brand-logo {
+            width: 72px;
+            height: 72px;
+            flex-shrink: 0;
+            background: var(--brand-purple);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect x='0' y='0' width='2' height='2' fill='black'/%3E%3C/svg%3E");
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .form-control {
-            background-color: transparent !important;
-            border: none !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
-            border-radius: 0;
-            color: white !important;
-            padding-left: 0;
-            padding-right: 0;
+        .brand-logo svg {
+            width: 54px;
+            height: 54px;
+            fill: white;
+        }
+
+        .brand-name {
+            font-family: 'Mustasurma', 'Outfit', sans-serif;
+            font-size: 3.6rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-name .tuto {
+            color: var(--text-primary);
+        }
+        .brand-name .match { color: var(--brand-purple); }
+
+        .motivational-section {
+            margin-top: 2rem;
+        }
+
+        .motivational-content {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .motivational-content.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .motivational-content.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .motivational-text {
+            font-size: 1.7rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .motivational-subtext {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .motivational-dots {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .motivational-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .motivational-dot.active {
+            background: var(--brand-purple);
+            width: 24px;
+            border-radius: 2px;
+        }
+
+        .registro-section {
+            flex: 0 0 440px;
+        }
+
+        .registro-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 2px;
+            padding: 2.5rem;
+        }
+
+        .registro-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .registro-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .registro-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
             margin-bottom: 0.5rem;
         }
 
-        .form-control:focus {
-            border-color: var(--brand) !important;
-            box-shadow: 0 1px 0 0 var(--brand) !important;
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease;
+            font-family: 'Inter', sans-serif;
         }
 
-        .form-control::placeholder { color: rgba(255, 255, 255, 0.6); }
+        .form-input:-webkit-autofill,
+        .form-input:-webkit-autofill:hover,
+        .form-input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-card) inset !important;
+            -webkit-text-fill-color: var(--text-primary) !important;
+            caret-color: var(--text-primary);
+        }
 
-        .form-label {
-            color: #ffffff;
+        .form-input:focus {
+            outline: none;
+            border-color: var(--text-secondary);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .role-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .role-label {
+            font-size: 0.85rem;
             font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .role-cards {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .role-card {
+            flex: 1;
+            position: relative;
+        }
+
+        .role-card input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .role-card-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+            text-align: center;
+        }
+
+        .role-card-label:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .role-card input[type="checkbox"]:checked + .role-card-label {
+            border-color: var(--brand-purple);
+        }
+
+        .role-card-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .role-card-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+
+
+        .role-card-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .role-card input[type="checkbox"]:checked + .role-card-label .role-card-text {
+            color: var(--brand-purple);
+        }
+
+        .role-error {
+            font-size: 0.8rem;
+            color: #fca5a5;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .role-error.show {
+            display: block;
+        }
+
+        .registro-error {
+            background: rgba(220, 38, 38, 0.12);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+            border-radius: 2px;
+            color: #fca5a5;
+            font-size: 0.95rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .registro-error.show {
+            display: block;
+        }
+
+        .btn-registro {
+            width: 100%;
+            padding: 1rem;
+            background: var(--brand-purple);
+            border: none;
+            border-radius: 2px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-registro:hover {
+            background: #7c3aed;
+        }
+
+        .btn-registro:active {
+            background: #6d28d9;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .login-prompt {
+            text-align: center;
             font-size: 0.9rem;
-            margin-bottom: 0.2rem;
-            font-family: 'Segoe UI', sans-serif;
+            color: var(--text-secondary);
         }
 
-        .btn-check:checked + .btn-outline-light {
-            background-color: var(--brand) !important;
-            border-color: var(--brand) !important;
-            color: white !important;
-            font-weight: bold;
-        }
-
-        .btn-outline-light {
-            border-color: rgba(255, 255, 255, 0.5);
-            color: #ffffff;
-        }
-
-        .btn-outline-light:hover { background-color: rgba(255, 255, 255, 0.1); color: #ffffff; }
-
-        .btn-primary {
-            background-color: var(--brand) !important;
-            border: none !important;
-            padding: 0.8rem;
+        .login-prompt a {
+            color: var(--brand-purple-light);
+            text-decoration: none;
             font-weight: 600;
+            transition: color 0.2s ease;
         }
 
-        .btn-primary:hover { background-color: #0f766e !important; }
+        .login-prompt a:hover {
+            color: var(--brand-purple);
+        }
 
-        @media (max-width: 992px) {
-            .text-column { padding: 1rem; text-align: center; margin-bottom: 2rem; }
-            .brand-phrase { max-width: 100%; margin: 0 auto; }
-            .brand-title { font-size: 3.5rem; }
-            .registration-card { padding: 2rem 1.5rem; }
-            .chalk-drawing { display: none; }
+        .registro-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .registro-footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .registro-footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .registro-footer a:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 1024px) {
+            .registro-wrapper {
+                flex-direction: column;
+                padding: 2rem;
+                gap: 3rem;
+            }
+
+            .branding-section {
+                max-width: 100%;
+                padding-right: 0;
+                text-align: center;
+            }
+
+            .brand-header {
+                justify-content: center;
+            }
+
+            .registro-section {
+                flex: 1;
+                width: 100%;
+                max-width: 440px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .registro-wrapper {
+                padding: 1.5rem;
+            }
+
+            .registro-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .brand-name {
+                font-size: 2.9rem;
+            }
+
+            .brand-logo {
+                width: 58px;
+                height: 58px;
+            }
+
+            .brand-logo {
+                width: 52px;
+                height: 52px;
+            }
+
+
+
+            .role-cards {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="aurora-bg"></div>
+    <div class="bg-overlay"></div>
 
-<i class="bi bi-code-slash chalk-drawing" style="font-size: 3.5rem; top: 15%; left: 8%; transform: rotate(-15deg);"></i>
-<i class="bi bi-calculator chalk-drawing" style="font-size: 2.5rem; top: 22%; left: 42%; transform: rotate(10deg);"></i>
-<i class="bi bi-infinity chalk-drawing" style="font-size: 3rem; bottom: 20%; left: 10%; transform: rotate(-5deg);"></i>
-<i class="bi bi-lightning-charge chalk-drawing" style="font-size: 4rem; bottom: 12%; right: 44%; transform: rotate(15deg); opacity: 0.08;"></i>
-<i class="bi bi-braces chalk-drawing" style="font-size: 3rem; top: 10%; right: 15%; transform: rotate(20deg);"></i>
+    <div class="registro-wrapper">
+        <div class="branding-section">
+            <div class="brand-header">
+                <div class="brand-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L1 9l11 6l9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/></svg>
+                </div>
+                <h1 class="brand-name">
+                    <span class="tuto">Tuto</span><span class="match">Match</span>
+                </h1>
+            </div>
 
-<div class="fullscreen-wrapper">
-    <div class="content-layout row g-0 justify-content-between align-items-center">
-
-        <!-- Reemplaza tu bloque actual de la columna de texto por este -->
-        <div class="col-lg-6 col-md-6 text-column">
-            <div>
-                <i class="bi bi-mortarboard-fill mb-3 d-block" style="font-size: 3.5rem; color: var(--brand);"></i>
-
-                <!-- Aquí está el cambio: envuelto en un <a> con href hacia tu página de inicio -->
-                <a href="/" style="text-decoration: none;">
-                    <h1 class="brand-title">TutoMatch</h1>
-                </a>
-
-                <p class="brand-phrase">
-                    "Conecta, aprende y domina tus materias. Encuentra al tutor ideal para superar tus retos académicos, o comparte tus conocimientos con la comunidad de la UCE."
-                </p>
+            <div class="motivational-section">
+                <div class="motivational-content" id="motivationalContent">
+                        <h3 class="motivational-text" id="motivationalText">Transforma tu futuro academico</h3>
+                        <p class="motivational-subtext" id="motivationalSub">Unite a la comunidad de aprendizaje mas grande de la UCE y empieza a brillar.</p>
+                    </div>
+                    <div class="motivational-dots" id="motivationalDots">
+                        <div class="motivational-dot active" data-index="0"></div>
+                        <div class="motivational-dot" data-index="1"></div>
+                        <div class="motivational-dot" data-index="2"></div>
+                    </div>
             </div>
         </div>
-        <div class="col-lg-5 col-md-6 form-column">
-            <div class="registration-card">
-                <h3 class="text-center fw-bold mb-4 text-white">Registro</h3>
 
-                <form id="registroForm" class="needs-validation" novalidate>
-                    <div class="mb-3">
-                        <label class="form-label">Nombre Completo</label>
-                        <input type="text" name="nombreCompleto" class="form-control" placeholder="Ej. Juan Pérez" required>
+        <div class="registro-section">
+            <div class="registro-card">
+                <div class="registro-header">
+                    <h2>Crea tu cuenta</h2>
+                    <p>Completa tus datos para comenzar</p>
+                </div>
+
+                <div class="registro-error" id="registroError" role="alert"></div>
+
+                <form id="registroForm" novalidate>
+                    <div class="form-group">
+                        <label for="nombre" class="form-label">Nombre Completo</label>
+                        <input 
+                            type="text" 
+                            id="nombre" 
+                            name="nombreCompleto" 
+                            class="form-input" 
+                            placeholder="Juan Perez"
+                            required 
+                            autocomplete="name"
+                        >
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Correo Institucional</label>
-                        <input type="email" name="correoInstitucional" class="form-control" placeholder="usuario@uce.edu.ec" required>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Correo Institucional</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="correoInstitucional" 
+                            class="form-input" 
+                            placeholder="tu@uce.edu.ec"
+                            required 
+                            autocomplete="email"
+                        >
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label">Contraseña</label>
-                        <input type="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Contrasena</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Minimo 6 caracteres"
+                            required 
+                            minlength="6"
+                            autocomplete="new-password"
+                        >
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label d-block mb-3">¿Cómo quieres participar?</label>
-                        <div class="row g-2">
-                            <div class="col-6">
+                    <div class="role-section">
+                        <span class="role-label">Como quieres participar?</span>
+                        <div class="role-cards">
+                            <div class="role-card">
                                 <input type="checkbox" class="btn-check" id="btnS" checked>
-                                <label class="btn btn-outline-light w-100" for="btnS">Busco tutorías</label>
+                                <label class="role-card-label" for="btnS">
+                                    <div class="role-card-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                    </div>
+                                    <span class="role-card-text">Necesito tutorias</span>
+                                </label>
                             </div>
-                            <div class="col-6">
+                            <div class="role-card">
                                 <input type="checkbox" class="btn-check" id="btnT">
-                                <label class="btn btn-outline-light w-100" for="btnT">Soy tutor</label>
+                                <label class="role-card-label" for="btnT">
+                                    <div class="role-card-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L1 9l11 6l9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/></svg>
+                                    </div>
+                                    <span class="role-card-text">Soy tutor</span>
+                                </label>
                             </div>
                         </div>
-                        <div id="rolError" class="text-danger small mt-2 d-none">Selecciona al menos una opción.</div>
+                        <div id="rolError" class="role-error">Selecciona al menos una opcion.</div>
                     </div>
 
-                    <div id="registroError" class="alert alert-danger d-none small p-2" role="alert"></div>
+                    <button type="submit" class="btn-registro">
+                        Crear Cuenta
+                    </button>
 
-                    <button type="submit" class="btn btn-primary w-100 mt-2">Crear mi cuenta</button>
+                    <div class="divider">o</div>
+
+                    <div class="login-prompt">
+                        Ya tienes cuenta? <a href="/auth/login">Inicia Sesion</a>
+                    </div>
                 </form>
 
-                <div class="text-center mt-4 pt-3 border-top border-light border-opacity-25">
-                    <p class="text-white-50 small mb-0">¿Ya tienes una cuenta?</p>
-                    <a href="/auth/login" class="text-white text-decoration-none fw-bold" style="border-bottom: 2px solid var(--brand);">Inicia sesión aquí</a>
+                <div class="registro-footer">
+                    <p>
+                        <a href="#">Terminos y Condiciones</a> &middot; 
+                        <a href="#">Privacidad</a>
+                    </p>
                 </div>
             </div>
         </div>
-
     </div>
-</div>
 
-<script>
-    document.getElementById('registroForm').addEventListener('submit', async function (event) {
-        event.preventDefault();
-
-        if (!this.checkValidity()) {
-            this.classList.add('was-validated');
-            return;
-        }
-
-        const esSolicitante = document.getElementById('btnS').checked;
-        const esTutor = document.getElementById('btnT').checked;
-
-        if (!esSolicitante && !esTutor) {
-            document.getElementById('rolError').classList.remove('d-none');
-            return;
-        }
-        document.getElementById('rolError').classList.add('d-none');
-
-        const formData = new FormData(this);
-        const data = {
-            correoInstitucional: formData.get('correoInstitucional'),
-            password: formData.get('password'),
-            nombreCompleto: formData.get('nombreCompleto'),
-            rolSolicitante: esSolicitante,
-            rolTutor: esTutor
-        };
-
-        const errorDiv = document.getElementById('registroError');
-        try {
-            const response = await fetch('/auth/registro', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                window.location.href = '/';
-            } else {
-                const result = await response.json();
-                errorDiv.textContent = result.error || 'Error al registrarse';
-                errorDiv.classList.remove('d-none');
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+        <style>
+            .loading-overlay {
+                position: fixed; inset: 0; z-index: 99999;
+                background: #16161a;
+                display: flex; align-items: center; justify-content: center;
+                opacity: 0; pointer-events: none;
+                transition: opacity 0.3s ease;
             }
-        } catch (err) {
-            errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
-            errorDiv.classList.remove('d-none');
+            .loading-overlay.loading-visible {
+                opacity: 1; pointer-events: all;
+            }
+            .loading-container { text-align: center; }
+            .loading-cap {
+                width: 96px; height: 96px;
+                display: block; margin: 0 auto;
+            }
+            .loading-cap-path {
+                fill: none; stroke: #8b5cf6;
+                stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+                stroke-dasharray: 200; stroke-dashoffset: 200;
+                transition: stroke-dashoffset 0.8s ease-out;
+            }
+            .loading-cap-path.drawn { stroke-dashoffset: 0; }
+            .loading-brand-text {
+                margin-top: 1.5rem;
+                font-family: 'Mustasurma', 'Outfit', sans-serif;
+                font-size: 3.2rem; letter-spacing: 0.5px;
+                opacity: 0; transform: translateY(12px);
+                transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            }
+            .loading-brand-text.revealed { opacity: 1; transform: translateY(0); }
+            .loading-tuto { color: #e8e8e8; }
+            .loading-match { color: #8b5cf6; }
+            .loading-bar {
+                margin-top: 2rem; width: 200px; height: 2px;
+                background: rgba(139, 92, 246, 0.15);
+                border-radius: 1px; overflow: hidden;
+                margin-left: auto; margin-right: auto;
+            }
+            .loading-bar-fill {
+                width: 40%; height: 100%;
+                background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+                border-radius: 1px;
+                animation: loading-slide 1.2s ease-in-out infinite;
+            }
+            @keyframes loading-slide {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(350%); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .loading-overlay,
+                .loading-cap-path,
+                .loading-brand-text { transition: none; }
+                .loading-bar-fill { animation: none; }
+            }
+        </style>
+        <div class="loading-container">
+            <svg class="loading-cap" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path class="loading-cap-path" id="loadingCapPath" d="M12 3L1 9l11 6l9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/>
+            </svg>
+            <div class="loading-brand-text" id="loadingBrandText">
+                <span class="loading-tuto">Tuto</span><span class="loading-match">Match</span>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const motivationalData = [
+            {
+                text: 'Transforma tu futuro academico',
+                sub: 'Unite a la comunidad de aprendizaje mas grande de la UCE y empieza a brillar.'
+            },
+            {
+                text: 'Domina tus materias',
+                sub: 'Accede a sesiones personalizadas con tutores que entienden tus desafios.'
+            },
+            {
+                text: 'Comparti tu conocimiento',
+                sub: 'Ayuda a otros estudiantes y consolida tu aprendizaje siendo tutor.'
+            }
+        ];
+
+        let currentSlide = 0;
+        const slideInterval = 5000;
+
+        function updateMotivationalContent(index) {
+            const content = document.getElementById('motivationalContent');
+            const dots = document.querySelectorAll('.motivational-dot');
+            
+            content.classList.add('fade-out');
+            
+            setTimeout(() => {
+                content.querySelector('.motivational-text').textContent = motivationalData[index].text;
+                content.querySelector('.motivational-subtext').textContent = motivationalData[index].sub;
+                
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+                
+                content.classList.remove('fade-out');
+                content.classList.add('fade-in');
+                
+                setTimeout(() => {
+                    content.classList.remove('fade-in');
+                }, 500);
+            }, 500);
         }
-    });
-</script>
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % motivationalData.length;
+            updateMotivationalContent(currentSlide);
+        }
+
+        let slideTimer = setInterval(nextSlide, slideInterval);
+
+        document.querySelectorAll('.motivational-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                clearInterval(slideTimer);
+                currentSlide = parseInt(dot.dataset.index);
+                updateMotivationalContent(currentSlide);
+                slideTimer = setInterval(nextSlide, slideInterval);
+            });
+        });
+
+        document.getElementById('registroForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const btnS = document.getElementById('btnS').checked;
+            const btnT = document.getElementById('btnT').checked;
+            const err = document.getElementById('registroError');
+            const rolErr = document.getElementById('rolError');
+
+            if (!nombre || !email || !pass) {
+                err.textContent = 'Por favor, completa todos los campos.';
+                err.classList.add('show');
+                return;
+            }
+
+            if (!btnS && !btnT) {
+                rolErr.classList.add('show');
+                return;
+            }
+            rolErr.classList.remove('show');
+            err.classList.remove('show');
+
+            if (window.loadingOverlay) window.loadingOverlay.show();
+
+            try {
+                const r = await fetch('/auth/registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        correoInstitucional: email,
+                        password: pass,
+                        nombreCompleto: nombre,
+                        rolSolicitante: btnS,
+                        rolTutor: btnT
+                    })
+                });
+                if (r.ok) { window.location.href = '/'; }
+                else {
+                    if (window.loadingOverlay) window.loadingOverlay.hide();
+                    const j = await r.json(); 
+                    err.textContent = j.error || 'Error en el registro. Intenta de nuevo.'; 
+                    err.classList.add('show'); 
+                }
+            } catch (_) {
+                if (window.loadingOverlay) window.loadingOverlay.hide();
+                err.textContent = 'Error de conexion. Intenta de nuevo.'; 
+                err.classList.add('show'); 
+            }
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="/js/animations.js"></script>
+    <script src="/js/loading.js"></script>
 </body>
 </html>

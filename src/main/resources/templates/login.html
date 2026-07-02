@@ -1,81 +1,742 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" lang="es">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión | TutoMatch</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Iniciar Sesion | TutoMatch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --brand: #0d9488; --bg-chalkboard: #234b3a; }
-
-        body {
-            background-color: var(--bg-chalkboard);
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E");
-            color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden;
+        @font-face {
+            font-family: 'Mustasurma';
+            src: url('/fonts/Mustasurma.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
         }
 
-        .chalk-drawing { position: absolute; color: rgba(255, 255, 255, 0.15); pointer-events: none; z-index: 0; }
-        .fullscreen-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; position: relative; z-index: 1; }
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        .brand-title { font-size: 4.5rem; font-weight: 800; color: #ffffff; font-family: 'Comic Sans MS', sans-serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-        .motivation-phrase { font-size: 1.3rem; font-style: italic; color: rgba(255, 255, 255, 0.9); max-width: 80%; }
+        :root {
+            --bg-deep: #16161a;
+            --bg-card: #1e1e24;
+            --brand-purple: #8b5cf6;
+            --brand-purple-light: #a78bfa;
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+        }
 
-        .login-card { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 16px; padding: 3rem; backdrop-filter: blur(8px); width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-deep);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            color: var(--text-primary);
+        }
 
-        /* Corrección de color en placeholders */
-        .form-control { background: transparent !important; border: none !important; border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important; color: white !important; border-radius: 0; }
-        .form-control::placeholder { color: rgba(255, 255, 255, 0.7) !important; opacity: 1; }
-        .form-control:focus { border-color: var(--brand) !important; box-shadow: 0 1px 0 var(--brand) !important; }
+        /* ===== BACKGROUND IMAGE ===== */
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: url('/images/fondo2.png') center/cover no-repeat;
+            filter: blur(1px);
+            transform: scale(1.02);
+        }
 
-        .btn-primary { background-color: var(--brand) !important; border: none !important; padding: 0.8rem; font-weight: 600; }
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(135deg,
+                rgba(0, 0, 0, 0.85) 0%,
+                rgba(0, 0, 0, 0.35) 50%,
+                transparent 75%
+            );
+            pointer-events: none;
+        }
 
-        @media (max-width: 992px) { .chalk-drawing { display: none; } }
+        /* ===== MAIN CONTAINER ===== */
+        .login-wrapper {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 4rem;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* ===== BRANDING SECTION (Left) ===== */
+        .branding-section {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 3rem;
+        }
+
+        .brand-logo {
+            width: 72px;
+            height: 72px;
+            flex-shrink: 0;
+            background: var(--brand-purple);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect x='0' y='0' width='2' height='2' fill='black'/%3E%3C/svg%3E");
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-logo svg {
+            width: 54px;
+            height: 54px;
+            fill: white;
+        }
+
+        .brand-name {
+            font-family: 'Mustasurma', 'Outfit', sans-serif;
+            font-size: 3.6rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-name .tuto {
+            color: var(--text-primary);
+        }
+
+        .brand-name .match {
+            color: var(--brand-purple);
+        }
+
+        /* Motivational Content */
+        .motivational-section {
+            margin-top: 2rem;
+        }
+
+        .motivational-content {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .motivational-content.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .motivational-content.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .motivational-text {
+            font-size: 1.7rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .motivational-subtext {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .motivational-dots {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .motivational-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .motivational-dot.active {
+            background: var(--brand-purple);
+            width: 24px;
+            border-radius: 2px;
+        }
+
+        /* ===== LOGIN CARD (Right) ===== */
+        .login-section {
+            flex: 0 0 420px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 2px;
+            padding: 3rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-input:-webkit-autofill,
+        .form-input:-webkit-autofill:hover,
+        .form-input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-card) inset !important;
+            -webkit-text-fill-color: var(--text-primary) !important;
+            caret-color: var(--text-primary);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--text-secondary);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-subtle);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked {
+            background: var(--brand-purple);
+            border-color: var(--brand-purple);
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .checkbox-wrapper span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .forgot-link {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-link:hover {
+            color: var(--brand-purple);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: var(--brand-purple);
+            border: none;
+            border-radius: 2px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-login:hover {
+            background: #7c3aed;
+        }
+
+        .btn-login:active {
+            background: #6d28d9;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .signup-prompt {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .signup-prompt a {
+            color: var(--brand-purple-light);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .signup-prompt a:hover {
+            color: var(--brand-purple);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .login-footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .login-footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .login-footer a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(220, 38, 38, 0.12);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+            border-radius: 2px;
+            color: #fca5a5;
+            font-size: 0.95rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .login-wrapper {
+                flex-direction: column;
+                padding: 2rem;
+                gap: 3rem;
+            }
+
+            .branding-section {
+                max-width: 100%;
+                padding-right: 0;
+                text-align: center;
+            }
+
+            .brand-header {
+                justify-content: center;
+            }
+
+        .login-section {
+            flex: 1;
+            width: 100%;
+            max-width: 420px;
+        }
+        }
+
+        @media (max-width: 480px) {
+            .login-wrapper {
+                padding: 1.5rem;
+            }
+
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .brand-name {
+                font-size: 2.9rem;
+            }
+
+            .brand-logo {
+                width: 58px;
+                height: 58px;
+            }
+
+
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Aurora Background -->
+    <div class="aurora-bg"></div>
+    <div class="bg-overlay"></div>
 
-<!-- Figuras dispersas por todo el fondo -->
-<i class="bi bi-code-slash chalk-drawing" style="font-size: 4rem; top: 10%; left: 5%; transform: rotate(-20deg);"></i>
-<i class="bi bi-calculator chalk-drawing" style="font-size: 3rem; top: 15%; right: 10%;"></i>
-<i class="bi bi-graph-up chalk-drawing" style="font-size: 3.5rem; top: 60%; left: 15%;"></i>
-<i class="bi bi-braces chalk-drawing" style="font-size: 4rem; bottom: 10%; right: 20%; transform: rotate(10deg);"></i>
-<i class="bi bi-infinity chalk-drawing" style="font-size: 3rem; bottom: 15%; left: 8%;"></i>
+    <!-- Main Content -->
+    <div class="login-wrapper">
+        <!-- Left Side: Branding & Motivational -->
+        <div class="branding-section">
+            <!-- Brand Header -->
+            <div class="brand-header">
+                <div class="brand-logo">
+                    <!-- Cap icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L1 9l11 6l9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/></svg>
+                </div>
+                <h1 class="brand-name">
+                    <span class="tuto">Tuto</span><span class="match">Match</span>
+                </h1>
+            </div>
 
-<div class="fullscreen-wrapper">
-    <div class="row w-100 align-items-center" style="max-width: 1100px;">
-
-        <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
-            <a href="/" class="text-decoration-none">
-                <!-- Birrete añadido -->
-                <i class="bi bi-mortarboard-fill mb-2 d-block" style="font-size: 3rem; color: var(--brand);"></i>
-                <h1 class="brand-title">TutoMatch</h1>
-            </a>
-            <p class="motivation-phrase mt-3">"Tu potencial no tiene límites. Conecta con quienes comparten tu visión y domina cada reto académico juntos."</p>
+            <!-- Motivational Section -->
+            <div class="motivational-section">
+                <div class="motivational-content" id="motivationalContent">
+                        <h3 class="motivational-text" id="motivationalText">Conecta con los mejores tutores</h3>
+                        <p class="motivational-subtext" id="motivationalSub">Encuentra apoyo académico personalizado de estudiantes de la UCE que dominan tus materias.</p>
+                    </div>
+                    <div class="motivational-dots" id="motivationalDots">
+                        <div class="motivational-dot active" data-index="0"></div>
+                        <div class="motivational-dot" data-index="1"></div>
+                        <div class="motivational-dot" data-index="2"></div>
+                    </div>
+            </div>
         </div>
 
-        <div class="col-lg-5 mx-auto">
+        <!-- Right Side: Login Card -->
+        <div class="login-section">
             <div class="login-card">
-                <h3 class="text-center fw-bold mb-4">Iniciar Sesión</h3>
-                <form id="loginForm" class="needs-validation" novalidate>
-                    <div class="mb-3">
-                        <label class="form-label">Correo Institucional</label>
-                        <input type="email" name="correoInstitucional" class="form-control" placeholder="usuario@uce.edu.ec" required>
+                <div class="login-header">
+                    <h2>Bienvenido de vuelta</h2>
+                    <p>Ingresa tus credenciales para acceder</p>
+                </div>
+
+                <div class="error-message" id="loginError" role="alert"></div>
+
+                <form id="loginForm" novalidate>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Correo Institucional</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="correoInstitucional" 
+                            class="form-input" 
+                            placeholder="tu@uce.edu.ec"
+                            required 
+                            autocomplete="email"
+                        >
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label">Contraseña</label>
-                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Tu contraseña"
+                            required 
+                            autocomplete="current-password"
+                        >
                     </div>
-                    <div id="loginError" class="alert alert-danger d-none p-2 small"></div>
-                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+
+                    <div class="form-options">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span>Recordarme</span>
+                        </label>
+                        <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <button type="submit" class="btn-login">
+                        Iniciar Sesion
+                    </button>
+
+                    <div class="divider">o</div>
+
+                    <div class="signup-prompt">
+                        ¿No tienes cuenta? <a href="/auth/registro">Registrate</a>
+                    </div>
                 </form>
-                <div class="text-center mt-4 pt-3 border-top border-light border-opacity-25">
-                    <p class="text-white-50 small mb-0">¿No tienes cuenta?</p>
-                    <a href="/auth/registro" class="text-white fw-bold text-decoration-none" style="border-bottom: 2px solid var(--brand);">Regístrate ahora</a>
+
+                <div class="login-footer">
+                    <p>
+                        <a href="#">Terminos y Condiciones</a> &middot; 
+                        <a href="#">Privacidad</a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+        <style>
+            .loading-overlay {
+                position: fixed; inset: 0; z-index: 99999;
+                background: #16161a;
+                display: flex; align-items: center; justify-content: center;
+                opacity: 0; pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+            .loading-overlay.loading-visible {
+                opacity: 1; pointer-events: all;
+            }
+            .loading-container { text-align: center; }
+            .loading-cap {
+                width: 96px; height: 96px;
+                display: block; margin: 0 auto;
+            }
+            .loading-cap-path {
+                fill: none; stroke: #8b5cf6;
+                stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+                stroke-dasharray: 200; stroke-dashoffset: 200;
+                transition: stroke-dashoffset 0.8s ease-out;
+            }
+            .loading-cap-path.drawn { stroke-dashoffset: 0; }
+            .loading-brand-text {
+                margin-top: 1.5rem;
+                font-family: 'Mustasurma', 'Outfit', sans-serif;
+                font-size: 3.2rem; letter-spacing: 0.5px;
+                opacity: 0; transform: translateY(12px);
+                transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            }
+            .loading-brand-text.revealed { opacity: 1; transform: translateY(0); }
+            .loading-tuto { color: #e8e8e8; }
+            .loading-match { color: #8b5cf6; }
+            .loading-bar {
+                margin-top: 2rem; width: 200px; height: 2px;
+                background: rgba(139, 92, 246, 0.15);
+                border-radius: 1px; overflow: hidden;
+                margin-left: auto; margin-right: auto;
+            }
+            .loading-bar-fill {
+                width: 40%; height: 100%;
+                background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+                border-radius: 1px;
+                animation: loading-slide 1.2s ease-in-out infinite;
+            }
+            @keyframes loading-slide {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(350%); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .loading-overlay,
+                .loading-cap-path,
+                .loading-brand-text { transition: none; }
+                .loading-bar-fill { animation: none; }
+            }
+        </style>
+        <div class="loading-container">
+            <svg class="loading-cap" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path class="loading-cap-path" id="loadingCapPath" d="M12 3L1 9l11 6l9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/>
+            </svg>
+            <div class="loading-brand-text" id="loadingBrandText">
+                <span class="loading-tuto">Tuto</span><span class="loading-match">Match</span>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== MOTIVATIONAL SLIDER =====
+        const motivationalData = [
+            {
+                text: 'Conecta con los mejores tutores',
+                sub: 'Encuentra apoyo académico personalizado de estudiantes de la UCE que dominan tus materias.'
+            },
+            {
+                text: 'Mejora tus calificaciones',
+                sub: 'Sesiones personalizadas, flexibles y adaptadas a tu ritmo de aprendizaje.'
+            },
+            {
+                text: 'Aprende de tus compañeros',
+                sub: 'Una comunidad de estudiantes que comparten conocimientos y experiencias.'
+            }
+        ];
+
+        let currentSlide = 0;
+        const slideInterval = 5000; // 5 seconds
+
+        function updateMotivationalContent(index) {
+            const content = document.getElementById('motivationalContent');
+            const dots = document.querySelectorAll('.motivational-dot');
+            
+            // Fade out
+            content.classList.add('fade-out');
+            
+            setTimeout(() => {
+                // Update content
+                content.querySelector('.motivational-text').textContent = motivationalData[index].text;
+                content.querySelector('.motivational-subtext').textContent = motivationalData[index].sub;
+                
+                // Update dots
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+                
+                // Fade in
+                content.classList.remove('fade-out');
+                content.classList.add('fade-in');
+                
+                setTimeout(() => {
+                    content.classList.remove('fade-in');
+                }, 500);
+            }, 500);
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % motivationalData.length;
+            updateMotivationalContent(currentSlide);
+        }
+
+        // Auto-rotate slides
+        let slideTimer = setInterval(nextSlide, slideInterval);
+
+        // Click on dots
+        document.querySelectorAll('.motivational-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                clearInterval(slideTimer);
+                currentSlide = parseInt(dot.dataset.index);
+                updateMotivationalContent(currentSlide);
+                slideTimer = setInterval(nextSlide, slideInterval);
+            });
+        });
+
+        // ===== FORM HANDLING =====
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!email || !password) {
+                errorDiv.textContent = 'Por favor, ingresa tu correo y contraseña.';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            errorDiv.classList.remove('show');
+            
+            if (window.loadingOverlay) window.loadingOverlay.show();
+            
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        correoInstitucional: email,
+                        password: password
+                    })
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    if (window.loadingOverlay) window.loadingOverlay.hide();
+                    const data = await response.json();
+                    errorDiv.textContent = data.error || 'Credenciales incorrectas. Intenta de nuevo.';
+                    errorDiv.classList.add('show');
+                }
+            } catch (error) {
+                if (window.loadingOverlay) window.loadingOverlay.hide();
+                errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
+                errorDiv.classList.add('show');
+            }
+        });
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="/js/animations.js"></script>
+    <script src="/js/loading.js"></script>
 </body>
 </html>

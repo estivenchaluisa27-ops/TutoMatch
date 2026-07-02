@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="loading-overlay" id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+        <style>
+            .loading-overlay {
+                position: fixed; inset: 0; z-index: 99999;
+                background: #16161a;
+                display: flex; align-items: center; justify-content: center;
+                opacity: 0; pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+            .loading-overlay.loading-visible {
+                opacity: 1; pointer-events: all;
+            }
+            .loading-container { text-align: center; }
+            .loading-cap {
+                width: 96px; height: 96px;
+                display: block; margin: 0 auto;
+            }
+            .loading-cap-path {
+                fill: none; stroke: #8b5cf6;
+                stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+                stroke-dasharray: 200; stroke-dashoffset: 200;
+                transition: stroke-dashoffset 0.8s ease-out;
+            }
+            .loading-cap-path.drawn { stroke-dashoffset: 0; }
+            .loading-brand-text {
+                margin-top: 1.5rem;
+                font-family: 'Mustasurma', 'Outfit', sans-serif;
+                font-size: 3.2rem; letter-spacing: 0.5px;
+                opacity: 0; transform: translateY(12px);
+                transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            }
+            .loading-brand-text.revealed { opacity: 1; transform: translateY(0); }
+            .loading-tuto { color: #e8e8e8; }
+            .loading-match { color: #8b5cf6; }
+            .loading-bar {
+                margin-top: 2rem; width: 200px; height: 2px;
+                background: rgba(139, 92, 246, 0.15);
+                border-radius: 1px; overflow: hidden;
+                margin-left: auto; margin-right: auto;
+            }
+            .loading-bar-fill {
+                width: 40%; height: 100%;
+                background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+                border-radius: 1px;
+                animation: loading-slide 1.2s ease-in-out infinite;
+            }
+            @keyframes loading-slide {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(350%); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .loading-overlay,
+                .loading-cap-path,
+                .loading-brand-text { transition: none; }
+                .loading-bar-fill { animation: none; }
+            }
+        </style>
+        <div class="loading-container">
+            <svg class="loading-cap" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path class="loading-cap-path" id="loadingCapPath" d="M12 3L1 9l11 6l9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/>
+            </svg>
+            <div class="loading-brand-text" id="loadingBrandText">
+                <span class="loading-tuto">Tuto</span><span class="loading-match">Match</span>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -6,6 +6,9 @@
     <th:block th:replace="~{fragments/head :: head(title=${pageTitle})}"/>
 </head>
 <body class="d-flex flex-column min-vh-100">
+    <!-- Loading Overlay -->
+    <th:block th:replace="~{fragments/loading-overlay :: loading-overlay}"/>
+
     <!-- Navbar -->
     <th:block th:replace="~{fragments/navbar :: navbar(authenticated=${authenticated}, isAdmin=${isAdmin})}"/>
 

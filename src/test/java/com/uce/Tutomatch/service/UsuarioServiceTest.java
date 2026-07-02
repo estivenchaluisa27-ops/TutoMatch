@@ -41,7 +41,7 @@ class UsuarioServiceTest {
     @BeforeEach
     void setUp() {
         usuarioService = new UsuarioService(usuarioRepository, perfilTutorRepository,
-                passwordEncoder, jwtTokenProvider);
+                passwordEncoder, jwtTokenProvider, false);
     }
 
     @Test

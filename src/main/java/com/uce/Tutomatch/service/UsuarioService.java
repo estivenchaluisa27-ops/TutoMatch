@@ -12,6 +12,7 @@ import com.uce.Tutomatch.exception.InvalidCredentialsException;
 import com.uce.Tutomatch.security.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +24,18 @@ public class UsuarioService {
     private final PerfilTutorRepository perfilTutorRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final boolean cookieSecure;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           PerfilTutorRepository perfilTutorRepository,
                           PasswordEncoder passwordEncoder,
-                          JwtTokenProvider jwtTokenProvider) {
+                          JwtTokenProvider jwtTokenProvider,
+                          @Value("${cookie.secure:true}") boolean cookieSecure) {
         this.usuarioRepository = usuarioRepository;
         this.perfilTutorRepository = perfilTutorRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.cookieSecure = cookieSecure;
     }
 
     @Transactional
@@ -82,7 +86,7 @@ public class UsuarioService {
     public void logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("jwt-token", "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/");
         cookie.setMaxAge(0); // expira inmediatamente
         cookie.setAttribute("SameSite", "Strict");
@@ -113,7 +117,7 @@ public class UsuarioService {
 
         Cookie cookie = new Cookie("jwt-token", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/");
         cookie.setMaxAge((int) (1800000 / 1000)); // 30 min en segundos
         cookie.setAttribute("SameSite", "Strict");
