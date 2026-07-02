@@ -313,121 +313,207 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
 
 });
 
-// --- 15. Hero floating icons (physics-based, outside matchMedia to prevent context revert) ---
+// --- 15. Hero floating icons — Phase System (outside matchMedia to prevent context revert) ---
 (function () {
     let container = document.querySelector('.hero-icons');
     if (!container) return;
-    let icons = container.querySelectorAll('.hero-icon');
-    if (!icons.length || window.innerWidth < 768) return;
+    let iconEls = container.querySelectorAll('.hero-icon');
+    if (!iconEls.length || window.innerWidth < 768) return;
 
-    function startFloating() {
-        let rect = container.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) {
-            requestAnimationFrame(startFloating);
-            return;
-        }
+    // ── State ──
+    const S = {
+        phase: 'A',
+        transitioning: false,
+        particles: [],
+        mouse: { x: -9999, y: -9999 },
+        rect: null,
+        timer: null,
+        canvas: null,
+        ctx: null,
+    };
 
-        let padding = 15;
-        let items = [];
-        let velocityScale = 1;
+    // ── Hat coordinates — 22 pts (viewBox 24×24) ──
+    const HAT = [
+        { x: 12, y: 3 },     { x: 6.5, y: 6 },    { x: 1, y: 9 },
+        { x: 4.7, y: 11 },   { x: 8.3, y: 13 },   { x: 12, y: 15 },
+        { x: 16.5, y: 12.5 },{ x: 21, y: 10.09 }, { x: 21, y: 13.5 },
+        { x: 21, y: 17 },    { x: 22, y: 17 },    { x: 23, y: 17 },
+        { x: 23, y: 13 },    { x: 23, y: 9 },     { x: 5, y: 13.18 },
+        { x: 5, y: 17.18 },  { x: 8.5, y: 19.1 }, { x: 12, y: 21 },
+        { x: 15.5, y: 19.1 },{ x: 19, y: 17.18 }, { x: 19, y: 13.18 },
+        { x: 12, y: 17 },
+    ];
 
-        icons.forEach(function (icon) {
-            let size = 22 + Math.random() * 32;
-            icon.style.width = size + 'px';
-            icon.style.height = size + 'px';
-            icon.style.top = '0';
-            icon.style.left = '0';
-            icon.style.opacity = '0';
+    function mapHat(p, r) {
+        const s = Math.min(r.width, r.height) / 28;
+        return { x: r.width / 2 + (p.x - 12) * s, y: r.height * 0.45 + (p.y - 12) * s };
+    }
 
-            let x = padding + Math.random() * (rect.width - size - padding * 2);
-            let y = padding + Math.random() * (rect.height - size - padding * 2);
+    function ensureCanvas(r) {
+        if (S.canvas) return;
+        const c = document.createElement('canvas');
+        c.id = 'hero-orbit-canvas';
+        c.style.cssText = 'position:absolute;inset:0;pointer-events:none;opacity:0;z-index:1';
+        c.width = r.width; c.height = r.height;
+        container.appendChild(c);
+        S.canvas = c; S.ctx = c.getContext('2d');
+    }
 
-            items.push({
-                el: icon,
-                size: size,
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * velocityScale * 1.2,
-                vy: (Math.random() - 0.5) * velocityScale * 1.2,
+    // ── Mouse ──
+    const hero = container.closest('.hero-section');
+    if (hero) {
+        hero.addEventListener('mousemove', e => {
+            const r = container.getBoundingClientRect();
+            S.mouse.x = e.clientX - r.left;
+            S.mouse.y = e.clientY - r.top;
+        });
+        hero.addEventListener('mouseleave', () => { S.mouse.x = -9999; S.mouse.y = -9999; });
+    }
+
+    // ── Init ──
+    function init() {
+        const r = container.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) { requestAnimationFrame(init); return; }
+        S.rect = r;
+        const pad = 15, w = r.width, h = r.height;
+
+        iconEls.forEach(el => {
+            const sz = 22 + Math.random() * 32;
+            el.style.cssText += `width:${sz}px;height:${sz}px;top:0;left:0;opacity:0;`;
+            S.particles.push({
+                el, size: sz,
+                x: pad + Math.random() * (w - sz - pad * 2),
+                y: pad + Math.random() * (h - sz - pad * 2),
+                vx: (Math.random() - 0.5) * 1.2,
+                vy: (Math.random() - 0.5) * 1.2,
                 rotation: Math.random() * 360,
-                vr: (Math.random() - 0.5) * 3
+                vr: (Math.random() - 0.5) * 3,
+                glow: 0, isClone: false,
             });
         });
 
-        // Fade in after positioning — wait for completion before revealing page
-        var tl = gsap.timeline({
-            onComplete: function () {
-                if (window.loadingOverlay && window.loadingOverlay.pageReady) {
-                    window.loadingOverlay.pageReady();
+        // 9 clones — smaller, for density in B & C
+        [0, 2, 4, 5, 7, 8, 9, 10, 11].forEach(si => {
+            const src = iconEls[si]; if (!src) return;
+            const clone = src.cloneNode(true);
+            const sz = 16 + Math.random() * 12;
+            clone.style.cssText = `width:${sz}px;height:${sz}px;top:0;left:0;opacity:0;`;
+            container.appendChild(clone);
+            S.particles.push({
+                el: clone, size: sz,
+                x: pad + Math.random() * (w - sz - pad * 2),
+                y: pad + Math.random() * (h - sz - pad * 2),
+                vx: (Math.random() - 0.5) * 1.2,
+                vy: (Math.random() - 0.5) * 1.2,
+                rotation: Math.random() * 360,
+                vr: (Math.random() - 0.5) * 3,
+                glow: 0, isClone: true,
+            });
+        });
+
+        // Fade in + pageReady
+        const tl = gsap.timeline({ onComplete() {
+            if (window.loadingOverlay && window.loadingOverlay.pageReady) window.loadingOverlay.pageReady();
+        }});
+        S.particles.forEach(p => tl.to(p.el, { opacity: p.isClone ? 0.06 : 0.12, duration: 0.6, ease: "power2.out" }, 0));
+
+        ensureCanvas(r);
+        enterPhaseA();
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // FASE A — Física libre + magnetismo cursor + glow
+    // ════════════════════════════════════════════════════════════
+    function enterPhaseA() {
+        S.phase = 'A';
+        S.transitioning = false;
+        gsap.ticker.remove(orbitTick);
+        gsap.ticker.add(physicsTickA);
+
+        S.particles.forEach(p => {
+            p.vx = (Math.random() - 0.5) * 1.2;
+            p.vy = (Math.random() - 0.5) * 1.2;
+            const sz = p.isClone ? 16 + Math.random() * 12 : 22 + Math.random() * 32;
+            p.size = sz;
+            p.el.style.cssText += `width:${sz}px;height:${sz}px;opacity:${p.isClone ? 0.06 : 0.12};filter:none;`;
+        });
+
+        if (S.canvas) gsap.to(S.canvas, { opacity: 0, duration: 0.5 });
+    }
+
+    function physicsTickA() {
+        const { rect, mouse, particles } = S;
+        const w = rect.width, h = rect.height, len = particles.length;
+
+        for (let i = 0; i < len; i++) {
+            const a = particles[i];
+
+            if (mouse.x >= 0 && mouse.y >= 0) {
+                const dx = a.x + a.size / 2 - mouse.x;
+                const dy = a.y + a.size / 2 - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120 && dist > 0) {
+                    const str = (120 - dist) / 120 * 0.5;
+                    a.vx += (dx / dist) * str;
+                    a.vy += (dy / dist) * str;
                 }
             }
-        });
-        icons.forEach(function (icon) {
-            tl.to(icon, { opacity: 0.12, duration: 0.6, ease: "power2.out" }, 0);
-        });
 
-        // Physics ticker
-        function physicsTick() {
-            let w = rect.width;
-            let h = rect.height;
-            let len = items.length;
+            a.x += a.vx; a.y += a.vy; a.rotation += a.vr;
+            a.vx *= 0.995; a.vy *= 0.995;
+            a.glow = Math.max(0, a.glow - 0.015);
 
-            for (let i = 0; i < len; i++) {
-                let a = items[i];
-                a.x += a.vx;
-                a.y += a.vy;
-                a.rotation += a.vr;
+            if (a.x < 0) { a.x = 0; a.vx *= -0.9; a.glow = 0.3; }
+            if (a.x > w - a.size) { a.x = w - a.size; a.vx *= -0.9; a.glow = 0.3; }
+            if (a.y < 0) { a.y = 0; a.vy *= -0.9; a.glow = 0.3; }
+            if (a.y > h - a.size) { a.y = h - a.size; a.vy *= -0.9; a.glow = 0.3; }
 
-                // Bounce off container walls
-                if (a.x < 0) { a.x = 0; a.vx *= -1; }
-                if (a.x > w - a.size) { a.x = w - a.size; a.vx *= -1; }
-                if (a.y < 0) { a.y = 0; a.vy *= -1; }
-                if (a.y > h - a.size) { a.y = h - a.size; a.vy *= -1; }
+            gsap.set(a.el, { x: a.x, y: a.y, rotation: a.rotation });
+        }
 
-                gsap.set(a.el, { x: a.x, y: a.y, rotation: a.rotation });
-            }
+        for (let i = 0; i < len; i++) {
+            for (let j = i + 1; j < len; j++) {
+                const a = particles[i], b = particles[j];
+                const dx = (a.x + a.size / 2) - (b.x + b.size / 2);
+                const dy = (a.y + a.size / 2) - (b.y + b.size / 2);
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const min = (a.size + b.size) / 2 + 8;
 
-            // Collision detection between pairs
-            for (let i = 0; i < len; i++) {
-                for (let j = i + 1; j < len; j++) {
-                    let a = items[i];
-                    let b = items[j];
-                    let dx = (a.x + a.size / 2) - (b.x + b.size / 2);
-                    let dy = (a.y + a.size / 2) - (b.y + b.size / 2);
-                    let dist = Math.sqrt(dx * dx + dy * dy);
-                    let minDist = (a.size + b.size) / 2 + 8;
-
-                    if (dist < minDist && dist > 0) {
-                        let nx = dx / dist;
-                        let ny = dy / dist;
-                        let overlap = minDist - dist;
-
-                        a.x += nx * overlap / 2;
-                        a.y += ny * overlap / 2;
-                        b.x -= nx * overlap / 2;
-                        b.y -= ny * overlap / 2;
-
-                        // Elastic collision response
-                        let dvx = a.vx - b.vx;
-                        let dvy = a.vy - b.vy;
-                        let dot = dvx * nx + dvy * ny;
-                        if (dot < 0) {
-                            a.vx -= dot * nx;
-                            a.vy -= dot * ny;
-                            b.vx += dot * nx;
-                            b.vy += dot * ny;
-                        }
+                if (dist < min && dist > 0) {
+                    const nx = dx / dist, ny = dy / dist, ov = min - dist;
+                    a.x += nx * ov / 2; a.y += ny * ov / 2;
+                    b.x -= nx * ov / 2; b.y -= ny * ov / 2;
+                    const dot = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+                    if (dot < 0) {
+                        a.vx -= dot * nx; a.vy -= dot * ny;
+                        b.vx += dot * nx; b.vy += dot * ny;
+                        a.glow = 0.4; b.glow = 0.4;
                     }
                 }
             }
         }
 
-        gsap.ticker.add(physicsTick);
+        for (let i = 0; i < len; i++) {
+            const a = particles[i];
+            a.el.style.filter = a.glow > 0.01
+                ? `drop-shadow(0 0 ${a.glow * 8}px rgba(167,139,250,${a.glow}))`
+                : 'none';
+        }
     }
 
-    if (document.readyState === 'complete') {
-        startFloating();
-    } else {
-        window.addEventListener('load', startFloating);
-    }
+    // ════════════════════════════════════════════════════════════
+    // FASE B — scaffold (commit 2)
+    // ════════════════════════════════════════════════════════════
+    function enterPhaseB() {}
+    function orbitTick() {}
+
+    // ════════════════════════════════════════════════════════════
+    // FASE C — scaffold (commit 3)
+    // ════════════════════════════════════════════════════════════
+    function enterPhaseC() {}
+    function resetToPhaseA() { enterPhaseA(); }
+
+    // ── Bootstrap ──
+    if (document.readyState === 'complete') init();
+    else window.addEventListener('load', init);
 })();
