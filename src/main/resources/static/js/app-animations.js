@@ -268,45 +268,123 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         });
     });
 
-    // --- 15. Hero floating icons (GSAP) ---
-    let heroContainer = document.querySelector('.hero-icons');
-    if (heroContainer) {
-        let icons = heroContainer.querySelectorAll('.hero-icon');
-        if (icons.length) {
-            let initIcons = function () {
-                let rect = heroContainer.getBoundingClientRect();
-                if (rect.width === 0 || rect.height === 0) {
-                    requestAnimationFrame(initIcons);
-                    return;
-                }
-                icons.forEach((icon, i) => {
-                    let size = 32 + Math.random() * 24;
-                    icon.style.width = size + 'px';
-                    icon.style.height = size + 'px';
-                    icon.style.top = '0';
-                    icon.style.left = '0';
-                    let xStart = Math.random() * (rect.width - size);
-                    let yStart = Math.random() * (rect.height - size);
-                    gsap.set(icon, { x: xStart, y: yStart, rotation: Math.random() * 360 });
-                    gsap.to(icon, {
-                        x: `+=${-60 + Math.random() * 120}`,
-                        y: `+=${-60 + Math.random() * 120}`,
-                        rotation: `+=${-20 + Math.random() * 40}`,
-                        duration: 4 + Math.random() * 4,
-                        repeat: -1,
-                        yoyo: true,
-                        ease: "sine.inOut",
-                        delay: i * 0.3 + 0.5
-                    });
-                });
-            };
-            if (document.readyState === 'complete') {
-                initIcons();
-            } else {
-                window.addEventListener('load', initIcons);
-            }
-        }
-    }
-
 });
 
+// --- 15. Hero floating icons (physics-based, outside matchMedia to prevent context revert) ---
+(function () {
+    let container = document.querySelector('.hero-icons');
+    if (!container) return;
+    let icons = container.querySelectorAll('.hero-icon');
+    if (!icons.length || window.innerWidth < 768) return;
+
+    function startFloating() {
+        let rect = container.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+            requestAnimationFrame(startFloating);
+            return;
+        }
+
+        let padding = 15;
+        let items = [];
+        let velocityScale = 1;
+
+        icons.forEach(function (icon) {
+            let size = 22 + Math.random() * 32;
+            icon.style.width = size + 'px';
+            icon.style.height = size + 'px';
+            icon.style.top = '0';
+            icon.style.left = '0';
+            icon.style.opacity = '0';
+
+            let x = padding + Math.random() * (rect.width - size - padding * 2);
+            let y = padding + Math.random() * (rect.height - size - padding * 2);
+
+            items.push({
+                el: icon,
+                size: size,
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * velocityScale * 1.2,
+                vy: (Math.random() - 0.5) * velocityScale * 1.2,
+                rotation: Math.random() * 360,
+                vr: (Math.random() - 0.5) * 3
+            });
+        });
+
+        // Fade in after positioning — wait for completion before revealing page
+        var tl = gsap.timeline({
+            onComplete: function () {
+                if (window.loadingOverlay && window.loadingOverlay.pageReady) {
+                    window.loadingOverlay.pageReady();
+                }
+            }
+        });
+        icons.forEach(function (icon) {
+            tl.to(icon, { opacity: 0.12, duration: 0.6, ease: "power2.out" }, 0);
+        });
+
+        // Physics ticker
+        function physicsTick() {
+            let w = rect.width;
+            let h = rect.height;
+            let len = items.length;
+
+            for (let i = 0; i < len; i++) {
+                let a = items[i];
+                a.x += a.vx;
+                a.y += a.vy;
+                a.rotation += a.vr;
+
+                // Bounce off container walls
+                if (a.x < 0) { a.x = 0; a.vx *= -1; }
+                if (a.x > w - a.size) { a.x = w - a.size; a.vx *= -1; }
+                if (a.y < 0) { a.y = 0; a.vy *= -1; }
+                if (a.y > h - a.size) { a.y = h - a.size; a.vy *= -1; }
+
+                gsap.set(a.el, { x: a.x, y: a.y, rotation: a.rotation });
+            }
+
+            // Collision detection between pairs
+            for (let i = 0; i < len; i++) {
+                for (let j = i + 1; j < len; j++) {
+                    let a = items[i];
+                    let b = items[j];
+                    let dx = (a.x + a.size / 2) - (b.x + b.size / 2);
+                    let dy = (a.y + a.size / 2) - (b.y + b.size / 2);
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    let minDist = (a.size + b.size) / 2 + 8;
+
+                    if (dist < minDist && dist > 0) {
+                        let nx = dx / dist;
+                        let ny = dy / dist;
+                        let overlap = minDist - dist;
+
+                        a.x += nx * overlap / 2;
+                        a.y += ny * overlap / 2;
+                        b.x -= nx * overlap / 2;
+                        b.y -= ny * overlap / 2;
+
+                        // Elastic collision response
+                        let dvx = a.vx - b.vx;
+                        let dvy = a.vy - b.vy;
+                        let dot = dvx * nx + dvy * ny;
+                        if (dot < 0) {
+                            a.vx -= dot * nx;
+                            a.vy -= dot * ny;
+                            b.vx += dot * nx;
+                            b.vy += dot * ny;
+                        }
+                    }
+                }
+            }
+        }
+
+        gsap.ticker.add(physicsTick);
+    }
+
+    if (document.readyState === 'complete') {
+        startFloating();
+    } else {
+        window.addEventListener('load', startFloating);
+    }
+})();

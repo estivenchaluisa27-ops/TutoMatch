@@ -325,7 +325,7 @@ h6 { font-size: 0.875rem; }
 
 .hero-icon {
     position: absolute;
-    opacity: 0.1;
+    opacity: 0;
     top: 0;
     left: 0;
     will-change: transform, opacity;
@@ -1273,7 +1273,7 @@ hr {
     color: var(--text-primary);
 }
 
-[data-theme="dark"] html {
+[data-theme] html {
     transition: background-color 0.3s ease;
 }
 
@@ -1945,15 +1945,15 @@ hr {
 }
 
 /* ---------- Transition all themed elements smoothly ---------- */
-[data-theme="dark"] body,
-[data-theme="dark"] .card,
+[data-theme] body,
+[data-theme] .card,
 .navbar,
 footer,
-.modal-content,
-.dropdown-menu,
-.form-control,
-.notif-dropdown,
-.alert {
+[data-theme] .modal-content,
+[data-theme] .dropdown-menu,
+[data-theme] .form-control,
+[data-theme] .notif-dropdown,
+[data-theme] .alert {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 

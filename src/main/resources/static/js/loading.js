@@ -7,6 +7,7 @@
     var capPath = document.getElementById('loadingCapPath');
     var brandText = document.getElementById('loadingBrandText');
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var _ready = false;
 
     function showLoader() {
         if (overlay.classList.contains('loading-visible')) return;
@@ -42,16 +43,30 @@
         overlay.classList.remove('loading-visible');
     }
 
-    if (document.readyState === 'complete') {
+    function pageReady() {
+        if (_ready) return;
+        _ready = true;
         hideLoader();
-    } else {
-        window.addEventListener('load', hideLoader);
     }
+
+    // Show loader on initial page load only on home page (has floating icons)
+    if (document.querySelector('.hero-icons')) {
+        showLoader();
+        // Safety: hide overlay after 5s even if pageReady is never signaled
+        setTimeout(pageReady, 5000);
+    }
+
+    // Fallback: ensure loader hides once everything fully loads
+    window.addEventListener('load', pageReady);
+    if (document.readyState === 'complete') {
+        pageReady();
+    }
+
     window.addEventListener('pageshow', function (e) {
-        if (e.persisted) hideLoader();
+        if (e.persisted) pageReady();
     });
 
-    window.loadingOverlay = { show: showLoader, hide: hideLoader };
+    window.loadingOverlay = { show: showLoader, hide: hideLoader, pageReady: pageReady };
 
     document.addEventListener('click', function (e) {
         var link = e.target.closest('a');
