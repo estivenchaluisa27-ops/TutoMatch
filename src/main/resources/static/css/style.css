@@ -333,6 +333,7 @@ h6 { font-size: 0.875rem; }
 
 /* Prevent FOUC: hide animated elements until GSAP removes the class */
 .gsap-loading .row.g-3.mb-4 .card,
+.gsap-loading .tutor-sidebar,
 .gsap-loading #notifList .notif-item,
 .gsap-loading .flash-messages-container .alert,
 .gsap-loading .pagination,
@@ -573,6 +574,12 @@ h6 { font-size: 0.875rem; }
     width: 36px;
     height: 36px;
     font-size: 0.9rem;
+}
+
+/* Prevent CSS card animation inside scrollable panels (GSAP handles reveal) */
+.panel-scrollable .card-fade-in {
+    animation: none;
+    opacity: 0;
 }
 
 /* ---------- Badges ---------- */
@@ -1385,6 +1392,10 @@ hr {
 [data-theme="dark"] .card-header {
     background: rgba(255, 255, 255, 0.03) !important;
     border-bottom: 1px solid var(--border-subtle);
+}
+
+[data-theme="dark"] .tutor-sidebar {
+    border-color: var(--border-white);
 }
 
 /* ---------- Buttons ---------- */

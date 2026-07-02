@@ -274,8 +274,8 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         let leftCards = panelLeft.querySelectorAll('.card-fade-in');
         if (leftCards.length) {
             ScrollTrigger.batch(leftCards, {
-                onEnter: batch => gsap.from(batch, {
-                    autoAlpha: 0, y: 40, duration: 0.5, stagger: 0.06,
+                onEnter: batch => gsap.to(batch, {
+                    autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.06,
                     ease: "back.out(1.2)", overwrite: true
                 }),
                 start: "top 88%",
@@ -289,8 +289,8 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         let rightCards = panelRight.querySelectorAll('.card-fade-in');
         if (rightCards.length) {
             ScrollTrigger.batch(rightCards, {
-                onEnter: batch => gsap.from(batch, {
-                    autoAlpha: 0, y: 30, duration: 0.5, stagger: 0.08,
+                onEnter: batch => gsap.to(batch, {
+                    autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.08,
                     ease: "power2.out", overwrite: true
                 }),
                 start: "top 85%",
