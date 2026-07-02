@@ -136,7 +136,7 @@
                 <!-- Reseñas -->
                 <div class="card shadow-sm mt-3">
                     <div class="card-header bg-white fw-bold">
-                        <i class="bi bi-star me-2"></i>Reseñas <span class="badge bg-secondary rounded-pill ms-1" th:text="${totalResenas}">0</span>
+                        <i class="bi bi-chat-quote me-2"></i>Reseñas <span class="badge bg-secondary rounded-pill ms-1" th:text="${totalResenas}">0</span>
                     </div>
                     <div class="card-body">
                         <div th:if="${#lists.isEmpty(resenas)}" class="text-center text-muted py-4">
@@ -162,7 +162,7 @@
                 </div>
 
                 <!-- CTA -->
-                <div th:if="${not authenticated}" class="card shadow-sm mt-3" style="background: linear-gradient(135deg, var(--brand) 0%, #0f766e 100%); border: none;">
+                <div th:if="${not authenticated}" class="card shadow-sm mt-3" style="background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%); border: none;">
                     <div class="card-body text-center text-white">
                         <h5 class="card-title fw-bold">¿Te interesa este tutor?</h5>
                         <p class="card-text mb-3 opacity-90">Reg&iacute;strate o inicia sesi&oacute;n para solicitar una tutor&iacute;a.</p>

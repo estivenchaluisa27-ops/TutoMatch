@@ -8,7 +8,7 @@
 <body>
 <th:block layout:fragment="content">
     <!-- Hero Section -->
-    <section class="hero-section text-white py-5 mb-5">
+    <section class="hero-section text-white mb-5">
         <div class="hero-icons">
             <svg class="hero-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             <svg class="hero-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
@@ -21,8 +21,13 @@
             <svg class="hero-icon" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 .5v6l3.59 4.57a1.5 1.5 0 0 1-1.18 2.43H2.59a1.5 1.5 0 0 1-1.18-2.43L5 6.5v-6M3.5.5h7"/></svg>
             <svg class="hero-icon" viewBox="0 0 24 24" fill="currentColor"><path d="m16 11.78 4.24-7.33 1.73 1-5.23 9.05-6.51-3.75L5.46 19H22v2H2V3h2v14.54L9.5 8Z"/></svg>
         </div>
-        <div class="container py-5 text-center">
-            <h1 class="display-4 fw-bold mb-3 stagger-fade stagger-fade-1">Domina tus materias con TutoMatch</h1>
+        <div class="container text-center">
+            <div class="hero-brand mb-4 stagger-fade stagger-fade-1">
+                <div class="hero-brand-name">
+                    <span class="hero-tuto">Tuto</span>
+                    <span class="hero-match">Match</span>
+                </div>
+            </div>
             <p class="lead mb-4 stagger-fade stagger-fade-2">Conecta con tutores de la UCE y alcanza tu m&aacute;ximo potencial acad&eacute;mico.</p>
 
             <!-- Botones para usuarios no autenticados -->
@@ -72,10 +77,10 @@
     </section>
 
     <!-- Tutores Recomendados -->
-    <section th:if="${not #lists.isEmpty(recomendados)}" class="py-5" style="background: #f0ede7;">
+    <section th:if="${not #lists.isEmpty(recomendados)}" class="py-5" style="background: var(--bg-light-utility);">
         <div class="container">
             <h2 class="text-center fw-bold mb-4 stagger-fade stagger-fade-6">
-                <i class="bi bi-star-fill text-warning me-2"></i>Tutores Recomendados
+                Tutores Recomendados
             </h2>
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                 <div th:each="t : ${recomendados}" class="col card-fade-in" th:style="'animation-delay: ' + (${t.id} * 0.05) + 's'">
