@@ -37,10 +37,14 @@
                 <button class="sg-btn sg-btn-danger" id="btnLimpiar">
                     <i class="bi bi-trash3"></i> Limpiar Todo
                 </button>
-                <button class="sg-btn sg-btn-primary" id="btnGuardar" disabled>
-                    <i class="bi bi-check2"></i> Guardar Cambios
+                <button class="sg-btn-icon-save" id="btnGuardar" disabled title="Guardar cambios">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
                 </button>
-                <span id="sgSavedBadge" style="display:none"></span>
+                <div id="sgToast" class="sg-toast" style="display:none"></div>
             </div>
 
             <!-- Grid -->
@@ -65,11 +69,9 @@
                                 th:data-dia="${d.diaSemana}"
                                 th:data-hora="${h}"
                                 th:data-cellkey="${d.diaSemana + '-' + h}"
-                                th:data-materias="${bloquesMaterias?.get(d.diaSemana + '-' + h) ? #strings.listJoin(bloquesMaterias?.get(d.diaSemana + '-' + h), ',') : ''}"
+                                th:data-materias="${bloquesMaterias?.get(d.diaSemana + '-' + h) != null ? #strings.listJoin(bloquesMaterias?.get(d.diaSemana + '-' + h), ',') : ''}"
                                 th:classappend="${#sets.contains(bloquesPorDia?.get(d.diaSemana), h) ? 'sg-active' : ''}">
-                                <span class="sg-cell-icon">
-                                    <i th:if="${#sets.contains(bloquesPorDia?.get(d.diaSemana), h)}" class="bi bi-check-lg"></i>
-                                </span>
+                                <span class="sg-cell-content"></span>
                             </td>
                         </tr>
                     </tbody>
@@ -93,7 +95,7 @@
         <span id="sgSemanaInicio" th:attr="data-semana-inicio=${semanaInicio}" style="display:none"></span>
 
         <!-- Materias Modal -->
-        <div class="modal fade" id="materiasModal" tabindex="-1">
+        <div class="modal fade" id="materiasModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-sm modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -132,7 +134,7 @@
                 var table = document.getElementById('sgTable');
                 var btnGuardar = document.getElementById('btnGuardar');
                 var btnLimpiar = document.getElementById('btnLimpiar');
-                var savedBadge = document.getElementById('sgSavedBadge');
+                var sgToast = document.getElementById('sgToast');
                 var materiasModal = document.getElementById('materiasModal');
                 var modalLabel = document.getElementById('modalCellLabel');
                 var btnConfirm = document.getElementById('btnConfirmMaterias');
@@ -140,11 +142,24 @@
 
                 if (!table) return;
 
+                // ── Build materia name lookup from the modal checkboxes ──
+                var materiaNames = {};
+                if (materiasList) {
+                    materiasList.querySelectorAll('.sg-mat-item').forEach(function(item) {
+                        var cb = item.querySelector('.sg-mat-check');
+                        var nameEl = item.querySelector('.sg-mat-name');
+                        if (cb && nameEl) {
+                            materiaNames[parseInt(cb.value)] = nameEl.textContent.trim();
+                        }
+                    });
+                }
+
                 // ── State ──
                 var celdaMaterias = {};  // key "1-8" -> [tutorMateriaId, ...]
                 var pendingKey = null;
                 var pendingWasActive = false;
                 var pendingPrevIds = [];
+                var saveSvgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
 
                 // Load initial materias from data attributes
                 table.querySelectorAll('.sg-cell[data-cellkey]').forEach(function(cell) {
@@ -170,6 +185,14 @@
                     return (diasNombres[dia - 1] || '?') + ' a las ' + hora + ':00';
                 }
 
+                function getMateriaLabel(ids) {
+                    if (!ids || ids.length === 0) return '';
+                    var names = ids.map(function(id) {
+                        return materiaNames[id] || ('Materia #' + id);
+                    });
+                    return names.join(', ');
+                }
+
                 function getActiveCells() {
                     var cells = [];
                     table.querySelectorAll('.sg-cell.sg-active').forEach(function(cell) {
@@ -187,19 +210,41 @@
                 function updateGuardarBtn() {
                     var cells = getActiveCells();
                     btnGuardar.disabled = cells.length === 0;
-                    btnGuardar.innerHTML = '<i class="bi bi-check2"></i> Guardar Cambios' +
-                        (cells.length > 0 ? ' (' + cells.length + ')' : '');
                 }
 
-                function setCellActive(cell, active) {
-                    if (active) {
+                function setCellActive(cell, active, ids) {
+                    var contentEl = cell.querySelector('.sg-cell-content');
+                    if (active && ids && ids.length > 0) {
                         cell.classList.add('sg-active');
-                        cell.querySelector('.sg-cell-icon').innerHTML = '<i class="bi bi-check-lg"></i>';
+                        var label = getMateriaLabel(ids);
+                        contentEl.textContent = label;
+                        contentEl.title = label;
                     } else {
                         cell.classList.remove('sg-active');
-                        cell.querySelector('.sg-cell-icon').innerHTML = '';
+                        contentEl.textContent = '';
+                        contentEl.title = '';
                     }
                 }
+
+                function showToast(message, isError) {
+                    sgToast.textContent = message;
+                    sgToast.className = 'sg-toast ' + (isError ? 'sg-toast-error' : 'sg-toast-success');
+                    sgToast.style.display = '';
+                    // Trigger reflow for animation
+                    sgToast.offsetHeight;
+                    sgToast.classList.add('sg-toast-visible');
+                    setTimeout(function() {
+                        sgToast.classList.remove('sg-toast-visible');
+                        setTimeout(function() { sgToast.style.display = 'none'; }, 350);
+                    }, 3000);
+                }
+
+                // ── Render initial cell content ──
+                table.querySelectorAll('.sg-cell.sg-active').forEach(function(cell) {
+                    var key = getCellKey(cell);
+                    var ids = celdaMaterias[key] || [];
+                    setCellActive(cell, true, ids);
+                });
 
                 // ── Modal handlers ──
                 function openMateriasModal(cell) {
@@ -233,15 +278,14 @@
                     if (cell) {
                         if (selectedIds.length > 0) {
                             celdaMaterias[pendingKey] = selectedIds;
-                            setCellActive(cell, true);
+                            setCellActive(cell, true, selectedIds);
                         } else {
                             delete celdaMaterias[pendingKey];
-                            setCellActive(cell, false);
+                            setCellActive(cell, false, []);
                         }
                     }
 
                     updateGuardarBtn();
-                    savedBadge.style.display = 'none';
 
                     var modal = bootstrap.Modal.getInstance(materiasModal);
                     if (modal) modal.hide();
@@ -255,10 +299,10 @@
                         if (cell) {
                             if (pendingWasActive) {
                                 celdaMaterias[pendingKey] = pendingPrevIds;
-                                setCellActive(cell, pendingPrevIds.length > 0);
+                                setCellActive(cell, pendingPrevIds.length > 0, pendingPrevIds);
                             } else {
                                 delete celdaMaterias[pendingKey];
-                                setCellActive(cell, false);
+                                setCellActive(cell, false, []);
                             }
                         }
                         updateGuardarBtn();
@@ -279,33 +323,33 @@
                     if (cells.length === 0) return;
 
                     btnGuardar.disabled = true;
-                    btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+                    btnGuardar.classList.add('sg-btn-saving');
 
                     fetch('/tutor/disponibilidad/semanal/guardar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
                         body: JSON.stringify({
                             semanaInicio: document.getElementById('sgSemanaInicio').getAttribute('data-semana-inicio'),
                             bloques: cells
                         })
                     })
-                    .then(function(r) { return r.json(); })
+                    .then(function(r) {
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        return r.json();
+                    })
                     .then(function(data) {
                         if (data.success) {
-                            savedBadge.className = 'sg-saved-badge';
-                            savedBadge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Guardado';
-                            savedBadge.style.display = '';
-                            setTimeout(function() {
-                                savedBadge.style.display = 'none';
-                            }, 3000);
+                            showToast('\u2713 Cambios guardados correctamente', false);
                         } else {
-                            alert('Error: ' + (data.error || 'desconocido'));
+                            showToast('Error: ' + (data.error || 'desconocido'), true);
                         }
                     })
-                    .catch(function() {
-                        alert('Error de conexi\u00f3n al guardar');
+                    .catch(function(err) {
+                        showToast('Error de conexi\u00f3n al guardar', true);
                     })
                     .finally(function() {
+                        btnGuardar.classList.remove('sg-btn-saving');
                         updateGuardarBtn();
                     });
                 });
