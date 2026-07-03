@@ -34,6 +34,7 @@ class UsuarioServiceTest {
     @Mock private PerfilTutorRepository perfilTutorRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtTokenProvider jwtTokenProvider;
+    @Mock private WalletOperacionService walletOperacionService;
     @Mock private HttpServletResponse response;
 
     private UsuarioService usuarioService;
@@ -41,7 +42,7 @@ class UsuarioServiceTest {
     @BeforeEach
     void setUp() {
         usuarioService = new UsuarioService(usuarioRepository, perfilTutorRepository,
-                passwordEncoder, jwtTokenProvider, false);
+                passwordEncoder, jwtTokenProvider, walletOperacionService, false);
     }
 
     @Test
@@ -69,6 +70,7 @@ class UsuarioServiceTest {
         assertEquals("Test User", result.getNombreCompleto());
         assertTrue(result.isRolSolicitante());
         assertFalse(result.isRolTutor());
+        verify(walletOperacionService).inicializarWallet(1L);
         verify(response).addCookie(any(Cookie.class));
     }
 
@@ -113,6 +115,7 @@ class UsuarioServiceTest {
         assertEquals(Integer.valueOf(1), saved.getPerfilTutor().getSemestre());
         assertFalse(saved.getPerfilTutor().isVerificado());
         assertFalse(saved.getPerfilTutor().isVisible());
+        verify(walletOperacionService).inicializarWallet(2L);
     }
 
     @Test

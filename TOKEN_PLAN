@@ -1,4 +1,4 @@
-# 🪙 Módulo de Economía de Tokens — TutoMatch (v3 — SOLID)
+# 🪙 Módulo de Economía de Tokens — TutoMatch (v3.1 — SOLID)
 
 Sistema de tokens donde **el pago lo realiza el estudiante** como acto de cierre. Arquitectura diseñada bajo los 5 principios SOLID.
 
@@ -12,6 +12,52 @@ Sistema de tokens donde **el pago lo realiza el estudiante** como acto de cierre
 > - Transición segura: `finalizar()` se mantiene deprecated, no se elimina de golpe
 > - Tests existentes que se rompen (`UsuarioServiceTest`) y cómo mitigarlo
 > - Carpeta `Tutomatch/` anidada IGNORADA — trabajar solo en `src/` raíz
+
+---
+
+## 📋 Estado de Implementación
+
+| Fase | Estado | Commit | Fecha |
+|------|--------|--------|-------|
+| **Fase 0** — Jerarquía de excepciones | ✅ Completado | `a8889ff` | Jul 2026 |
+| **Fase 1** — Wallet, transacciones, servicios, integración navbar | ✅ Completado | `d268c74` | Jul 2026 |
+| **Fase 1.5** — Tests (UsuarioServiceTest reparado) | 🔶 Parcial | *(working copy)* | Jul 2026 |
+| **Fase 2** — Flujo de pago + reseñas validadas | ⏳ Pendiente | — | — |
+| **Fase 3** — Masterclass + bonus + limpieza | ⏳ Pendiente | — | — |
+
+### ✅ Fase 0 — Jerarquía de excepciones (commit `a8889ff`)
+
+| Archivo | Propósito |
+|---------|-----------|
+| `exception/BusinessException.java` | Clase base abstracta de dominio |
+| `exception/SaldoInsuficienteException.java` | Error de saldo |
+| `exception/EstadoReservaInvalidoException.java` | Error de transición de estado |
+| `exception/GlobalExceptionHandler.java` | Handler REST captura `BusinessException` |
+
+### ✅ Fase 1 — Economía base (commit `d268c74`)
+
+| Tipo | Archivo | Propósito |
+|------|---------|-----------|
+| 🆕 | `model/WalletToken.java` | Entidad wallet con `@Version` |
+| 🆕 | `model/TransaccionToken.java` | Entidad transacciones + `TipoTransaccion` enum |
+| 🆕 | `repository/WalletTokenRepository.java` | Repo con `@Lock(PESSIMISTIC_WRITE)` |
+| 🆕 | `repository/TransaccionTokenRepository.java` | Repo con paginación |
+| 🆕 | `service/WalletConsultaService.java` | Interfaz consulta (ISP) |
+| 🆕 | `service/WalletOperacionService.java` | Interfaz operación (ISP) |
+| 🆕 | `service/TokenService.java` | Implementación (5 tokens bienvenida) |
+| 🆕 | `controller/TokenController.java` | GET `/wallet` con historial paginado |
+| 🆕 | `templates/mi-wallet.html` | Vista saldo + transacciones |
+| ✏️ | `service/UsuarioService.java` | Inyecta `WalletOperacionService`, llama `inicializarWallet()` en registro |
+| ✏️ | `config/GlobalControllerAdvice.java` | Expone `saldoTokens` a todas las vistas |
+| ✏️ | `templates/fragments/navbar.html` | Badge tokens + link `/wallet` en dropdown |
+
+### 🔶 Fase 1.5 — Tests (en progreso)
+
+| Archivo | Estado | Cambio |
+|---------|--------|--------|
+| `test/UsuarioServiceTest.java` | ✅ Reparado | `@Mock WalletOperacionService` + constructor + verify en tests de registro |
+| `test/TokenServiceTest.java` | ⏳ Pendiente | Crear cobertura de TokenService |
+| `test/ReservaPagoServiceTest.java` | ⏳ Pendiente | Crear cuando exista `ReservaPagoService` |
 
 ---
 
@@ -640,7 +686,9 @@ public int saldoTokens(Authentication authentication) {
 
 ---
 
-## Tabla de Archivos Nuevos y Modificados
+## Tabla de Archivos — Estado Real
+
+### ✅ Implementados (Fase 0 + Fase 1)
 
 | Tipo | Archivo | Principio SOLID clave |
 |------|---------|----------------------|
@@ -654,58 +702,63 @@ public int saldoTokens(Authentication authentication) {
 | 🆕 | `service/WalletConsultaService.java` (interfaz) | ISP + DIP |
 | 🆕 | `service/WalletOperacionService.java` (interfaz) | ISP + DIP |
 | 🆕 | `service/TokenService.java` | SRP (implementa ambas) |
-| 🆕 | `service/ReservaPagoService.java` | SRP + DIP |
 | 🆕 | `controller/TokenController.java` | DIP |
 | 🆕 | `templates/mi-wallet.html` | — |
-| ✏️ | `model/Reserva.java` | OCP (nuevo valor en enum + `costoTokens`) |
-| ✏️ | `model/Notificacion.java` | OCP (nuevos tipos en enum) |
 | ✏️ | `service/UsuarioService.java` | DIP + SRP |
-| ✏️ | `service/ReservaService.java` | SRP (deprecar `finalizar()`) |
-| ✏️ | `controller/ReservaController.java` | SRP |
 | ✏️ | `config/GlobalControllerAdvice.java` | — (`saldoTokens` + `WalletConsultaService`) |
-| ✏️ | `templates/mis-tutorias.html` | — |
 | ✏️ | `templates/fragments/navbar.html` | — |
 | ✏️ | `test/UsuarioServiceTest.java` | — (constructor + mock) |
-| 🆕 | `test/TokenServiceTest.java` | — |
-| 🆕 | `test/ReservaPagoServiceTest.java` | — |
 
-**Total**: 15 archivos nuevos, 10 archivos modificados.
+### ⏳ Pendientes (Fase 2+)
 
----
-
-## Plan de Fases
-
-| Fase | Alcance | Estimación |
-|------|---------|-----------|
-| **Fase 1** | `BusinessException` + excepciones, `WalletToken`, `TransaccionToken`, repos, interfaces ISP, `TokenService`, `inicializarWallet` en registro, saldo en navbar | 3–4 h |
-| **Fase 1.5** | Actualizar `UsuarioServiceTest`, crear `TokenServiceTest` + `ReservaPagoServiceTest`, adaptar `GlobalControllerAdvice`, agregar link `/wallet` en navbar | 1–2 h |
-| **Fase 2** | `ReservaPagoService`, nuevo estado `PENDIENTE_PAGO` + `costoTokens`, endpoints pagar/marcar-impartida/cancelar-pago, botones en `mis-tutorias.html`, `mi-wallet.html` | 3–4 h |
-| **Fase 3** | Masterclass (entidades + servicio + vistas), bonus por primera tutoría, eliminar `finalizar()` deprecated | 5–6 h |
+| Tipo | Archivo | Plan |
+|------|---------|------|
+| 🆕 | `service/ReservaPagoService.java` | Fase 2 |
+| ✏️ | `model/Reserva.java` | Fase 2: nuevo estado `PENDIENTE_PAGO` + campo `costoTokens` |
+| ✏️ | `model/Notificacion.java` | Fase 2: nuevos tipos `PAGO_REALIZADO` / `PAGO_RECIBIDO` |
+| ✏️ | `service/ReservaService.java` | Fase 2: deprecar `finalizar()`, permitir cancelar en `PENDIENTE_PAGO` |
+| ✏️ | `controller/ReservaController.java` | Fase 2: endpoints pagar/marcar-impartida/cancelar-pago |
+| ✏️ | `templates/mis-tutorias.html` | Fase 2: botones por estado |
+| 🆕 | `test/TokenServiceTest.java` | Fase 1.5 |
+| 🆕 | `test/ReservaPagoServiceTest.java` | Fase 2 |
 
 ---
 
-## ⚠️ Tests que se rompen y acciones requeridas
+## Plan de Fases — Estado Real
 
-| Test | Por qué se rompe | Acción |
-|------|-----------------|--------|
-| `UsuarioServiceTest` (8 casos) | Constructor cambia al inyectar `WalletOperacionService` | Agregar `@Mock WalletOperacionService` e inyectarlo en `setUp()` |
-| `ReservaServiceTest` (13 casos) | **NO se rompe** si mantenemos SRP y no inyectamos tokens en `ReservaService` | Sin cambios |
-| — | Nuevos tests necesarios | Crear `TokenServiceTest` + `ReservaPagoServiceTest` |
+| Fase | Alcance | Estado | Commit |
+|------|---------|--------|--------|
+| **Fase 0** | Jerarquía de excepciones (`BusinessException`, `SaldoInsuficienteException`, `EstadoReservaInvalidoException`, handler REST) | ✅ Completado | `a8889ff` |
+| **Fase 1** | Wallet, transacciones, repos, interfaces ISP, `TokenService`, `TokenController`, `mi-wallet.html`, integración `UsuarioService` + `GlobalControllerAdvice` + navbar | ✅ Completado | `d268c74` |
+| **Fase 1.5.a** | Reparar `UsuarioServiceTest` (constructor + verify inicializarWallet) | ✅ Completado | *(working)* |
+| **Fase 1.5.b** | Crear `TokenServiceTest` | ⏳ Pendiente | — |
+| **Fase 2** | `ReservaPagoService`, `PENDIENTE_PAGO`, `costoTokens`, endpoints, botones en `mis-tutorias.html` | ⏳ Pendiente | — |
+| **Fase 3** | Masterclass, bonus primera tutoría, eliminar `finalizar()` | ⏳ Pendiente | — |
 
-### Nuevos tests requeridos
+---
 
-| Test | Cobertura |
-|------|-----------|
-| `TokenServiceTest` | Inicializar wallet, debitar con saldo suficiente, debitar sin saldo → `SaldoInsuficienteException`, acreditar, historial |
-| `ReservaPagoServiceTest` | `marcarSesionImpartida()`, `pagarConToken()` (saldo suficiente e insuficiente), `cancelarEnPendientePago()` |
+## ⚠️ Tests — Impacto y acciones
+
+| Test | Resultado | Acción tomada |
+|------|-----------|---------------|
+| `UsuarioServiceTest` (8 casos) | ✅ Reparado | `@Mock WalletOperacionService` + constructor actualizado + verify en tests de registro |
+| `ReservaServiceTest` (14 casos) | ✅ Sin impacto | No se modificó `ReservaService` (SRP intacto) |
+| `TutomatchApplicationTests` (contextLoads) | ✅ Sin impacto | Spring auto-wirea `TokenService` en ambas interfaces |
+
+### Nuevos tests requeridos (pendientes)
+
+| Test | Cobertura | Fase |
+|------|-----------|------|
+| `TokenServiceTest` | Inicializar wallet, debitar con saldo suficiente, debitar sin saldo → `SaldoInsuficienteException`, acreditar, historial | 1.5 |
+| `ReservaPagoServiceTest` | `marcarSesionImpartida()`, `pagarConToken()` (saldo suficiente e insuficiente), `cancelarEnPendientePago()` | 2 |
 
 ## Plan de Verificación
 
-### Fase 1
-1. Registrar usuario → wallet con 5 tokens → badge visible en navbar
-2. `TokenService` → test unitario con Mockito: debitar más de lo disponible lanza `SaldoInsuficienteException`
-3. `GlobalExceptionHandler` captura `BusinessException` correctamente (endpoints REST)
-4. `UsuarioServiceTest` actualizado pasa con nueva dependencia
+### Fase 1 — Estado
+- [x] 1. Registrar usuario → wallet con 5 tokens → badge visible en navbar
+- [ ] 2. `TokenService` → test unitario con Mockito: debitar más de lo disponible lanza `SaldoInsuficienteException`
+- [x] 3. `GlobalExceptionHandler` captura `BusinessException` correctamente (endpoints REST)
+- [x] 4. `UsuarioServiceTest` actualizado pasa con nueva dependencia
 
 ### Fase 2
 5. Tutor marca impartida → estado `PENDIENTE_PAGO`
