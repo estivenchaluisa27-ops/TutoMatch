@@ -340,22 +340,6 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         });
     }
 
-    // --- 17. Timeline blocks entrance (configurar-disponibilidad.html) ---
-    let tlBlocks = document.querySelectorAll('.tl-block');
-    if (tlBlocks.length) {
-        ScrollTrigger.batch(tlBlocks, {
-            onEnter: batch => gsap.from(batch, {
-                autoAlpha: 0,
-                scaleX: 0.3,
-                duration: 0.5,
-                stagger: 0.04,
-                ease: "back.out(1.4)",
-                overwrite: true
-            }),
-            start: "top 88%"
-        });
-    }
-
 });
 
 // --- 15. Hero floating icons — Phase System (outside matchMedia to prevent context revert) ---
