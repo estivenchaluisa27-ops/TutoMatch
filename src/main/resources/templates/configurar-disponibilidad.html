@@ -66,9 +66,9 @@
                                 th:data-hora="${h}"
                                 th:data-cellkey="${d.diaSemana + '-' + h}"
                                 th:data-materias="${bloquesMaterias?.get(d.diaSemana + '-' + h) ? #strings.listJoin(bloquesMaterias?.get(d.diaSemana + '-' + h), ',') : ''}"
-                                th:classappend="${bloquesPorDia?.get(d.diaSemana)?.contains(h) ? 'sg-active' : ''}">
+                                th:classappend="${#sets.contains(bloquesPorDia?.get(d.diaSemana), h) ? 'sg-active' : ''}">
                                 <span class="sg-cell-icon">
-                                    <i th:if="${bloquesPorDia?.get(d.diaSemana)?.contains(h)}" class="bi bi-check-lg"></i>
+                                    <i th:if="${#sets.contains(bloquesPorDia?.get(d.diaSemana), h)}" class="bi bi-check-lg"></i>
                                 </span>
                             </td>
                         </tr>

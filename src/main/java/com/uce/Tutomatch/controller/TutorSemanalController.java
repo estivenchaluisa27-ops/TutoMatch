@@ -86,6 +86,10 @@ public class TutorSemanalController {
             model.addAttribute("semanaInicio", semanaInicio.toString());
             model.addAttribute("semanaFin", semanaFin.toString());
             model.addAttribute("semanaRango", inicioFormato + " \u2013 " + finFormato);
+            // Defensa: asegurar que bloquesPorDia tenga entrada para cada día 1..7
+            for (int i = 1; i <= 7; i++) {
+                bloquesPorDia.putIfAbsent(i, Collections.emptySet());
+            }
             model.addAttribute("diasInfo", diasInfo);
             model.addAttribute("horas", HORAS);
             model.addAttribute("bloquesPorDia", bloquesPorDia);
