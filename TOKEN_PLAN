@@ -1,0 +1,740 @@
+# 🪙 Módulo de Economía de Tokens — TutoMatch (v3 — SOLID)
+
+Sistema de tokens donde **el pago lo realiza el estudiante** como acto de cierre. Arquitectura diseñada bajo los 5 principios SOLID.
+
+> [!IMPORTANT]
+> **Ajustes post-análisis con MCP codebase (Jul 2026):**
+> Se verificó la factibilidad del plan contra el código real del proyecto. Los ajustes incorporan:
+> - Concurrencia en wallets (optimistic locking + lock pesimista)
+> - Costo variable por tutoría (`Reserva.costoTokens` en vez de hardcode 1)
+> - Cancelación en `PENDIENTE_PAGO` (solo estudiante, sin mover tokens)
+> - Notificaciones extendidas (`PAGO_RECIBIDO`, `PAGO_REALIZADO`)
+> - Transición segura: `finalizar()` se mantiene deprecated, no se elimina de golpe
+> - Tests existentes que se rompen (`UsuarioServiceTest`) y cómo mitigarlo
+> - Carpeta `Tutomatch/` anidada IGNORADA — trabajar solo en `src/` raíz
+
+---
+
+## Principios SOLID Aplicados al Módulo
+
+### 🔹 S — Single Responsibility Principle (SRP)
+
+Cada clase tiene **una sola razón para cambiar**:
+
+| Clase | Responsabilidad única | Qué NO hace |
+|-------|----------------------|-------------|
+| `TokenService` | Gestionar saldos y registrar transacciones | No sabe de reservas ni reseñas |
+| `ReservaPagoService` | Orquestar el flujo pago → finalización → notificación | No manipula saldos directamente (delega a `TokenService`) |
+| `ReservaService` | CRUD y transiciones de estado de reservas | No toca tokens (eso es de `ReservaPagoService`) |
+| `ResenaService` | CRUD de reseñas y promedio del tutor | No verifica pagos; solo chequea `estado == FINALIZADA` (que ya implica pago) |
+| `WalletToken` (entidad) | Almacenar el saldo de un usuario | No tiene lógica de negocio; los cálculos están en el servicio |
+| `TransaccionToken` (entidad) | Registro inmutable de un movimiento | No modifica wallets |
+
+> [!IMPORTANT]
+> **Decisión clave SRP**: Se crea `ReservaPagoService` (nuevo) en lugar de meter la lógica de pago dentro de `ReservaService`. Así `ReservaService` no crece con responsabilidades de economía de tokens.
+
+---
+
+### 🔹 O — Open/Closed Principle (OCP)
+
+El módulo está **abierto a extensión, cerrado a modificación**:
+
+```java
+/**
+ * Enum extensible para tipos de transacción.
+ * Para agregar un nuevo tipo (ej: BONUS_RACHA, COMPRA_TOKENS),
+ * solo se añade una entrada al enum sin modificar TokenService.
+ */
+public enum TipoTransaccion {
+    BIENVENIDA,
+    PAGO_TUTORIA_RECIBIDA,
+    INGRESO_TUTORIA_DADA,
+    DEVOLUCION_CANCELACION,
+    BONUS_PRIMERA_TUTORIA    // Fase 2: solo se agrega aquí
+    // MASTERCLASS_INGRESO   // Fase 3: solo se agrega aquí
+}
+```
+
+**Cómo se extiende sin modificar**:
+
+- **Nuevo tipo de transacción** → Se agrega al enum `TipoTransaccion`. `TokenService.acreditar()` y `debitar()` son genéricos y no hacen `switch` sobre el tipo.
+- **Nuevo tipo de evento que genera tokens** → Se crea un nuevo servicio orquestador (ej: `MasterclassPagoService`) que llama a `TokenService.acreditar()`. No se modifica `TokenService`.
+- **Nueva regla de validación de reseña** → Se agrega una nueva clase `ResenaPagoValidator` implementando una interfaz, sin modificar `ResenaService`.
+
+---
+
+### 🔹 L — Liskov Substitution Principle (LSP)
+
+Las excepciones del dominio son **sustituibles**:
+
+```java
+// Jerarquía coherente de excepciones de negocio
+public abstract class BusinessException extends RuntimeException {
+    protected BusinessException(String message) { super(message); }
+}
+
+public class SaldoInsuficienteException extends BusinessException { ... }
+public class CupoLlenoException extends BusinessException { ... }
+public class EstadoReservaInvalidoException extends BusinessException { ... }
+```
+
+**Beneficio LSP**: El `GlobalExceptionHandler` puede capturar `BusinessException` genérica y renderizar un error de negocio coherente. Cualquier nueva excepción de dominio que extienda `BusinessException` funcionará automáticamente sin modificar el handler:
+
+```java
+// GlobalExceptionHandler — abierto a nuevas excepciones (OCP + LSP)
+// ⚠️ Solo para endpoints REST (/auth/**). Los controllers MVC (Thymeleaf)
+//    siguen usando try-catch local + RedirectAttributes (deuda técnica #3).
+@ExceptionHandler(BusinessException.class)
+public ResponseEntity<Map<String, String>> handleBusinessError(BusinessException ex) {
+    return ResponseEntity.badRequest()
+            .body(Map.of("error", ex.getMessage()));
+}
+```
+
+---
+
+### 🔹 I — Interface Segregation Principle (ISP)
+
+Los clientes **solo dependen de los métodos que necesitan**:
+
+```java
+/**
+ * Consulta de saldo y transacciones (para Controllers de vista).
+ * No expone operaciones de débito/crédito.
+ */
+public interface WalletConsultaService {
+    int obtenerSaldo(Long usuarioId);
+    WalletToken obtenerWallet(Long usuarioId);
+    Page<TransaccionToken> obtenerHistorial(Long usuarioId, Pageable pageable);
+}
+
+/**
+ * Operaciones de modificación de saldo (para Services internos).
+ * No expone consultas de historial.
+ */
+public interface WalletOperacionService {
+    void acreditar(Long usuarioId, int cantidad,
+                   TipoTransaccion tipo, String descripcion, Long referenciaId);
+    void debitar(Long usuarioId, int cantidad,
+                 TipoTransaccion tipo, String descripcion, Long referenciaId)
+        throws SaldoInsuficienteException;
+    void inicializarWallet(Long usuarioId);
+}
+```
+
+**Quién consume cada interfaz**:
+
+| Consumidor | Interfaz que inyecta | Justificación |
+|-----------|---------------------|---------------|
+| `TokenController` (vista wallet) | `WalletConsultaService` | Solo necesita leer saldo e historial |
+| `GlobalControllerAdvice` (badge navbar) | `WalletConsultaService` | Solo necesita `obtenerSaldo()` |
+| `ReservaPagoService` | `WalletOperacionService` | Necesita debitar/acreditar, no listar historial |
+| `UsuarioService` (registro) | `WalletOperacionService` | Solo necesita `inicializarWallet()` |
+
+`TokenService` implementa **ambas** interfaces. Así cada cliente solo ve el contrato que necesita:
+
+```java
+@Service
+public class TokenService implements WalletConsultaService, WalletOperacionService {
+    // Implementa todos los métodos
+}
+```
+
+---
+
+### 🔹 D — Dependency Inversion Principle (DIP)
+
+Las clases de alto nivel **dependen de abstracciones, no de implementaciones concretas**:
+
+```java
+// ReservaPagoService depende de la INTERFAZ, no de la clase TokenService
+@Service
+public class ReservaPagoService {
+
+    private final WalletOperacionService walletOperaciones; // Interfaz
+    private final ReservaService reservaService;
+    private final NotificacionService notificacionService;
+
+    public ReservaPagoService(WalletOperacionService walletOperaciones, ...) {
+        this.walletOperaciones = walletOperaciones;
+        // ...
+    }
+}
+
+// TokenController depende de la INTERFAZ de consulta
+@Controller
+public class TokenController {
+
+    private final WalletConsultaService walletConsulta; // Interfaz
+
+    public TokenController(WalletConsultaService walletConsulta) {
+        this.walletConsulta = walletConsulta;
+    }
+}
+```
+
+**Beneficio DIP**: Si en el futuro se reemplaza `TokenService` por una implementación con Redis o un microservicio externo, ningún controller ni servicio orquestador cambia. Solo se registra un nuevo `@Service` que implemente las interfaces.
+
+---
+
+## Flujo Principal
+
+```
+TUTOR marca "Sesión impartida"
+       ↓
+Reserva pasa a: PENDIENTE_PAGO
+       ↓
+ESTUDIANTE ve botón "Pagar con N tokens"
+       ↓
+ReservaPagoService.pagarConToken():
+  1. walletOperaciones.debitar(estudianteId, reserva.getCostoTokens(), ...)  ← DIP
+  2. reservaService.transicionarEstado(id, FINALIZADA)                       ← SRP
+  3. walletOperaciones.acreditar(tutorId, reserva.getCostoTokens(), ...)     ← DIP
+  4. notificacionService.crear(...)                                           ← SRP
+       ↓
+FINALIZADA → botón "Calificar" habilitado
+       ↓
+ResenaService.crear() verifica estado == FINALIZADA (sin saber de tokens) ← SRP
+```
+
+---
+
+## Diagrama de Estados de Reserva
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDIENTE : Estudiante reserva
+    PENDIENTE --> CONFIRMADA : Tutor acepta
+    CONFIRMADA --> PENDIENTE_PAGO : Tutor marca sesión impartida
+    PENDIENTE_PAGO --> FINALIZADA : Estudiante paga con token
+    PENDIENTE --> CANCELADA : Tutor o estudiante cancela
+    CONFIRMADA --> CANCELADA : Estudiante cancela
+    PENDIENTE_PAGO --> CANCELADA : Estudiante cancela (sin mover tokens)
+    FINALIZADA --> [*]
+    CANCELADA --> [*]
+```
+
+---
+
+## Diagrama de Dependencias (DIP en acción)
+
+```mermaid
+graph TD
+    RC[ReservaController] -->|usa| RPS[ReservaPagoService]
+    RC -->|usa| RS[ReservaService]
+    TC[TokenController] -->|inyecta| WCS[«interface» WalletConsultaService]
+    RPS -->|inyecta| WOS[«interface» WalletOperacionService]
+    RPS -->|usa| RS
+    RPS -->|usa| NS[NotificacionService]
+    US[UsuarioService] -->|inyecta| WOS
+    TS[TokenService] -.->|implementa| WCS
+    TS -.->|implementa| WOS
+
+    style WCS fill:#2196F3,color:#fff
+    style WOS fill:#2196F3,color:#fff
+    style TS fill:#4CAF50,color:#fff
+```
+
+---
+
+## Propuesta de Implementación por Archivos
+
+### Fase 1 — Economía Base (Wallet + Tokens de Bienvenida)
+
+---
+
+#### exception/
+
+##### [NEW] BusinessException.java
+Clase base abstracta para todas las excepciones de dominio. Extiende `RuntimeException`.
+
+##### [NEW] SaldoInsuficienteException.java
+Extiende `BusinessException`. Mensaje: "Saldo insuficiente. Tienes {saldo} tokens, necesitas {requerido}."
+
+##### [NEW] EstadoReservaInvalidoException.java
+Extiende `BusinessException`. Reemplaza los `IllegalArgumentException` genéricos para transiciones de estado inválidas.
+
+---
+
+#### model/
+
+##### [NEW] WalletToken.java
+```java
+@Entity @Table(name = "wallets_token")
+public class WalletToken {
+    @Id @GeneratedValue private Long id;
+    @OneToOne(fetch = LAZY)
+    @JoinColumn(name = "usuario_id", unique = true, nullable = false)
+    private Usuario usuario;
+    @Column(nullable = false) private int saldo = 0;
+    @Version private int version;  // ← Optimistic locking para concurrencia
+    // getters + setters (no exponer version)
+}
+```
+
+##### [NEW] TransaccionToken.java
+```java
+public enum TipoTransaccion {
+    BIENVENIDA, PAGO_TUTORIA_RECIBIDA, INGRESO_TUTORIA_DADA,
+    DEVOLUCION_CANCELACION, BONUS_PRIMERA_TUTORIA
+}
+
+@Entity @Table(name = "transacciones_token")
+public class TransaccionToken {
+    @Id @GeneratedValue private Long id;
+    @ManyToOne(fetch = LAZY) @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+    @Enumerated(STRING) @Column(nullable = false)
+    private TipoTransaccion tipo;
+    @Column(nullable = false) private int cantidad;
+    @Column(nullable = false, columnDefinition = "TEXT") private String descripcion;
+    @Column(name = "referencia_reserva_id") private Long referenciaReservaId;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime fecha = LocalDateTime.now();
+}
+```
+
+##### [MODIFY] [Reserva.java](file:///c:/Users/HP%20VICTUS/Documents/NetBeansProjects/Tutomatch/src/main/java/com/uce/Tutomatch/model/Reserva.java)
+```diff
+ public enum EstadoReserva {
+-    PENDIENTE, CONFIRMADA, FINALIZADA, CANCELADA
++    PENDIENTE, CONFIRMADA, PENDIENTE_PAGO, FINALIZADA, CANCELADA
+ }
++
++// Nuevo campo: costo en tokens de esta tutoría (default 1, permite variar por materia/tutor)
++@Column(name = "costo_tokens", nullable = false)
++private int costoTokens = 1;
++
++public int getCostoTokens() { return costoTokens; }
++public void setCostoTokens(int costoTokens) { this.costoTokens = costoTokens; }
+```
+
+---
+
+#### repository/
+
+##### [NEW] WalletTokenRepository.java
+```java
+public interface WalletTokenRepository extends JpaRepository<WalletToken, Long> {
+    @Lock(PESSIMISTIC_WRITE)  // ← Evita race conditions en débito/crédito simultáneo
+    Optional<WalletToken> findByUsuarioId(Long usuarioId);
+}
+```
+
+##### [NEW] TransaccionTokenRepository.java
+```java
+public interface TransaccionTokenRepository extends JpaRepository<TransaccionToken, Long> {
+    List<TransaccionToken> findByUsuarioIdOrderByFechaDesc(Long usuarioId);
+    Page<TransaccionToken> findByUsuarioIdOrderByFechaDesc(Long usuarioId, Pageable pageable);
+}
+```
+
+---
+
+#### service/
+
+##### [NEW] WalletConsultaService.java (interfaz — ISP)
+```java
+public interface WalletConsultaService {
+    int obtenerSaldo(Long usuarioId);
+    WalletToken obtenerWallet(Long usuarioId);
+    Page<TransaccionToken> obtenerHistorial(Long usuarioId, Pageable pageable);
+}
+```
+
+##### [NEW] WalletOperacionService.java (interfaz — ISP)
+```java
+public interface WalletOperacionService {
+    void acreditar(Long usuarioId, int cantidad,
+                   TipoTransaccion tipo, String descripcion, Long referenciaId);
+    void debitar(Long usuarioId, int cantidad,
+                 TipoTransaccion tipo, String descripcion, Long referenciaId);
+    void inicializarWallet(Long usuarioId);
+}
+```
+
+##### [NEW] TokenService.java (implementa ambas interfaces)
+```java
+@Service
+public class TokenService implements WalletConsultaService, WalletOperacionService {
+
+    private static final int TOKENS_BIENVENIDA = 5;
+    private final WalletTokenRepository walletRepo;
+    private final TransaccionTokenRepository transaccionRepo;
+    private final UsuarioRepository usuarioRepo;
+
+    // Constructor injection (DIP)
+
+    @Override @Transactional
+    public void inicializarWallet(Long usuarioId) { /* +5 tokens */ }
+
+    @Override @Transactional(readOnly = true)
+    public int obtenerSaldo(Long usuarioId) { /* ... */ }
+
+    @Override @Transactional
+    public void acreditar(Long usuarioId, int cantidad,
+                          TipoTransaccion tipo, String desc, Long refId) { /* ... */ }
+
+    @Override @Transactional
+    public void debitar(Long usuarioId, int cantidad,
+                        TipoTransaccion tipo, String desc, Long refId) {
+        WalletToken wallet = obtenerWallet(usuarioId);
+        if (wallet.getSaldo() < cantidad) {
+            throw new SaldoInsuficienteException(
+                "Saldo insuficiente. Tienes " + wallet.getSaldo()
+                + " tokens, necesitas " + cantidad);
+        }
+        // ...
+    }
+
+    @Override @Transactional(readOnly = true)
+    public WalletToken obtenerWallet(Long usuarioId) { /* ... */ }
+
+    @Override @Transactional(readOnly = true)
+    public Page<TransaccionToken> obtenerHistorial(Long usuarioId, Pageable pageable) { /* ... */ }
+}
+```
+
+---
+
+### Fase 2 — Flujo de Pago + Reseñas Validadas
+
+---
+
+#### service/
+
+##### [NEW] ReservaPagoService.java (Orquestador — SRP separado de ReservaService)
+
+```java
+/**
+ * Orquesta el flujo de pago de tokens en reservas.
+ * SRP: Solo coordina pago + transición + notificación.
+ * DIP: Depende de interfaces WalletOperacionService, no de TokenService.
+ */
+@Service
+public class ReservaPagoService {
+
+    private final WalletOperacionService walletOperaciones;
+    private final ReservaRepository reservaRepo;
+    private final NotificacionService notificacionService;
+
+    // Constructor injection
+
+    /**
+     * Tutor marca que la sesión fue impartida.
+     * Transición: CONFIRMADA → PENDIENTE_PAGO.
+     */
+    @Transactional
+    public Reserva marcarSesionImpartida(Long reservaId, Long tutorUsuarioId) {
+        // Valida estado CONFIRMADA, valida que sea el tutor
+        // Cambia a PENDIENTE_PAGO
+        // Notifica al estudiante
+    }
+
+    /**
+     * Estudiante paga con token. Esto es el acto de confirmación.
+     * Transición: PENDIENTE_PAGO → FINALIZADA.
+     * Acredita N tokens al tutor (costo variable desde Reserva.costoTokens).
+     */
+    @Transactional
+    public Reserva pagarConToken(Long reservaId, Long estudianteId) {
+        // 1. Valida estado PENDIENTE_PAGO
+        // 2. Valida que estudianteId == solicitante
+        // 3. int costo = reserva.getCostoTokens();
+        // 4. walletOperaciones.debitar(estudianteId, costo, PAGO_TUTORIA_RECIBIDA, ...)
+        // 5. reserva.setEstado(FINALIZADA)
+        // 6. walletOperaciones.acreditar(tutorId, costo, INGRESO_TUTORIA_DADA, ...)
+        // 7. Notifica al tutor
+    }
+
+    /**
+     * Estudiante cancela en PENDIENTE_PAGO.
+     * Transición: PENDIENTE_PAGO → CANCELADA
+     * NO se mueven tokens (el tutor aún no recibió pago).
+     * El bloque de disponibilidad se libera.
+     */
+    @Transactional
+    public Reserva cancelarEnPendientePago(Long reservaId, Long estudianteId) {
+        // Valida estado PENDIENTE_PAGO
+        // Valida que sea el estudiante (solo él puede cancelar en este estado)
+        // Cambia a CANCELADA
+        // Libera el bloque de disponibilidad
+        // Notifica al tutor que el estudiante canceló el pago
+    }
+}
+```
+
+##### [MODIFY] [ReservaService.java](file:///c:/Users/HP%20VICTUS/Documents/NetBeansProjects/Tutomatch/src/main/java/com/uce/Tutomatch/service/ReservaService.java)
+- Se conservan: `crear()`, `confirmar()`, `cancelar()`, `obtenerComo*()`
+- `finalizar()` se **depreca con `@Deprecated`** pero NO se elimina en esta fase para no romper referencias externas. En Fase 3 se elimina tras verificar cero referencias.
+- SRP: ReservaService solo maneja CRUD y transiciones que no involucran tokens
+- NOTA: `cancelar()` debe actualizarse para aceptar también `PENDIENTE_PAGO` como estado cancelable (solo estudiante). La lógica de tokens NO toca a ReservaService — `ReservaPagoService.cancelarEnPendientePago()` maneja el flujo completo.
+
+##### [NO SE MODIFICA] [ResenaService.java](file:///c:/Users/HP%20VICTUS/Documents/NetBeansProjects/Tutomatch/src/main/java/com/uce/Tutomatch/service/ResenaService.java)
+La validación `reserva.getEstado() != FINALIZADA` (línea 44) **ya es suficiente** porque `FINALIZADA` solo se alcanza tras el pago del token. No se agrega dependencia de tokens a `ResenaService` → SRP intacto.
+
+---
+
+#### [MODIFY] [Notificacion.java](file:///c:/Users/HP%20VICTUS/Documents/NetBeansProjects/Tutomatch/src/main/java/com/uce/Tutomatch/model/Notificacion.java)
+
+```diff
+ public enum TipoNotificacion {
+     RESERVA_CREADA,
+     RESERVA_CONFIRMADA,
+     RESERVA_CANCELADA,
+-    RESERVA_FINALIZADA
++    RESERVA_FINALIZADA,
++    PAGO_REALIZADO,     // Estudiante pagó
++    PAGO_RECIBIDO       // Tutor recibió token(s)
+ }
+```
+
+---
+
+#### controller/
+
+##### [MODIFY] [ReservaController.java](file:///c:/Users/HP%20VICTUS/Documents/NetBeansProjects/Tutomatch/src/main/java/com/uce/Tutomatch/controller/ReservaController.java)
+
+```diff
+ public class ReservaController {
+
+     private final ReservaService reservaService;
++    private final ReservaPagoService reservaPagoService;
+     private final UsuarioRepository usuarioRepository;
+     // ...
+
+-    @PostMapping("/{id}/finalizar")              // ← Se depreca pero se mantiene
+-    public String finalizarReserva(...) { ... }   //   para no romper enlaces externos
+
++    @PostMapping("/{id}/marcar-impartida")
++    public String marcarImpartida(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
++        Long usuarioId = obtenerUsuarioId(auth);
++        reservaPagoService.marcarSesionImpartida(id, usuarioId);
++        ra.addFlashAttribute("success", "Sesión marcada como impartida");
++        return "redirect:/reservas";
++    }
+
++    @PostMapping("/{id}/pagar-token")
++    public String pagarConToken(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
++        Long usuarioId = obtenerUsuarioId(auth);
++        reservaPagoService.pagarConToken(id, usuarioId);
++        ra.addFlashAttribute("success", "¡Pago realizado! Ya puedes calificar esta tutoría.");
++        return "redirect:/reservas";
++    }
+
++    @PostMapping("/{id}/cancelar-pago")
++    public String cancelarEnPendientePago(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
++        Long usuarioId = obtenerUsuarioId(auth);
++        reservaPagoService.cancelarEnPendientePago(id, usuarioId);
++        ra.addFlashAttribute("success", "Tutoría cancelada.");
++        return "redirect:/reservas";
++    }
+ }
+```
+
+##### [NEW] TokenController.java
+```java
+@Controller
+public class TokenController {
+
+    private final WalletConsultaService walletConsulta; // ISP + DIP
+    private final UsuarioRepository usuarioRepository;  // para obtenerUsuarioId()
+
+    public TokenController(WalletConsultaService walletConsulta,
+                           UsuarioRepository usuarioRepository) {
+        this.walletConsulta = walletConsulta;
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    // Helper idéntico al de otros controllers
+    private Long obtenerUsuarioId(Authentication auth) {
+        String email = auth.getName();
+        return usuarioRepository.findByCorreoInstitucional(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"))
+                .getId();
+    }
+
+    @GetMapping("/wallet")
+    public String verWallet(Authentication auth, Model model, Pageable pageable) {
+        Long usuarioId = obtenerUsuarioId(auth);
+        model.addAttribute("saldo", walletConsulta.obtenerSaldo(usuarioId));
+        model.addAttribute("transacciones", walletConsulta.obtenerHistorial(usuarioId, pageable));
+        return "mi-wallet";
+    }
+}
+```
+
+---
+
+#### [MODIFY] [UsuarioService.java](file:///c:/Users/HP%20VICTUS/Documents/NetBeansProjects/Tutomatch/src/main/java/com/uce/Tutomatch/service/UsuarioService.java)
+
+```diff
+ public class UsuarioService {
+     private final UsuarioRepository usuarioRepository;
++    private final WalletOperacionService walletOperaciones; // ISP + DIP
+     // ...
+
+     public UsuarioResponse registrar(RegistroRequest request, HttpServletResponse response) {
+         // ... (código existente sin cambios)
+         Usuario saved = usuarioRepository.save(usuario);
++        walletOperaciones.inicializarWallet(saved.getId());
+         setJwtCookie(response, saved);
+         return UsuarioResponse.from(saved);
+     }
+ }
+```
+
+---
+
+### Fase 2 — Templates
+
+##### [MODIFY] [mis-tutorias.html](file:///c:/Users/HP%20VICTUS/Documents/NetBeansProjects/Tutomatch/src/main/resources/templates/mis-tutorias.html)
+
+**Tab Solicitante — nuevos estados de acción**:
+
+| Estado | Botón visible al estudiante |
+|--------|---------------------------|
+| `PENDIENTE` | Cancelar |
+| `CONFIRMADA` | Cancelar |
+| `PENDIENTE_PAGO` | 🪙 **"Pagar con N Token(s)"** + ❌ Cancelar |
+| `FINALIZADA` + sin reseña | ⭐ "Calificar" |
+| `FINALIZADA` + con reseña | ✅ "Calificado" |
+
+**Tab Tutor — nuevos estados de acción**:
+
+| Estado | Botón visible al tutor |
+|--------|----------------------|
+| `PENDIENTE` | Aceptar / Cancelar |
+| `CONFIRMADA` | 📋 **"Marcar sesión impartida"** |
+| `PENDIENTE_PAGO` | ⏳ "Esperando pago del alumno" |
+| `FINALIZADA` | ✅ "Finalizada" |
+
+##### [NEW] mi-wallet.html
+Vista con saldo prominente + historial paginado con iconos verdes (+) / rojos (−).
+
+##### [MODIFY] Navbar
+- Badge con saldo de tokens inyectado vía `@ControllerAdvice` + `WalletConsultaService`
+- Link "Mi Wallet" (`/wallet`) en dropdown de "Mi Cuenta" (navbar línea 78)
+- En `GlobalControllerAdvice.java` se inyecta `WalletConsultaService` y se agrega:
+```java
+@ModelAttribute("saldoTokens")
+public int saldoTokens(Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated()) return 0;
+    return usuarioRepository.findByCorreoInstitucional(authentication.getName())
+            .map(u -> walletConsulta.obtenerSaldo(u.getId()))
+            .orElse(0);
+}
+```
+
+---
+
+## Resumen de Adherencia SOLID
+
+| Principio | Cómo se aplica | Archivo clave |
+|-----------|---------------|---------------|
+| **S** — Single Responsibility | `TokenService` solo maneja saldos. `ReservaPagoService` solo orquesta pagos. `ResenaService` no se toca. | `ReservaPagoService.java` (nuevo) |
+| **O** — Open/Closed | Nuevos tipos de transacción se agregan al enum sin modificar `TokenService`. Nuevos flujos de pago crean nuevos orquestadores. | `TipoTransaccion` enum |
+| **L** — Liskov Substitution | `SaldoInsuficienteException` sustituye a `BusinessException` en cualquier handler. Nuevas excepciones heredan sin romper. | `BusinessException.java` (nuevo) |
+| **I** — Interface Segregation | Controllers solo ven `WalletConsultaService`. Services internos solo ven `WalletOperacionService`. | Dos interfaces separadas |
+| **D** — Dependency Inversion | `ReservaPagoService` inyecta `WalletOperacionService` (interfaz), no `TokenService` (clase). | Todas las inyecciones |
+
+---
+
+## Tabla de Archivos Nuevos y Modificados
+
+| Tipo | Archivo | Principio SOLID clave |
+|------|---------|----------------------|
+| 🆕 | `exception/BusinessException.java` | LSP |
+| 🆕 | `exception/SaldoInsuficienteException.java` | LSP |
+| 🆕 | `exception/EstadoReservaInvalidoException.java` | LSP |
+| 🆕 | `model/WalletToken.java` | SRP |
+| 🆕 | `model/TransaccionToken.java` | SRP |
+| 🆕 | `repository/WalletTokenRepository.java` | — |
+| 🆕 | `repository/TransaccionTokenRepository.java` | — |
+| 🆕 | `service/WalletConsultaService.java` (interfaz) | ISP + DIP |
+| 🆕 | `service/WalletOperacionService.java` (interfaz) | ISP + DIP |
+| 🆕 | `service/TokenService.java` | SRP (implementa ambas) |
+| 🆕 | `service/ReservaPagoService.java` | SRP + DIP |
+| 🆕 | `controller/TokenController.java` | DIP |
+| 🆕 | `templates/mi-wallet.html` | — |
+| ✏️ | `model/Reserva.java` | OCP (nuevo valor en enum + `costoTokens`) |
+| ✏️ | `model/Notificacion.java` | OCP (nuevos tipos en enum) |
+| ✏️ | `service/UsuarioService.java` | DIP + SRP |
+| ✏️ | `service/ReservaService.java` | SRP (deprecar `finalizar()`) |
+| ✏️ | `controller/ReservaController.java` | SRP |
+| ✏️ | `config/GlobalControllerAdvice.java` | — (`saldoTokens` + `WalletConsultaService`) |
+| ✏️ | `templates/mis-tutorias.html` | — |
+| ✏️ | `templates/fragments/navbar.html` | — |
+| ✏️ | `test/UsuarioServiceTest.java` | — (constructor + mock) |
+| 🆕 | `test/TokenServiceTest.java` | — |
+| 🆕 | `test/ReservaPagoServiceTest.java` | — |
+
+**Total**: 15 archivos nuevos, 10 archivos modificados.
+
+---
+
+## Plan de Fases
+
+| Fase | Alcance | Estimación |
+|------|---------|-----------|
+| **Fase 1** | `BusinessException` + excepciones, `WalletToken`, `TransaccionToken`, repos, interfaces ISP, `TokenService`, `inicializarWallet` en registro, saldo en navbar | 3–4 h |
+| **Fase 1.5** | Actualizar `UsuarioServiceTest`, crear `TokenServiceTest` + `ReservaPagoServiceTest`, adaptar `GlobalControllerAdvice`, agregar link `/wallet` en navbar | 1–2 h |
+| **Fase 2** | `ReservaPagoService`, nuevo estado `PENDIENTE_PAGO` + `costoTokens`, endpoints pagar/marcar-impartida/cancelar-pago, botones en `mis-tutorias.html`, `mi-wallet.html` | 3–4 h |
+| **Fase 3** | Masterclass (entidades + servicio + vistas), bonus por primera tutoría, eliminar `finalizar()` deprecated | 5–6 h |
+
+---
+
+## ⚠️ Tests que se rompen y acciones requeridas
+
+| Test | Por qué se rompe | Acción |
+|------|-----------------|--------|
+| `UsuarioServiceTest` (8 casos) | Constructor cambia al inyectar `WalletOperacionService` | Agregar `@Mock WalletOperacionService` e inyectarlo en `setUp()` |
+| `ReservaServiceTest` (13 casos) | **NO se rompe** si mantenemos SRP y no inyectamos tokens en `ReservaService` | Sin cambios |
+| — | Nuevos tests necesarios | Crear `TokenServiceTest` + `ReservaPagoServiceTest` |
+
+### Nuevos tests requeridos
+
+| Test | Cobertura |
+|------|-----------|
+| `TokenServiceTest` | Inicializar wallet, debitar con saldo suficiente, debitar sin saldo → `SaldoInsuficienteException`, acreditar, historial |
+| `ReservaPagoServiceTest` | `marcarSesionImpartida()`, `pagarConToken()` (saldo suficiente e insuficiente), `cancelarEnPendientePago()` |
+
+## Plan de Verificación
+
+### Fase 1
+1. Registrar usuario → wallet con 5 tokens → badge visible en navbar
+2. `TokenService` → test unitario con Mockito: debitar más de lo disponible lanza `SaldoInsuficienteException`
+3. `GlobalExceptionHandler` captura `BusinessException` correctamente (endpoints REST)
+4. `UsuarioServiceTest` actualizado pasa con nueva dependencia
+
+### Fase 2
+5. Tutor marca impartida → estado `PENDIENTE_PAGO`
+6. Estudiante paga → estado `FINALIZADA`, estudiante −N tokens, tutor +N tokens
+7. Estudiante cancela en `PENDIENTE_PAGO` → estado `CANCELADA`, bloque liberado, 0 tokens movidos
+8. Botón "Calificar" **solo** aparece tras pagar
+9. Estudiante con 0 tokens → `SaldoInsuficienteException` → mensaje claro
+10. `ReservaPagoServiceTest` y `TokenServiceTest` pasan
+
+### Fase 3
+11. Prueba de concurrencia: dos pagos simultáneos desde saldo de 1 → solo uno pasa, el otro recibe `OptimisticLockException` o `SaldoInsuficienteException`
+
+### ⚠️ Deuda técnica no resuelta
+La carpeta `Tutomatch/` dentro del proyecto raíz es una copia anidada del mismo código. **NO se debe trabajar allí**. Todo el desarrollo va en `src/` raíz.
+
+### 🧵 Concurrencia — Nota de implementación
+`WalletTokenRepository.findByUsuarioId()` usa `@Lock(PESSIMISTIC_WRITE)` + `@Version` en la entidad. Esto garantiza:
+1. Lectura con bloqueo de escritura evita que dos transacciones lean el mismo saldo.
+2. Si por algún motivo dos writes ocurren, `OptimisticLockException` fuerza reintento.
+3. `TokenService.debitar()` debe capturar `OptimisticLockException` y reintentar o lanzar error al usuario.
+
+### Queries SQL de verificación
+```sql
+SELECT u.nombre_completo, w.saldo
+FROM usuarios u JOIN wallets_token w ON u.id = w.usuario_id;
+
+-- Verificar que solo FINALIZADAS tienen reseña
+SELECT res.id, res.estado, r.calificacion
+FROM reservas res LEFT JOIN resenas r ON r.reserva_id = res.id
+WHERE r.id IS NOT NULL AND res.estado != 'FINALIZADA';
+-- ↑ Debe retornar 0 filas
+```

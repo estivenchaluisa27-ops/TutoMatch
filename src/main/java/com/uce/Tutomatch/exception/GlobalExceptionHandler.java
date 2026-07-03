@@ -81,6 +81,13 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", "Conflicto de integridad de datos", "path", request.getRequestURI()));
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<Map<String, String>> handleBusinessError(BusinessException ex, HttpServletRequest request) {
+        log.warn("Business error at {}: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(Map.of("error", ex.getMessage(), "path", request.getRequestURI()));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
         log.warn("Illegal argument at {}: {}", request.getRequestURI(), ex.getMessage());
