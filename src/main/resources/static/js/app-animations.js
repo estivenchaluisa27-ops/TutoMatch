@@ -261,23 +261,10 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     let tabPanes = document.querySelectorAll('.tab-pane');
     tabPanes.forEach(pane => {
         pane.addEventListener('shown.bs.tab', function () {
-            let content = this.querySelector('.table-responsive, .text-center.py-5, .tutorias-cards-mobile');
+            let content = this.querySelector('.table-responsive, .text-center.py-5');
             if (content) {
                 gsap.from(content, { autoAlpha: 0, x: 20, duration: 0.3, ease: "power2.out" });
             }
-        });
-    });
-
-    // --- 14b. Segmented tab transitions (tabs-pro) ---
-    let tabButtons = document.querySelectorAll('.tabs-pro .tab-pro');
-    tabButtons.forEach(btn => {
-        btn.addEventListener('shown.bs.tab', function () {
-            gsap.from(this.closest('.tab-content').querySelector('.tab-pane.active'), {
-                autoAlpha: 0,
-                x: 15,
-                duration: 0.25,
-                ease: "power2.out"
-            });
         });
     });
 
@@ -310,22 +297,6 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
                 scroller: panelRight
             });
         }
-    }
-
-    // --- 15b. Tutoria cards mobile entrance ---
-    let tutoriaCards = document.querySelectorAll('.tutoria-card');
-    if (tutoriaCards.length) {
-        ScrollTrigger.batch(tutoriaCards, {
-            onEnter: batch => gsap.from(batch, {
-                autoAlpha: 0,
-                y: 20,
-                duration: 0.4,
-                stagger: 0.06,
-                ease: "power2.out",
-                overwrite: true
-            }),
-            start: "top 88%"
-        });
     }
 
     // --- 16. Sidebar entrance animation (home.html desktop) ---

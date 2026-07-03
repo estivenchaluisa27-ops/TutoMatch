@@ -13,27 +13,28 @@
             </div>
 
             <div class="col-12 mb-4">
-                <div class="tabs-pro" role="tablist">
-                    <button class="tab-pro" th:classappend="${tab == 'tutor'} ? '' : 'active'" id="solicitante-tab" data-bs-toggle="tab" data-bs-target="#solicitante" type="button" role="tab">
-                        <i class="bi bi-person"></i>Como Solicitante
-                    </button>
-                    <button class="tab-pro" th:classappend="${tab == 'tutor'} ? 'active' : ''" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor" type="button" role="tab">
-                        <i class="bi bi-mortarboard"></i>Como Tutor
-                    </button>
-                </div>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" th:classappend="${tab == 'tutor'} ? '' : 'active'" id="solicitante-tab" data-bs-toggle="tab" data-bs-target="#solicitante" type="button" role="tab">
+                            <i class="bi bi-person me-1"></i>Como Solicitante
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" th:classappend="${tab == 'tutor'} ? 'active' : ''" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor" type="button" role="tab">
+                            <i class="bi bi-mortarboard me-1"></i>Como Tutor
+                        </button>
+                    </li>
+                </ul>
                 <div class="tab-content pt-3">
-                    <!-- ===================== SOLICITANTE ===================== -->
                     <div class="tab-pane fade" th:classappend="${tab == 'tutor'} ? '' : 'show active'" id="solicitante" role="tabpanel">
                         <div th:if="${#lists.isEmpty(comoSolicitante)}" class="text-center text-muted py-5">
                             <i class="bi bi-calendar-plus fs-1 d-block mb-2"></i>
                             <p class="mb-0">No has solicitado ninguna tutoría aún.</p>
                             <a href="/buscar" class="btn btn-primary mt-3">Buscar tutores</a>
                         </div>
-
-                        <!-- Desktop table -->
-                        <div th:unless="${#lists.isEmpty(comoSolicitante)}" class="table-responsive tutorias-table-desktop">
+                        <div th:unless="${#lists.isEmpty(comoSolicitante)}" class="table-responsive">
                             <table class="table table-hover align-middle" aria-label="Tutorías como solicitante">
-                                <thead>
+                                <thead class="table-light">
                                     <tr>
                                         <th>Tutor</th>
                                         <th>Materia</th>
@@ -45,137 +46,72 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="r : ${comoSolicitante}">
-                                        <td class="fw-semibold" th:text="${r.disponibilidad.perfilTutor.usuario.nombreCompleto}">Tutor</td>
+                                        <td th:text="${r.disponibilidad.perfilTutor.usuario.nombreCompleto}">Tutor</td>
                                         <td th:text="${r.materia.nombre}">Matemáticas</td>
                                         <td th:text="${dias[r.disponibilidad.diaSemana - 1]}">Lunes</td>
                                         <td th:text="${#strings.substring(r.disponibilidad.horaInicio.toString(), 0, 5)} + ' - ' + ${#strings.substring(r.disponibilidad.horaFin.toString(), 0, 5)}">08:00 - 10:00</td>
                                         <td>
                                             <th:block th:switch="${r.estado.name()}">
-                                                <span th:case="'PENDIENTE'" class="status-pill pendiente">Pendiente</span>
-                                                <span th:case="'CONFIRMADA'" class="status-pill confirmada">Confirmada</span>
-                                                <span th:case="'PENDIENTE_PAGO'" class="status-pill pendiente-pago">Pendiente de pago</span>
-                                                <span th:case="'FINALIZADA'" class="status-pill finalizada">Finalizada</span>
-                                                <span th:case="'CANCELADA'" class="status-pill cancelada">Cancelada</span>
+                                                <span th:case="'PENDIENTE'" class="badge bg-warning text-dark">Pendiente</span>
+                                                <span th:case="'CONFIRMADA'" class="badge bg-info">Confirmada</span>
+                                                <span th:case="'PENDIENTE_PAGO'" class="badge bg-primary">Pendiente de pago</span>
+                                                <span th:case="'FINALIZADA'" class="badge bg-secondary">Finalizada</span>
+                                                <span th:case="'CANCELADA'" class="badge bg-danger">Cancelada</span>
                                             </th:block>
                                         </td>
                                         <td>
-                                            <div class="action-group">
-                                                <a th:if="${r.estado.name() == 'FINALIZADA' and not yaCalificadas.contains(r.id)}"
-                                                   th:href="@{'/resenas/nueva/' + ${r.id}}"
-                                                   class="action-btn warning">
-                                                    <i class="bi bi-pencil"></i>Calificar
-                                                </a>
-                                                <span th:if="${r.estado.name() == 'FINALIZADA' and yaCalificadas.contains(r.id)}"
-                                                      class="status-pill calificado">
-                                                    <i class="bi bi-check-circle me-1"></i>Calificado
-                                                </span>
+                                            <a th:if="${r.estado.name() == 'FINALIZADA' and not yaCalificadas.contains(r.id)}"
+                                               th:href="@{'/resenas/nueva/' + ${r.id}}"
+                                               class="btn btn-warning btn-sm me-1">
+                                                 <i class="bi bi-pencil me-1"></i>Calificar
+                                            </a>
+                                            <span th:if="${r.estado.name() == 'FINALIZADA' and yaCalificadas.contains(r.id)}"
+                                                  class="badge bg-success bg-opacity-10 text-success border border-success me-1 py-2">
+                                                <i class="bi bi-check-circle me-1"></i>Calificado
+                                            </span>
 
-                                                <form th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
-                                                      th:action="@{'/reservas/' + ${r.id} + '/pagar-token'}"
-                                                      method="post"
-                                                      class="d-inline">
-                                                    <button type="submit" class="action-btn success">
-                                                        <i class="bi bi-coin"></i>Pagar <span th:text="${r.costoTokens}">1</span> Token(s)
-                                                    </button>
-                                                </form>
+                                            <form th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
+                                                  th:action="@{'/reservas/' + ${r.id} + '/pagar-token'}"
+                                                  method="post"
+                                                  class="d-inline me-1">
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    <i class="bi bi-coin me-1"></i>Pagar con <span th:text="${r.costoTokens}">1</span> Token(s)
+                                                </button>
+                                            </form>
 
-                                                <form th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
-                                                      th:action="@{'/reservas/' + ${r.id} + '/cancelar-pago'}"
-                                                      method="post"
-                                                      class="d-inline"
-                                                      onsubmit="return confirm('¿Cancelar esta tutoría? No se moverán tokens.')">
-                                                    <button type="submit" class="action-btn outline">
-                                                        <i class="bi bi-x-circle"></i>Cancelar
-                                                    </button>
-                                                </form>
+                                            <form th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
+                                                  th:action="@{'/reservas/' + ${r.id} + '/cancelar-pago'}"
+                                                  method="post"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('¿Cancelar esta tutoría? No se moverán tokens.')">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                                                </button>
+                                            </form>
 
-                                                <form th:if="${r.estado.name() == 'PENDIENTE' or r.estado.name() == 'CONFIRMADA'}"
-                                                      th:action="@{'/reservas/' + ${r.id} + '/cancelar'}"
-                                                      method="post"
-                                                      class="d-inline"
-                                                      onsubmit="return confirm('¿Cancelar esta tutoría?')">
-                                                    <button type="submit" class="action-btn outline">
-                                                        <i class="bi bi-x-circle"></i>Cancelar
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            <form th:if="${r.estado.name() == 'PENDIENTE' or r.estado.name() == 'CONFIRMADA'}"
+                                                  th:action="@{'/reservas/' + ${r.id} + '/cancelar'}"
+                                                  method="post"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('¿Cancelar esta tutoría?')">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Mobile cards -->
-                        <div th:unless="${#lists.isEmpty(comoSolicitante)}" class="tutorias-cards-mobile">
-                            <div th:each="r : ${comoSolicitante}" class="tutoria-card">
-                                <div class="card-row">
-                                    <div>
-                                        <div class="card-label">Tutor</div>
-                                        <div class="card-value" th:text="${r.disponibilidad.perfilTutor.usuario.nombreCompleto}">Tutor</div>
-                                    </div>
-                                    <th:block th:switch="${r.estado.name()}">
-                                        <span th:case="'PENDIENTE'" class="status-pill pendiente">Pendiente</span>
-                                        <span th:case="'CONFIRMADA'" class="status-pill confirmada">Confirmada</span>
-                                        <span th:case="'PENDIENTE_PAGO'" class="status-pill pendiente-pago">Pendiente de pago</span>
-                                        <span th:case="'FINALIZADA'" class="status-pill finalizada">Finalizada</span>
-                                        <span th:case="'CANCELADA'" class="status-pill cancelada">Cancelada</span>
-                                    </th:block>
-                                </div>
-                                <div class="card-row">
-                                    <div>
-                                        <div class="card-label">Materia</div>
-                                        <div class="card-value" th:text="${r.materia.nombre}">Matemáticas</div>
-                                    </div>
-                                    <div class="text-end">
-                                        <div class="card-label">Horario</div>
-                                        <div class="card-value" th:text="${dias[r.disponibilidad.diaSemana - 1]} + ' ' + ${#strings.substring(r.disponibilidad.horaInicio.toString(), 0, 5)} + ' - ' + ${#strings.substring(r.disponibilidad.horaFin.toString(), 0, 5)}">Lunes 08:00 - 10:00</div>
-                                    </div>
-                                </div>
-                                <div class="card-actions">
-                                    <a th:if="${r.estado.name() == 'FINALIZADA' and not yaCalificadas.contains(r.id)}"
-                                       th:href="@{'/resenas/nueva/' + ${r.id}}"
-                                       class="action-btn warning">
-                                        <i class="bi bi-pencil"></i>Calificar
-                                    </a>
-                                    <span th:if="${r.estado.name() == 'FINALIZADA' and yaCalificadas.contains(r.id)}"
-                                          class="status-pill calificado">
-                                        <i class="bi bi-check-circle"></i>Calificado
-                                    </span>
-                                    <form th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
-                                          th:action="@{'/reservas/' + ${r.id} + '/pagar-token'}"
-                                          method="post" class="d-inline">
-                                        <button type="submit" class="action-btn success">
-                                            <i class="bi bi-coin"></i>Pagar <span th:text="${r.costoTokens}">1</span> Token(s)
-                                        </button>
-                                    </form>
-                                    <form th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
-                                          th:action="@{'/reservas/' + ${r.id} + '/cancelar-pago'}"
-                                          method="post" class="d-inline"
-                                          onsubmit="return confirm('¿Cancelar esta tutoría? No se moverán tokens.')">
-                                        <button type="submit" class="action-btn outline"><i class="bi bi-x-circle"></i>Cancelar</button>
-                                    </form>
-                                    <form th:if="${r.estado.name() == 'PENDIENTE' or r.estado.name() == 'CONFIRMADA'}"
-                                          th:action="@{'/reservas/' + ${r.id} + '/cancelar'}"
-                                          method="post" class="d-inline"
-                                          onsubmit="return confirm('¿Cancelar esta tutoría?')">
-                                        <button type="submit" class="action-btn outline"><i class="bi bi-x-circle"></i>Cancelar</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-
-                    <!-- ===================== TUTOR ===================== -->
                     <div class="tab-pane fade" th:classappend="${tab == 'tutor'} ? 'show active' : ''" id="tutor" role="tabpanel">
                         <div th:if="${#lists.isEmpty(comoTutor)}" class="text-center text-muted py-5">
                             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                             <p class="mb-0">No tienes tutorías solicitadas aún.</p>
                         </div>
-
-                        <!-- Desktop table -->
-                        <div th:unless="${#lists.isEmpty(comoTutor)}" class="table-responsive tutorias-table-desktop">
+                        <div th:unless="${#lists.isEmpty(comoTutor)}" class="table-responsive">
                             <table class="table table-hover align-middle" aria-label="Tutorías como tutor">
-                                <thead>
+                                <thead class="table-light">
                                     <tr>
                                         <th>Solicitante</th>
                                         <th>Materia</th>
@@ -187,106 +123,56 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="r : ${comoTutor}">
-                                        <td class="fw-semibold" th:text="${r.solicitante.nombreCompleto}">Solicitante</td>
+                                        <td th:text="${r.solicitante.nombreCompleto}">Solicitante</td>
                                         <td th:text="${r.materia.nombre}">Matemáticas</td>
                                         <td th:text="${dias[r.disponibilidad.diaSemana - 1]}">Lunes</td>
                                         <td th:text="${#strings.substring(r.disponibilidad.horaInicio.toString(), 0, 5)} + ' - ' + ${#strings.substring(r.disponibilidad.horaFin.toString(), 0, 5)}">08:00 - 10:00</td>
                                         <td>
                                             <th:block th:switch="${r.estado.name()}">
-                                                <span th:case="'PENDIENTE'" class="status-pill pendiente">Pendiente</span>
-                                                <span th:case="'CONFIRMADA'" class="status-pill confirmada">Confirmada</span>
-                                                <span th:case="'PENDIENTE_PAGO'" class="status-pill pendiente-pago">Pendiente de pago</span>
-                                                <span th:case="'FINALIZADA'" class="status-pill finalizada">Finalizada</span>
-                                                <span th:case="'CANCELADA'" class="status-pill cancelada">Cancelada</span>
+                                                <span th:case="'PENDIENTE'" class="badge bg-warning text-dark">Pendiente</span>
+                                                <span th:case="'CONFIRMADA'" class="badge bg-info">Confirmada</span>
+                                                <span th:case="'PENDIENTE_PAGO'" class="badge bg-primary">Pendiente de pago</span>
+                                                <span th:case="'FINALIZADA'" class="badge bg-secondary">Finalizada</span>
+                                                <span th:case="'CANCELADA'" class="badge bg-danger">Cancelada</span>
                                             </th:block>
                                         </td>
                                         <td>
-                                            <div class="action-group">
-                                                <form th:if="${r.estado.name() == 'PENDIENTE'}"
-                                                      th:action="@{'/reservas/' + ${r.id} + '/confirmar'}"
-                                                      method="post" class="d-inline">
-                                                    <button type="submit" class="action-btn success">
-                                                        <i class="bi bi-check-circle"></i>Aceptar
-                                                    </button>
-                                                </form>
+                                            <form th:if="${r.estado.name() == 'PENDIENTE'}"
+                                                  th:action="@{'/reservas/' + ${r.id} + '/confirmar'}"
+                                                  method="post"
+                                                  class="d-inline me-1">
+                                                <button type="submit" class="btn btn-outline-success btn-sm">
+                                                    <i class="bi bi-check-circle me-1"></i>Aceptar
+                                                </button>
+                                            </form>
 
-                                                <form th:if="${r.estado.name() == 'CONFIRMADA'}"
-                                                      th:action="@{'/reservas/' + ${r.id} + '/marcar-impartida'}"
-                                                      method="post" class="d-inline">
-                                                    <button type="submit" class="action-btn primary">
-                                                        <i class="bi bi-check2-circle"></i>Marcar sesión impartida
-                                                    </button>
-                                                </form>
+                                            <form th:if="${r.estado.name() == 'CONFIRMADA'}"
+                                                  th:action="@{'/reservas/' + ${r.id} + '/marcar-impartida'}"
+                                                  method="post"
+                                                  class="d-inline me-1">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="bi bi-check2-circle me-1"></i>Marcar sesión impartida
+                                                </button>
+                                            </form>
 
-                                                <span th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
-                                                      class="status-pill espera-pago">
-                                                    <i class="bi bi-hourglass me-1"></i>Esperando pago del alumno
-                                                </span>
+                                            <span th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
+                                                  class="badge bg-info bg-opacity-10 text-info border border-info me-1 py-2">
+                                                <i class="bi bi-hourglass me-1"></i>Esperando pago del alumno
+                                            </span>
 
-                                                <form th:if="${r.estado.name() == 'PENDIENTE'}"
-                                                      th:action="@{'/reservas/' + ${r.id} + '/cancelar'}"
-                                                      method="post" class="d-inline"
-                                                      onsubmit="return confirm('¿Cancelar esta tutoría?')">
-                                                    <button type="submit" class="action-btn outline">
-                                                        <i class="bi bi-x-circle"></i>Cancelar
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            <form th:if="${r.estado.name() == 'PENDIENTE'}"
+                                                  th:action="@{'/reservas/' + ${r.id} + '/cancelar'}"
+                                                  method="post"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('¿Cancelar esta tutoría?')">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-
-                        <!-- Mobile cards -->
-                        <div th:unless="${#lists.isEmpty(comoTutor)}" class="tutorias-cards-mobile">
-                            <div th:each="r : ${comoTutor}" class="tutoria-card">
-                                <div class="card-row">
-                                    <div>
-                                        <div class="card-label">Solicitante</div>
-                                        <div class="card-value" th:text="${r.solicitante.nombreCompleto}">Solicitante</div>
-                                    </div>
-                                    <th:block th:switch="${r.estado.name()}">
-                                        <span th:case="'PENDIENTE'" class="status-pill pendiente">Pendiente</span>
-                                        <span th:case="'CONFIRMADA'" class="status-pill confirmada">Confirmada</span>
-                                        <span th:case="'PENDIENTE_PAGO'" class="status-pill pendiente-pago">Pendiente de pago</span>
-                                        <span th:case="'FINALIZADA'" class="status-pill finalizada">Finalizada</span>
-                                        <span th:case="'CANCELADA'" class="status-pill cancelada">Cancelada</span>
-                                    </th:block>
-                                </div>
-                                <div class="card-row">
-                                    <div>
-                                        <div class="card-label">Materia</div>
-                                        <div class="card-value" th:text="${r.materia.nombre}">Matemáticas</div>
-                                    </div>
-                                    <div class="text-end">
-                                        <div class="card-label">Horario</div>
-                                        <div class="card-value" th:text="${dias[r.disponibilidad.diaSemana - 1]} + ' ' + ${#strings.substring(r.disponibilidad.horaInicio.toString(), 0, 5)} + ' - ' + ${#strings.substring(r.disponibilidad.horaFin.toString(), 0, 5)}">Lunes 08:00 - 10:00</div>
-                                    </div>
-                                </div>
-                                <div class="card-actions">
-                                    <form th:if="${r.estado.name() == 'PENDIENTE'}"
-                                          th:action="@{'/reservas/' + ${r.id} + '/confirmar'}"
-                                          method="post" class="d-inline">
-                                        <button type="submit" class="action-btn success"><i class="bi bi-check-circle"></i>Aceptar</button>
-                                    </form>
-                                    <form th:if="${r.estado.name() == 'CONFIRMADA'}"
-                                          th:action="@{'/reservas/' + ${r.id} + '/marcar-impartida'}"
-                                          method="post" class="d-inline">
-                                        <button type="submit" class="action-btn primary"><i class="bi bi-check2-circle"></i>Marcar sesión</button>
-                                    </form>
-                                    <span th:if="${r.estado.name() == 'PENDIENTE_PAGO'}"
-                                          class="status-pill espera-pago">
-                                        <i class="bi bi-hourglass me-1"></i>Esperando pago
-                                    </span>
-                                    <form th:if="${r.estado.name() == 'PENDIENTE'}"
-                                          th:action="@{'/reservas/' + ${r.id} + '/cancelar'}"
-                                          method="post" class="d-inline"
-                                          onsubmit="return confirm('¿Cancelar esta tutoría?')">
-                                        <button type="submit" class="action-btn outline"><i class="bi bi-x-circle"></i>Cancelar</button>
-                                    </form>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
