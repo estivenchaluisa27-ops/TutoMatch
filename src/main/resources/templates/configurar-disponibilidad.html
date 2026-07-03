@@ -14,17 +14,17 @@
                     <h1 class="fw-bold mb-1">
                         <i class="bi bi-calendar-week me-2"></i>Disponibilidad Semanal
                     </h1>
-                    <p class="text-muted mb-0">Selecciona los bloques de 1 hora en los que estar&aacute;s disponible.</p>
+                    <p class="text-muted mb-0">Selecciona los bloques y las materias que impartir&aacute;s.</p>
                 </div>
             </div>
 
-            <!-- Week navigation -->
+            <!-- Week nav -->
             <div class="sg-nav">
                 <a th:href="@{/tutor/disponibilidad/semanal(semana=${semanaAnterior})}" class="sg-nav-btn">
                     <i class="bi bi-chevron-left"></i> Semana anterior
                 </a>
                 <div class="sg-week-label">
-                    <span th:text="${semanaRango}">07 – 13 jul, 2026</span>
+                    <span th:text="${semanaRango}">07 \u2013 13 jul, 2026</span>
                     <small th:if="${esSemanaActual}">Semana actual</small>
                 </div>
                 <a th:href="@{/tutor/disponibilidad/semanal(semana=${semanaSiguiente})}" class="sg-nav-btn">
@@ -64,6 +64,8 @@
                                 class="sg-cell"
                                 th:data-dia="${d.diaSemana}"
                                 th:data-hora="${h}"
+                                th:data-cellkey="${d.diaSemana + '-' + h}"
+                                th:data-materias="${bloquesMaterias?.get(d.diaSemana + '-' + h) ? #strings.listJoin(bloquesMaterias?.get(d.diaSemana + '-' + h), ',') : ''}"
                                 th:classappend="${bloquesPorDia?.get(d.diaSemana)?.contains(h) ? 'sg-active' : ''}">
                                 <span class="sg-cell-icon">
                                     <i th:if="${bloquesPorDia?.get(d.diaSemana)?.contains(h)}" class="bi bi-check-lg"></i>
@@ -88,30 +90,98 @@
             </div>
         </div>
 
+        <span id="sgSemanaInicio" th:attr="data-semana-inicio=${semanaInicio}" style="display:none"></span>
+
+        <!-- Materias Modal -->
+        <div class="modal fade" id="materiasModal" tabindex="-1">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Materias &mdash; <span id="modalCellLabel"></span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div th:if="${#lists.isEmpty(tutorMaterias)}" class="text-muted small text-center py-2">
+                            No tienes materias registradas.
+                            <a th:href="@{/tutor/perfil}" class="d-block mt-1">Agregar materias</a>
+                        </div>
+                        <div th:unless="${#lists.isEmpty(tutorMaterias)}" id="materiasList">
+                            <div th:each="tm : ${tutorMaterias}" class="form-check sg-mat-item">
+                                <input type="checkbox" class="form-check-input sg-mat-check"
+                                       th:id="'mat-' + ${tm.id}" th:value="${tm.id}">
+                                <label class="form-check-label sg-mat-label"
+                                       th:for="'mat-' + ${tm.id}">
+                                    <span class="sg-mat-name" th:text="${tm.materia.nombre}">Matem\u00e1ticas</span>
+                                    <span class="sg-mat-cat" th:text="${tm.materia.categoria}">Ciencias</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" th:unless="${#lists.isEmpty(tutorMaterias)}">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="btnConfirmMaterias">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script>
             (function() {
                 var table = document.getElementById('sgTable');
                 var btnGuardar = document.getElementById('btnGuardar');
                 var btnLimpiar = document.getElementById('btnLimpiar');
                 var savedBadge = document.getElementById('sgSavedBadge');
+                var materiasModal = document.getElementById('materiasModal');
+                var modalLabel = document.getElementById('modalCellLabel');
+                var btnConfirm = document.getElementById('btnConfirmMaterias');
+                var materiasList = document.getElementById('materiasList');
 
                 if (!table) return;
 
+                // ── State ──
+                var celdaMaterias = {};  // key "1-8" -> [tutorMateriaId, ...]
+                var pendingKey = null;
+                var pendingWasActive = false;
+                var pendingPrevIds = [];
+
+                // Load initial materias from data attributes
+                table.querySelectorAll('.sg-cell[data-cellkey]').forEach(function(cell) {
+                    var key = cell.getAttribute('data-cellkey');
+                    var raw = cell.getAttribute('data-materias') || '';
+                    if (raw) {
+                        celdaMaterias[key] = raw.split(',').map(Number);
+                    }
+                });
+
+                // Dias array for labels
+                var diasNombres = ['Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b', 'Dom'];
+
                 // ── Helpers ──
+                function getCellKey(cell) {
+                    return cell.getAttribute('data-cellkey');
+                }
+
+                function cellKeyToLabel(key) {
+                    var parts = key.split('-');
+                    var dia = parseInt(parts[0]);
+                    var hora = parseInt(parts[1]);
+                    return (diasNombres[dia - 1] || '?') + ' a las ' + hora + ':00';
+                }
+
                 function getActiveCells() {
                     var cells = [];
                     table.querySelectorAll('.sg-cell.sg-active').forEach(function(cell) {
                         if (cell.classList.contains('sg-reserved')) return;
+                        var key = getCellKey(cell);
                         cells.push({
                             diaSemana: parseInt(cell.getAttribute('data-dia')),
-                            hora: parseInt(cell.getAttribute('data-hora'))
+                            hora: parseInt(cell.getAttribute('data-hora')),
+                            materiaIds: celdaMaterias[key] || []
                         });
                     });
                     return cells;
-                }
-
-                function hasChanges() {
-                    return getActiveCells().length > 0;
                 }
 
                 function updateGuardarBtn() {
@@ -121,19 +191,86 @@
                         (cells.length > 0 ? ' (' + cells.length + ')' : '');
                 }
 
-                // ── Toggle cell ──
+                function setCellActive(cell, active) {
+                    if (active) {
+                        cell.classList.add('sg-active');
+                        cell.querySelector('.sg-cell-icon').innerHTML = '<i class="bi bi-check-lg"></i>';
+                    } else {
+                        cell.classList.remove('sg-active');
+                        cell.querySelector('.sg-cell-icon').innerHTML = '';
+                    }
+                }
+
+                // ── Modal handlers ──
+                function openMateriasModal(cell) {
+                    var key = getCellKey(cell);
+                    pendingKey = key;
+                    pendingWasActive = cell.classList.contains('sg-active');
+                    pendingPrevIds = celdaMaterias[key] ? celdaMaterias[key].slice() : [];
+
+                    modalLabel.textContent = cellKeyToLabel(key);
+
+                    // Check/uncheck based on current selection
+                    var currentIds = celdaMaterias[key] || [];
+                    materiasList.querySelectorAll('.sg-mat-check').forEach(function(cb) {
+                        cb.checked = currentIds.indexOf(parseInt(cb.value)) !== -1;
+                    });
+
+                    var modal = new bootstrap.Modal(materiasModal);
+                    modal.show();
+                }
+
+                btnConfirm.addEventListener('click', function() {
+                    if (!pendingKey) return;
+
+                    // Read checked checkboxes
+                    var selectedIds = [];
+                    materiasList.querySelectorAll('.sg-mat-check:checked').forEach(function(cb) {
+                        selectedIds.push(parseInt(cb.value));
+                    });
+
+                    var cell = table.querySelector('.sg-cell[data-cellkey="' + pendingKey + '"]');
+                    if (cell) {
+                        if (selectedIds.length > 0) {
+                            celdaMaterias[pendingKey] = selectedIds;
+                            setCellActive(cell, true);
+                        } else {
+                            delete celdaMaterias[pendingKey];
+                            setCellActive(cell, false);
+                        }
+                    }
+
+                    updateGuardarBtn();
+                    savedBadge.style.display = 'none';
+
+                    var modal = bootstrap.Modal.getInstance(materiasModal);
+                    if (modal) modal.hide();
+                    pendingKey = null;
+                });
+
+                materiasModal.addEventListener('hidden.bs.modal', function() {
+                    if (pendingKey) {
+                        // User dismissed without confirming — revert
+                        var cell = table.querySelector('.sg-cell[data-cellkey="' + pendingKey + '"]');
+                        if (cell) {
+                            if (pendingWasActive) {
+                                celdaMaterias[pendingKey] = pendingPrevIds;
+                                setCellActive(cell, pendingPrevIds.length > 0);
+                            } else {
+                                delete celdaMaterias[pendingKey];
+                                setCellActive(cell, false);
+                            }
+                        }
+                        updateGuardarBtn();
+                        pendingKey = null;
+                    }
+                });
+
+                // ── Cell click ──
                 table.addEventListener('click', function(e) {
                     var cell = e.target.closest('.sg-cell');
                     if (!cell || cell.classList.contains('sg-reserved')) return;
-                    cell.classList.toggle('sg-active');
-                    var icon = cell.querySelector('.sg-cell-icon');
-                    if (cell.classList.contains('sg-active')) {
-                        icon.innerHTML = '<i class="bi bi-check-lg"></i>';
-                    } else {
-                        icon.innerHTML = '';
-                    }
-                    updateGuardarBtn();
-                    savedBadge.style.display = 'none';
+                    openMateriasModal(cell);
                 });
 
                 // ── Guardar ──
@@ -148,7 +285,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            semanaInicio: getSemanaInicio(),
+                            semanaInicio: document.getElementById('sgSemanaInicio').getAttribute('data-semana-inicio'),
                             bloques: cells
                         })
                     })
@@ -173,12 +310,6 @@
                     });
                 });
 
-                var semanaInicioActual = '[[${semanaInicio}]]';
-
-                function getSemanaInicio() {
-                    return semanaInicioActual;
-                }
-
                 // ── Limpiar ──
                 btnLimpiar.addEventListener('click', function() {
                     if (!confirm('\u00bfLimpiar toda la disponibilidad de esta semana?')) return;
@@ -192,7 +323,7 @@
                     var input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = 'semana';
-                    input.value = getSemanaInicio();
+                    input.value = document.getElementById('sgSemanaInicio').getAttribute('data-semana-inicio');
                     form.appendChild(input);
                     document.body.appendChild(form);
                     form.submit();
@@ -202,8 +333,6 @@
                 updateGuardarBtn();
             })();
         </script>
-
-        <meta name="semana-inicio" th:content="${semanaInicio}">
     </th:block>
 </body>
 </html>

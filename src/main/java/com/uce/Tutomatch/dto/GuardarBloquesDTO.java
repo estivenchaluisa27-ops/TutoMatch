@@ -18,6 +18,7 @@ public class GuardarBloquesDTO {
     public static class CeldaDTO {
         private Integer diaSemana;
         private Integer hora;
+        private List<Long> materiaIds;
 
         public CeldaDTO() {}
 
@@ -26,5 +27,8 @@ public class GuardarBloquesDTO {
 
         public Integer getHora() { return hora; }
         public void setHora(Integer hora) { this.hora = hora; }
+
+        public List<Long> getMateriaIds() { return materiaIds; }
+        public void setMateriaIds(List<Long> materiaIds) { this.materiaIds = materiaIds; }
     }
 }

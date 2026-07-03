@@ -1,6 +1,7 @@
 package com.uce.Tutomatch.controller;
 
 import com.uce.Tutomatch.dto.GuardarBloquesDTO;
+import com.uce.Tutomatch.model.TutorMateria;
 import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.SemanalDisponibilidadService;
 import org.springframework.security.core.Authentication;
@@ -24,11 +25,8 @@ public class TutorSemanalController {
 
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM");
     private static final DateTimeFormatter FORMATO_FECHA_LARGO = DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy");
-    private static final List<String> NOMBRES_DIAS = List.of(
-            "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"
-    );
     private static final List<String> NOMBRES_DIAS_CORTOS = List.of(
-            "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"
+            "Lun", "Mar", "Mi\u00e9", "Jue", "Vie", "S\u00e1b", "Dom"
     );
     private static final List<Integer> HORAS = IntStream.rangeClosed(7, 19)
             .boxed().collect(Collectors.toList());
@@ -69,6 +67,8 @@ public class TutorSemanalController {
 
             LocalDate semanaFin = semanaInicio.plusDays(6);
             Map<Integer, Set<Integer>> bloquesPorDia = semanalService.obtenerSemana(usuarioId, semanaInicio);
+            Map<String, List<Long>> bloquesMaterias = semanalService.obtenerMateriasPorBloque(usuarioId, semanaInicio);
+            List<TutorMateria> tutorMaterias = semanalService.obtenerTutorMaterias(usuarioId);
 
             List<Map<String, Object>> diasInfo = new ArrayList<>();
             for (int i = 0; i < 7; i++) {
@@ -76,9 +76,7 @@ public class TutorSemanalController {
                 Map<String, Object> info = new LinkedHashMap<>();
                 info.put("diaSemana", i + 1);
                 info.put("nombre", NOMBRES_DIAS_CORTOS.get(i));
-                info.put("nombreCompleto", NOMBRES_DIAS.get(i));
                 info.put("fecha", fecha.format(FORMATO_FECHA));
-                info.put("fechaIso", fecha.toString());
                 info.put("esHoy", fecha.equals(hoy));
                 diasInfo.add(info);
             }
@@ -87,10 +85,12 @@ public class TutorSemanalController {
             String finFormato = semanaFin.format(FORMATO_FECHA_LARGO);
             model.addAttribute("semanaInicio", semanaInicio.toString());
             model.addAttribute("semanaFin", semanaFin.toString());
-            model.addAttribute("semanaRango", inicioFormato + " – " + finFormato);
+            model.addAttribute("semanaRango", inicioFormato + " \u2013 " + finFormato);
             model.addAttribute("diasInfo", diasInfo);
             model.addAttribute("horas", HORAS);
             model.addAttribute("bloquesPorDia", bloquesPorDia);
+            model.addAttribute("bloquesMaterias", bloquesMaterias);
+            model.addAttribute("tutorMaterias", tutorMaterias);
             model.addAttribute("esSemanaActual", semanaInicio.equals(hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))));
             model.addAttribute("semanaAnterior", semanaInicio.minusDays(7).toString());
             model.addAttribute("semanaSiguiente", semanaInicio.plusDays(7).toString());
@@ -109,11 +109,11 @@ public class TutorSemanalController {
             Long usuarioId = obtenerUsuarioId(auth);
             LocalDate semanaInicio = LocalDate.parse(dto.getSemanaInicio());
 
-            Map<Integer, Set<Integer>> celdas = dto.getBloques().stream()
-                    .collect(Collectors.groupingBy(
-                            GuardarBloquesDTO.CeldaDTO::getDiaSemana,
-                            Collectors.mapping(GuardarBloquesDTO.CeldaDTO::getHora, Collectors.toSet())
-                    ));
+            Map<Integer, Map<Integer, List<Long>>> celdas = new HashMap<>();
+            for (GuardarBloquesDTO.CeldaDTO celda : dto.getBloques()) {
+                celdas.computeIfAbsent(celda.getDiaSemana(), k -> new HashMap<>())
+                      .put(celda.getHora(), celda.getMateriaIds() != null ? celda.getMateriaIds() : List.of());
+            }
 
             semanalService.guardarSemana(usuarioId, semanaInicio, celdas);
             response.put("success", true);

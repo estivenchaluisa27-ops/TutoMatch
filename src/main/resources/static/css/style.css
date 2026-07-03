@@ -2402,6 +2402,41 @@ footer,
     }
 }
 
+/* ---------- Modal Materias ---------- */
+.sg-mat-item {
+    padding: 8px 12px;
+    margin: 0;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.sg-mat-item:hover {
+    background: var(--bg-light-utility, #f0ede7);
+}
+[data-theme="dark"] .sg-mat-item:hover {
+    background: rgba(255,255,255,0.04);
+}
+.sg-mat-item + .sg-mat-item {
+    margin-top: 2px;
+}
+.sg-mat-check {
+    margin-top: 3px !important;
+}
+.sg-mat-label {
+    display: flex;
+    flex-direction: column;
+    padding-left: 4px;
+    cursor: pointer;
+}
+.sg-mat-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+}
+.sg-mat-cat {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
 /* ---------- Reduced Motion ---------- */
 @media (prefers-reduced-motion: reduce) {
     *,

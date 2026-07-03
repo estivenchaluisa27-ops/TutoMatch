@@ -2,6 +2,8 @@ package com.uce.Tutomatch.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bloques_semanales")
@@ -32,6 +34,12 @@ public class BloqueSemanal {
     @Column(nullable = false)
     private EstadoBloque estado;
 
+    @ManyToMany
+    @JoinTable(name = "bloque_materias",
+               joinColumns = @JoinColumn(name = "bloque_semanal_id"),
+               inverseJoinColumns = @JoinColumn(name = "tutor_materia_id"))
+    private List<TutorMateria> materias = new ArrayList<>();
+
     public BloqueSemanal() {
         this.estado = EstadoBloque.DISPONIBLE;
     }
@@ -61,4 +69,7 @@ public class BloqueSemanal {
 
     public EstadoBloque getEstado() { return estado; }
     public void setEstado(EstadoBloque estado) { this.estado = estado; }
+
+    public List<TutorMateria> getMaterias() { return materias; }
+    public void setMaterias(List<TutorMateria> materias) { this.materias = materias; }
 }

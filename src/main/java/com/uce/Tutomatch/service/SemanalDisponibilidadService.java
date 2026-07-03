@@ -2,15 +2,15 @@ package com.uce.Tutomatch.service;
 
 import com.uce.Tutomatch.model.BloqueSemanal;
 import com.uce.Tutomatch.model.PerfilTutor;
+import com.uce.Tutomatch.model.TutorMateria;
 import com.uce.Tutomatch.repository.BloqueSemanalRepository;
 import com.uce.Tutomatch.repository.PerfilTutorRepository;
+import com.uce.Tutomatch.repository.TutorMateriaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,11 +18,14 @@ public class SemanalDisponibilidadService {
 
     private final BloqueSemanalRepository bloqueSemanalRepository;
     private final PerfilTutorRepository perfilTutorRepository;
+    private final TutorMateriaRepository tutorMateriaRepository;
 
     public SemanalDisponibilidadService(BloqueSemanalRepository bloqueSemanalRepository,
-                                        PerfilTutorRepository perfilTutorRepository) {
+                                        PerfilTutorRepository perfilTutorRepository,
+                                        TutorMateriaRepository tutorMateriaRepository) {
         this.bloqueSemanalRepository = bloqueSemanalRepository;
         this.perfilTutorRepository = perfilTutorRepository;
+        this.tutorMateriaRepository = tutorMateriaRepository;
     }
 
     public PerfilTutor obtenerPerfilPorUsuarioId(Long usuarioId) {
@@ -42,19 +45,44 @@ public class SemanalDisponibilidadService {
                 ));
     }
 
+    public Map<String, List<Long>> obtenerMateriasPorBloque(Long usuarioId, LocalDate semanaInicio) {
+        PerfilTutor perfil = obtenerPerfilPorUsuarioId(usuarioId);
+        List<BloqueSemanal> bloques = bloqueSemanalRepository
+                .findByPerfilTutorIdAndSemanaInicioOrderByDiaSemanaAscHoraAsc(perfil.getId(), semanaInicio);
+        Map<String, List<Long>> result = new HashMap<>();
+        for (BloqueSemanal b : bloques) {
+            String key = b.getDiaSemana() + "-" + b.getHora();
+            result.put(key, b.getMaterias().stream()
+                    .map(TutorMateria::getId)
+                    .collect(Collectors.toList()));
+        }
+        return result;
+    }
+
+    public List<TutorMateria> obtenerTutorMaterias(Long usuarioId) {
+        PerfilTutor perfil = obtenerPerfilPorUsuarioId(usuarioId);
+        return perfil.getMaterias();
+    }
+
     @Transactional
     public void guardarSemana(Long usuarioId, LocalDate semanaInicio,
-                               Map<Integer, Set<Integer>> celdasActivas) {
+                               Map<Integer, Map<Integer, List<Long>>> celdasActivas) {
         PerfilTutor perfil = obtenerPerfilPorUsuarioId(usuarioId);
         Long perfilId = perfil.getId();
 
         bloqueSemanalRepository.deleteByPerfilTutorIdAndSemanaInicio(perfilId, semanaInicio);
 
-        for (Map.Entry<Integer, Set<Integer>> entry : celdasActivas.entrySet()) {
-            Integer diaSemana = entry.getKey();
-            for (Integer hora : entry.getValue()) {
+        for (Map.Entry<Integer, Map<Integer, List<Long>>> entryDia : celdasActivas.entrySet()) {
+            Integer diaSemana = entryDia.getKey();
+            for (Map.Entry<Integer, List<Long>> entryHora : entryDia.getValue().entrySet()) {
+                Integer hora = entryHora.getKey();
+                List<Long> materiaIds = entryHora.getValue();
                 if (hora < 7 || hora > 19) continue;
                 BloqueSemanal bloque = new BloqueSemanal(perfil, semanaInicio, diaSemana, hora);
+                if (materiaIds != null && !materiaIds.isEmpty()) {
+                    List<TutorMateria> materias = tutorMateriaRepository.findAllById(materiaIds);
+                    bloque.setMaterias(materias);
+                }
                 bloqueSemanalRepository.save(bloque);
             }
         }
