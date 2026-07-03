@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es"
+      layout:decorate="~{layout}"
+      th:with="pageTitle='Mi Wallet'">
+<head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h4 class="fw-bold"><i class="bi bi-wallet2 me-2"></i>Mi Wallet</h4>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-coin fs-1 text-warning mb-3 d-block"></i>
+                        <h5 class="text-muted mb-1">Saldo actual</h5>
+                        <span class="display-4 fw-bold" th:text="${saldo}">0</span>
+                        <span class="fs-4 text-muted ms-1">tokens</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent fw-bold">
+                        <i class="bi bi-clock-history me-2"></i>Historial de transacciones
+                    </div>
+                    <div class="card-body p-0">
+                        <div th:if="${transacciones.isEmpty()}" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            <p class="mb-0">No hay transacciones aún.</p>
+                        </div>
+                        <div th:unless="${transacciones.isEmpty()}" class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" aria-label="Historial de transacciones">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Descripción</th>
+                                        <th class="text-end">Cantidad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="tx : ${transacciones}">
+                                        <td class="text-nowrap small" th:text="${#temporals.format(tx.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
+                                        <td>
+                                            <span th:text="${tx.tipo.name()}" class="badge bg-secondary">TIPO</span>
+                                        </td>
+                                        <td th:text="${tx.descripcion}">Descripción</td>
+                                        <td class="text-end fw-bold"
+                                            th:style="${tx.cantidad > 0} ? 'color: var(--bs-success)' : 'color: var(--bs-danger)'"
+                                            th:text="${tx.cantidad > 0} ? '+' + ${tx.cantidad} : ${tx.cantidad}">
+                                            +5
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

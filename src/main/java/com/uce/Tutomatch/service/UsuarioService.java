@@ -10,6 +10,7 @@ import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.exception.EmailAlreadyExistsException;
 import com.uce.Tutomatch.exception.InvalidCredentialsException;
 import com.uce.Tutomatch.security.JwtTokenProvider;
+import com.uce.Tutomatch.service.WalletOperacionService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,17 +25,20 @@ public class UsuarioService {
     private final PerfilTutorRepository perfilTutorRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final WalletOperacionService walletOperaciones;
     private final boolean cookieSecure;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           PerfilTutorRepository perfilTutorRepository,
                           PasswordEncoder passwordEncoder,
                           JwtTokenProvider jwtTokenProvider,
+                          WalletOperacionService walletOperaciones,
                           @Value("${cookie.secure:true}") boolean cookieSecure) {
         this.usuarioRepository = usuarioRepository;
         this.perfilTutorRepository = perfilTutorRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.walletOperaciones = walletOperaciones;
         this.cookieSecure = cookieSecure;
     }
 
@@ -67,6 +71,7 @@ public class UsuarioService {
         }
 
         Usuario saved = usuarioRepository.save(usuario);
+        walletOperaciones.inicializarWallet(saved.getId());
         setJwtCookie(response, saved);
         return UsuarioResponse.from(saved);
     }
