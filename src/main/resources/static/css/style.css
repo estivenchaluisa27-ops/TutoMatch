@@ -2015,6 +2015,315 @@ hr {
     background: #3a3a42;
 }
 
+/* =========================================================
+   Sistema de Estados Profesionales — Status Pills
+   ========================================================= */
+
+
+
+/* ---------- Status Pill Base ---------- */
+.status-pill {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+/* --- Variant: Pendiente --- */
+.status-pill.pendiente {
+    color: #92400e;
+}
+[data-theme="dark"] .status-pill.pendiente {
+    color: #fbbf24;
+}
+
+/* --- Variant: Confirmada --- */
+.status-pill.confirmada {
+    color: #0369a1;
+}
+[data-theme="dark"] .status-pill.confirmada {
+    color: #38bdf8;
+}
+
+/* --- Variant: Pendiente de pago --- */
+.status-pill.pendiente-pago {
+    color: #6d28d9;
+}
+[data-theme="dark"] .status-pill.pendiente-pago {
+    color: #a78bfa;
+}
+
+/* --- Variant: Finalizada --- */
+.status-pill.finalizada {
+    color: #047857;
+}
+[data-theme="dark"] .status-pill.finalizada {
+    color: #34d399;
+}
+
+/* --- Variant: Cancelada --- */
+.status-pill.cancelada {
+    color: #b91c1c;
+}
+[data-theme="dark"] .status-pill.cancelada {
+    color: #f87171;
+}
+
+/* --- Variant: Calificado (post-review) --- */
+.status-pill.calificado {
+    color: #047857;
+}
+[data-theme="dark"] .status-pill.calificado {
+    color: #34d399;
+}
+
+/* --- Variant: Esperando pago (tutor view, non-actionable) --- */
+.status-pill.espera-pago {
+    color: #0369a1;
+    cursor: default;
+    pointer-events: none;
+}
+[data-theme="dark"] .status-pill.espera-pago {
+    color: #38bdf8;
+}
+
+/* =========================================================
+   Action Buttons — Pills semánticos profesionales
+   ========================================================= */
+
+.action-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.4;
+    border: 1.5px solid transparent;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.action-btn i, .action-btn svg {
+    font-size: 0.85rem;
+}
+
+/* Primary (brand) — Marcar sesión impartida */
+.action-btn.primary {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
+}
+.action-btn.primary:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+[data-theme="dark"] .action-btn.primary:hover {
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* Success (green) — Pagar, Aceptar */
+.action-btn.success {
+    background: #10b981;
+    color: #fff;
+    border-color: #10b981;
+}
+.action-btn.success:hover {
+    background: #059669;
+    border-color: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+[data-theme="dark"] .action-btn.success {
+    background: #059669;
+    border-color: #059669;
+}
+[data-theme="dark"] .action-btn.success:hover {
+    background: #047857;
+    border-color: #047857;
+}
+
+/* Warning (amber) — Calificar */
+.action-btn.warning {
+    background: #f59e0b;
+    color: #fff;
+    border-color: #f59e0b;
+}
+.action-btn.warning:hover {
+    background: #d97706;
+    border-color: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+[data-theme="dark"] .action-btn.warning {
+    background: #d97706;
+    border-color: #d97706;
+    color: #000;
+}
+[data-theme="dark"] .action-btn.warning:hover {
+    background: #b45309;
+    border-color: #b45309;
+}
+
+/* Outline (neutral) — Cancelar, secundarias */
+.action-btn.outline {
+    background: transparent;
+    color: var(--text-secondary);
+    border-color: #d4d0c9;
+}
+.action-btn.outline:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.04);
+    transform: translateY(-1px);
+}
+[data-theme="dark"] .action-btn.outline {
+    color: var(--text-muted);
+    border-color: var(--border-white);
+}
+[data-theme="dark"] .action-btn.outline:hover {
+    border-color: #f87171;
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.06);
+}
+
+/* Info pill (non-actionable status badge for tutor) */
+.action-btn.info-pill {
+    background: var(--status-confirmed-bg);
+    color: #0369a1;
+    border: 1px solid rgba(14, 165, 233, 0.15);
+    cursor: default;
+    pointer-events: none;
+}
+[data-theme="dark"] .action-btn.info-pill {
+    color: #7dd3fc;
+    border-color: rgba(56, 189, 248, 0.2);
+}
+
+/* =========================================================
+   Segmented Tabs — Reemplazo profesional de nav-tabs
+   ========================================================= */
+
+.tabs-pro {
+    display: inline-flex;
+    gap: 4px;
+    background: #f0ede7;
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 0;
+    border: none;
+    list-style: none;
+}
+[data-theme="dark"] .tabs-pro {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.tab-pro {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.tab-pro:hover {
+    color: var(--text-primary);
+}
+.tab-pro.active {
+    background: var(--bg-card);
+    color: var(--brand);
+    box-shadow: var(--shadow-sm);
+}
+[data-theme="dark"] .tab-pro {
+    color: var(--text-muted);
+}
+[data-theme="dark"] .tab-pro:hover {
+    color: var(--text-primary);
+}
+[data-theme="dark"] .tab-pro.active {
+    background: var(--bg-elevated);
+    color: var(--brand-light);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* =========================================================
+   Mis Tutorías — Responsive Card Layout (<768px)
+   ========================================================= */
+
+@media (max-width: 768px) {
+    .tutorias-table-desktop {
+        display: none !important;
+    }
+    .tutorias-cards-mobile {
+        display: block !important;
+    }
+}
+.tutorias-cards-mobile {
+    display: none;
+}
+
+.tutoria-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: transform 0.25s var(--ease-smooth), box-shadow 0.25s ease;
+}
+.tutoria-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.tutoria-card .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+.tutoria-card .card-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.tutoria-card .card-value {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.tutoria-card .card-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-divider);
+}
+[data-theme="dark"] .tutoria-card {
+    border-color: var(--border-white);
+}
+
 /* ---------- Transition all themed elements smoothly ---------- */
 [data-theme] body,
 [data-theme] .card,
