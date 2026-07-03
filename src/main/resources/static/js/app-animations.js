@@ -311,6 +311,32 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         });
     }
 
+    // --- 17. Grid semanal cells entrance (configurar-disponibilidad) ---
+    let sgCells = document.querySelectorAll('.sg-cell:not(.sg-active)');
+    let sgActiveCells = document.querySelectorAll('.sg-cell.sg-active');
+    if (sgCells.length || sgActiveCells.length) {
+        if (sgActiveCells.length) {
+            gsap.from(sgActiveCells, {
+                autoAlpha: 0,
+                scale: 0.6,
+                duration: 0.3,
+                stagger: 0.008,
+                ease: "back.out(1.7)",
+                overwrite: true
+            });
+        }
+        if (sgCells.length) {
+            gsap.from(sgCells, {
+                autoAlpha: 0,
+                duration: 0.2,
+                stagger: 0.004,
+                ease: "power2.out",
+                delay: 0.15,
+                overwrite: true
+            });
+        }
+    }
+
 });
 
 // --- 15. Hero floating icons — Phase System (outside matchMedia to prevent context revert) ---

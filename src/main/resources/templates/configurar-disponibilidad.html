@@ -7,82 +7,203 @@
 <head>
 <body>
     <th:block layout:fragment="content">
-        <div class="row">
-            <div class="col-12 mb-4">
-                <h1 class="fw-bold">
-                    <i class="bi bi-calendar-week me-2"></i>Disponibilidad Horaria
-                </h1>
-                <p class="text-muted">Define los bloques horarios en los que estar&aacute;s disponible para dar tutor&iacute;as.</p>
-            </div>
-
-            <div class="col-lg-5 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold">
-                        <i class="bi bi-plus-circle me-2"></i>Agregar Bloque
-                    </div>
-                    <div class="card-body">
-                        <form th:action="@{/tutor/disponibilidad}" method="post">
-                            <div class="mb-3">
-                                <label for="diaSemana" class="form-label fw-semibold">D&iacute;a</label>
-                                <select id="diaSemana" name="diaSemana" class="form-select" required>
-                                    <option value="">Selecciona un d&iacute;a...</option>
-                                    <option th:each="d, iter : ${dias}" th:value="${iter.index + 1}" th:text="${d}">Lunes</option>
-                                </select>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-6">
-                                    <label for="horaInicio" class="form-label fw-semibold">Inicio</label>
-                                    <input type="time" id="horaInicio" name="horaInicio" class="form-control" required step="1800">
-                                </div>
-                                <div class="col-6">
-                                    <label for="horaFin" class="form-label fw-semibold">Fin</label>
-                                    <input type="time" id="horaFin" name="horaFin" class="form-control" required step="1800">
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-plus-circle me-1"></i>Agregar Bloque
-                            </button>
-                        </form>
-                    </div>
+        <div class="sg-wrapper">
+            <!-- Header -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+                <div>
+                    <h1 class="fw-bold mb-1">
+                        <i class="bi bi-calendar-week me-2"></i>Disponibilidad Semanal
+                    </h1>
+                    <p class="text-muted mb-0">Selecciona los bloques de 1 hora en los que estar&aacute;s disponible.</p>
                 </div>
             </div>
 
-            <div class="col-lg-7 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold">
-                        <i class="bi bi-list-check me-2"></i>Tus Bloques
-                    </div>
-                    <div class="card-body">
-                        <div th:if="${#maps.isEmpty(bloquesPorDia)}" class="text-center text-muted py-4">
-                            <i class="bi bi-calendar-plus fs-1 d-block mb-2"></i>
-                            <p class="mb-0">No has agregado bloques horarios. Agrega tu primer bloque para empezar a recibir solicitudes.</p>
-                        </div>
-
-                        <div th:unless="${#maps.isEmpty(bloquesPorDia)}">
-                            <div th:each="entry : ${bloquesPorDia}" class="mb-3">
-                                <h6 class="fw-bold text-primary border-bottom pb-2" th:text="${dias[entry.key - 1]}">Lunes</h6>
-                                <div th:each="bloque : ${entry.value}" class="d-flex justify-content-between align-items-center bg-light rounded p-2 mb-1">
-                                        <span>
-                                            <i class="bi bi-clock me-2 text-muted"></i>
-                                            <span th:text="${bloque.horaInicio}">08:00</span>
-                                            <span class="mx-1">&ndash;</span>
-                                            <span th:text="${bloque.horaFin}">09:00</span>
-                                            <span th:if="${bloque.estado.name() == 'RESERVADO'}" class="badge bg-warning text-dark ms-2">Reservado</span>
-                                            <span th:if="${bloque.estado.name() == 'LIBRE'}" class="badge bg-success ms-2">Libre</span>
-                                        </span>
-                                        <form th:action="@{/tutor/disponibilidad/{id}/eliminar(id=${bloque.id})}" method="post" onsubmit="return confirm('Eliminar este bloque?')">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" th:disabled="${bloque.estado.name() == 'RESERVADO'}" aria-label="Eliminar bloque">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Week navigation -->
+            <div class="sg-nav">
+                <a th:href="@{/tutor/disponibilidad/semanal(semana=${semanaAnterior})}" class="sg-nav-btn">
+                    <i class="bi bi-chevron-left"></i> Semana anterior
+                </a>
+                <div class="sg-week-label">
+                    <span th:text="${semanaRango}">07 – 13 jul, 2026</span>
+                    <small th:if="${esSemanaActual}">Semana actual</small>
                 </div>
+                <a th:href="@{/tutor/disponibilidad/semanal(semana=${semanaSiguiente})}" class="sg-nav-btn">
+                    Siguiente <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+
+            <!-- Actions -->
+            <div class="sg-actions">
+                <button class="sg-btn sg-btn-danger" id="btnLimpiar">
+                    <i class="bi bi-trash3"></i> Limpiar Todo
+                </button>
+                <button class="sg-btn sg-btn-primary" id="btnGuardar" disabled>
+                    <i class="bi bi-check2"></i> Guardar Cambios
+                </button>
+                <span id="sgSavedBadge" style="display:none"></span>
+            </div>
+
+            <!-- Grid -->
+            <div class="sg-table-wrap">
+                <table class="sg-table" id="sgTable">
+                    <thead>
+                        <tr>
+                            <th class="sg-th-hour">Hora</th>
+                            <th th:each="d : ${diasInfo}"
+                                class="sg-th-day"
+                                th:classappend="${d.esHoy} ? 'sg-th-today' : ''">
+                                <span class="sg-day-name" th:text="${d.nombre}">Lun</span>
+                                <span class="sg-day-date" th:text="${d.fecha}">07/07</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="h : ${horas}">
+                            <td class="sg-td-hour" th:text="${h} + ':00'">07:00</td>
+                            <td th:each="d : ${diasInfo}"
+                                class="sg-cell"
+                                th:data-dia="${d.diaSemana}"
+                                th:data-hora="${h}"
+                                th:classappend="${bloquesPorDia?.get(d.diaSemana)?.contains(h) ? 'sg-active' : ''}">
+                                <span class="sg-cell-icon">
+                                    <i th:if="${bloquesPorDia?.get(d.diaSemana)?.contains(h)}" class="bi bi-check-lg"></i>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Legend -->
+            <div class="sg-legend">
+                <span class="sg-legend-item">
+                    <span class="sg-legend-swatch"></span> No disponible
+                </span>
+                <span class="sg-legend-item">
+                    <span class="sg-legend-swatch available"></span> Disponible
+                </span>
+                <span class="sg-legend-item">
+                    <span class="sg-legend-swatch reserved"></span> Reservado
+                </span>
             </div>
         </div>
+
+        <script>
+            (function() {
+                var table = document.getElementById('sgTable');
+                var btnGuardar = document.getElementById('btnGuardar');
+                var btnLimpiar = document.getElementById('btnLimpiar');
+                var savedBadge = document.getElementById('sgSavedBadge');
+
+                if (!table) return;
+
+                // ── Helpers ──
+                function getActiveCells() {
+                    var cells = [];
+                    table.querySelectorAll('.sg-cell.sg-active').forEach(function(cell) {
+                        if (cell.classList.contains('sg-reserved')) return;
+                        cells.push({
+                            diaSemana: parseInt(cell.getAttribute('data-dia')),
+                            hora: parseInt(cell.getAttribute('data-hora'))
+                        });
+                    });
+                    return cells;
+                }
+
+                function hasChanges() {
+                    return getActiveCells().length > 0;
+                }
+
+                function updateGuardarBtn() {
+                    var cells = getActiveCells();
+                    btnGuardar.disabled = cells.length === 0;
+                    btnGuardar.innerHTML = '<i class="bi bi-check2"></i> Guardar Cambios' +
+                        (cells.length > 0 ? ' (' + cells.length + ')' : '');
+                }
+
+                // ── Toggle cell ──
+                table.addEventListener('click', function(e) {
+                    var cell = e.target.closest('.sg-cell');
+                    if (!cell || cell.classList.contains('sg-reserved')) return;
+                    cell.classList.toggle('sg-active');
+                    var icon = cell.querySelector('.sg-cell-icon');
+                    if (cell.classList.contains('sg-active')) {
+                        icon.innerHTML = '<i class="bi bi-check-lg"></i>';
+                    } else {
+                        icon.innerHTML = '';
+                    }
+                    updateGuardarBtn();
+                    savedBadge.style.display = 'none';
+                });
+
+                // ── Guardar ──
+                btnGuardar.addEventListener('click', function() {
+                    var cells = getActiveCells();
+                    if (cells.length === 0) return;
+
+                    btnGuardar.disabled = true;
+                    btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+
+                    fetch('/tutor/disponibilidad/semanal/guardar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            semanaInicio: getSemanaInicio(),
+                            bloques: cells
+                        })
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            savedBadge.className = 'sg-saved-badge';
+                            savedBadge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Guardado';
+                            savedBadge.style.display = '';
+                            setTimeout(function() {
+                                savedBadge.style.display = 'none';
+                            }, 3000);
+                        } else {
+                            alert('Error: ' + (data.error || 'desconocido'));
+                        }
+                    })
+                    .catch(function() {
+                        alert('Error de conexi\u00f3n al guardar');
+                    })
+                    .finally(function() {
+                        updateGuardarBtn();
+                    });
+                });
+
+                var semanaInicioActual = '[[${semanaInicio}]]';
+
+                function getSemanaInicio() {
+                    return semanaInicioActual;
+                }
+
+                // ── Limpiar ──
+                btnLimpiar.addEventListener('click', function() {
+                    if (!confirm('\u00bfLimpiar toda la disponibilidad de esta semana?')) return;
+
+                    btnLimpiar.disabled = true;
+                    btnLimpiar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Limpiando...';
+
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/tutor/disponibilidad/semanal/limpiar';
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'semana';
+                    input.value = getSemanaInicio();
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+
+                // ── Init ──
+                updateGuardarBtn();
+            })();
+        </script>
+
+        <meta name="semana-inicio" th:content="${semanaInicio}">
     </th:block>
 </body>
 </html>

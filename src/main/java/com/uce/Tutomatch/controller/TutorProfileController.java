@@ -176,29 +176,8 @@ public class TutorProfileController {
     }
 
     @GetMapping("/disponibilidad")
-    public String verDisponibilidad(Authentication auth, Model model) {
-        if (auth == null || !auth.isAuthenticated()) {
-            return "redirect:/auth/login";
-        }
-
-        try {
-            Long usuarioId = obtenerUsuarioId(auth);
-            obtenerOCrearPerfilTutor(usuarioId);
-            List<Disponibilidad> bloques = disponibilidadService.obtenerDisponibilidades(usuarioId);
-
-            Map<Integer, List<Disponibilidad>> bloquesPorDia = bloques.stream()
-                    .collect(Collectors.groupingBy(Disponibilidad::getDiaSemana, LinkedHashMap::new, Collectors.toList()));
-
-            model.addAttribute("bloquesPorDia", bloquesPorDia);
-            model.addAttribute("authenticated", true);
-
-            List<String> dias = List.of("Lunes", "Martes", "Mi\u00e9rcoles", "Jueves", "Viernes", "S\u00e1bado", "Domingo");
-            model.addAttribute("dias", dias);
-        } catch (IllegalArgumentException e) {
-            return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
-
-        return "configurar-disponibilidad";
+    public String verDisponibilidad() {
+        return "redirect:/tutor/disponibilidad/semanal";
     }
 
     @PostMapping("/disponibilidad")
