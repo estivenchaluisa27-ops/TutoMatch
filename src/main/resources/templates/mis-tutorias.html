@@ -15,18 +15,18 @@
             <div class="col-12 mb-4">
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="solicitante-tab" data-bs-toggle="tab" data-bs-target="#solicitante" type="button" role="tab">
+                        <button class="nav-link" th:classappend="${tab == 'tutor'} ? '' : 'active'" id="solicitante-tab" data-bs-toggle="tab" data-bs-target="#solicitante" type="button" role="tab">
                             <i class="bi bi-person me-1"></i>Como Solicitante
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor" type="button" role="tab">
+                        <button class="nav-link" th:classappend="${tab == 'tutor'} ? 'active' : ''" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor" type="button" role="tab">
                             <i class="bi bi-mortarboard me-1"></i>Como Tutor
                         </button>
                     </li>
                 </ul>
                 <div class="tab-content pt-3">
-                    <div class="tab-pane fade show active" id="solicitante" role="tabpanel">
+                    <div class="tab-pane fade" th:classappend="${tab == 'tutor'} ? '' : 'show active'" id="solicitante" role="tabpanel">
                         <div th:if="${#lists.isEmpty(comoSolicitante)}" class="text-center text-muted py-5">
                             <i class="bi bi-calendar-plus fs-1 d-block mb-2"></i>
                             <p class="mb-0">No has solicitado ninguna tutoría aún.</p>
@@ -104,7 +104,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="tutor" role="tabpanel">
+                    <div class="tab-pane fade" th:classappend="${tab == 'tutor'} ? 'show active' : ''" id="tutor" role="tabpanel">
                         <div th:if="${#lists.isEmpty(comoTutor)}" class="text-center text-muted py-5">
                             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                             <p class="mb-0">No tienes tutorías solicitadas aún.</p>

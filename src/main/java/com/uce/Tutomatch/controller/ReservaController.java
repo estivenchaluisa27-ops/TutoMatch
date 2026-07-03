@@ -54,6 +54,7 @@ public class ReservaController {
     public String verMisReservas(Authentication auth,
                                   @RequestParam(defaultValue = "0") int page,
                                   @RequestParam(defaultValue = "10") int size,
+                                  @RequestParam(defaultValue = "solicitante") String tab,
                                   Model model) {
         if (auth == null || !auth.isAuthenticated()) {
             return "redirect:/auth/login";
@@ -85,6 +86,7 @@ public class ReservaController {
         model.addAttribute("dias", dias);
         model.addAttribute("authenticated", true);
         model.addAttribute("yaCalificadas", yaCalificadas);
+        model.addAttribute("tab", tab);
 
         return "mis-tutorias";
     }
@@ -117,9 +119,9 @@ public class ReservaController {
         try {
             Long usuarioId = obtenerUsuarioId(auth);
             reservaService.confirmar(id, usuarioId);
-            return "redirect:/reservas?success=reserva_confirmada";
+            return "redirect:/reservas?tab=tutor&success=reserva_confirmada";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+            return "redirect:/reservas?tab=tutor&error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -164,9 +166,9 @@ public class ReservaController {
         try {
             Long usuarioId = obtenerUsuarioId(auth);
             reservaPagoService.marcarSesionImpartida(id, usuarioId);
-            return "redirect:/reservas?success=sesion_marcada";
+            return "redirect:/reservas?tab=tutor&success=sesion_marcada";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+            return "redirect:/reservas?tab=tutor&error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
