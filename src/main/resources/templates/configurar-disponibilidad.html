@@ -7,7 +7,7 @@
 <head>
 <body>
     <th:block layout:fragment="content">
-        <div class="row">
+        <div class="row tl-wrapper">
             <div class="col-12 mb-4">
                 <h1 class="fw-bold">
                     <i class="bi bi-calendar-week me-2"></i>Disponibilidad Horaria
@@ -15,42 +15,59 @@
                 <p class="text-muted">Define los bloques horarios en los que estar&aacute;s disponible para dar tutor&iacute;as.</p>
             </div>
 
+            <!-- Form -->
             <div class="col-lg-5 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white fw-bold">
                         <i class="bi bi-plus-circle me-2"></i>Agregar Bloque
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/tutor/disponibilidad}" method="post">
-                            <div class="mb-3">
-                                <label for="diaSemana" class="form-label fw-semibold">D&iacute;a</label>
-                                <select id="diaSemana" name="diaSemana" class="form-select" required>
-                                    <option value="">Selecciona un d&iacute;a...</option>
-                                    <option th:each="d, iter : ${dias}" th:value="${iter.index + 1}" th:text="${d}">Lunes</option>
-                                </select>
+                        <form th:action="@{/tutor/disponibilidad}" method="post" id="tlForm">
+                            <label class="form-label fw-semibold">D&iacute;a</label>
+                            <div class="day-chips" role="group" aria-label="D&iacute;a de la semana">
+                                <button type="button" class="day-chip" th:each="d, iter : ${dias}" th:data-value="${iter.index + 1}" th:text="${d}">Lunes</button>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-6">
+                            <input type="hidden" id="diaSemana" name="diaSemana" required>
+
+                            <div class="time-input-group">
+                                <div class="form-group">
                                     <label for="horaInicio" class="form-label fw-semibold">Inicio</label>
                                     <input type="time" id="horaInicio" name="horaInicio" class="form-control" required step="1800">
                                 </div>
-                                <div class="col-6">
+                                <span class="time-sep">&rarr;</span>
+                                <div class="form-group">
                                     <label for="horaFin" class="form-label fw-semibold">Fin</label>
                                     <input type="time" id="horaFin" name="horaFin" class="form-control" required step="1800">
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">
+
+                            <button type="submit" class="action-btn primary w-100">
                                 <i class="bi bi-plus-circle me-1"></i>Agregar Bloque
                             </button>
                         </form>
                     </div>
                 </div>
+
+                <!-- Tip -->
+                <div class="card shadow-sm mt-3 border-0 bg-light-utility">
+                    <div class="card-body py-3">
+                        <p class="mb-0 small text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Los bloques se muestran sobre una l&iacute;nea de tiempo de 24h.
+                            <span class="d-inline-block" style="width:10px;height:10px;border-radius:2px;vertical-align:middle;background:rgba(124,58,237,0.15);"></span>
+                            &nbsp;AM&nbsp;&middot;&nbsp;
+                            <span class="d-inline-block" style="width:10px;height:10px;border-radius:2px;vertical-align:middle;background:rgba(245,158,11,0.12);"></span>
+                            &nbsp;PM
+                        </p>
+                    </div>
+                </div>
             </div>
 
+            <!-- Timeline -->
             <div class="col-lg-7 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white fw-bold">
-                        <i class="bi bi-list-check me-2"></i>Tus Bloques
+                        <i class="bi bi-list-check me-2"></i>Tu Horario
                     </div>
                     <div class="card-body">
                         <div th:if="${#maps.isEmpty(bloquesPorDia)}" class="text-center text-muted py-4">
@@ -58,24 +75,45 @@
                             <p class="mb-0">No has agregado bloques horarios. Agrega tu primer bloque para empezar a recibir solicitudes.</p>
                         </div>
 
-                        <div th:unless="${#maps.isEmpty(bloquesPorDia)}">
-                            <div th:each="entry : ${bloquesPorDia}" class="mb-3">
-                                <h6 class="fw-bold text-primary border-bottom pb-2" th:text="${dias[entry.key - 1]}">Lunes</h6>
-                                <div th:each="bloque : ${entry.value}" class="d-flex justify-content-between align-items-center bg-light rounded p-2 mb-1">
-                                        <span>
-                                            <i class="bi bi-clock me-2 text-muted"></i>
-                                            <span th:text="${bloque.horaInicio}">08:00</span>
-                                            <span class="mx-1">&ndash;</span>
-                                            <span th:text="${bloque.horaFin}">09:00</span>
-                                            <span th:if="${bloque.estado.name() == 'RESERVADO'}" class="badge bg-warning text-dark ms-2">Reservado</span>
-                                            <span th:if="${bloque.estado.name() == 'LIBRE'}" class="badge bg-success ms-2">Libre</span>
-                                        </span>
-                                        <form th:action="@{/tutor/disponibilidad/{id}/eliminar(id=${bloque.id})}" method="post" onsubmit="return confirm('Eliminar este bloque?')">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" th:disabled="${bloque.estado.name() == 'RESERVADO'}" aria-label="Eliminar bloque">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                        <div th:unless="${#maps.isEmpty(bloquesPorDia)}" class="tl-view">
+                            <div th:each="entry : ${bloquesPorDia}" class="tl-day-section">
+                                <!-- Day header -->
+                                <div class="tl-day-header">
+                                    <h6 th:text="${dias[entry.key - 1]}">Lunes</h6>
+                                    <span class="tl-day-count" th:text="${#lists.size(entry.value)} + ' bloque' + (${#lists.size(entry.value)} != 1 ? 's' : '')">2 bloques</span>
+                                </div>
+
+                                <!-- Timeline track -->
+                                <div class="tl-track-wrap">
+                                    <!-- AM / PM zones -->
+                                    <div class="tl-zone-am"><span class="tl-zone-label am">AM</span></div>
+                                    <div class="tl-zone-pm"><span class="tl-zone-label pm">PM</span></div>
+
+                                    <!-- Hour markers -->
+                                    <div class="tl-marks">
+                                        <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
                                     </div>
+
+                                    <!-- Blocks -->
+                                    <div th:if="${#lists.isEmpty(entry.value)}" class="tl-empty-inline">
+                                        <i class="bi bi-plus-circle"></i>
+                                        <span>Sin bloques &mdash; agrega uno a la izquierda</span>
+                                    </div>
+
+                                    <th:block th:each="bloque : ${entry.value}">
+                                        <div class="tl-block"
+                                             th:classappend="${bloque.estado.name() == 'LIBRE' ? 'tl-libre' : 'tl-reservado'}"
+                                             th:style="'left: ' + (${bloque.horaInicio.getHour()} * 60 + ${bloque.horaInicio.getMinute()}) * 100 / 1440 + '%; width: ' + ((${bloque.horaFin.getHour()} * 60 + ${bloque.horaFin.getMinute()}) - (${bloque.horaInicio.getHour()} * 60 + ${bloque.horaInicio.getMinute()})) * 100 / 1440 + '%;'">
+                                            <span class="tl-block-label" th:text="${bloque.horaInicio} + ' - ' + ${bloque.horaFin}">08:00 - 10:00</span>
+                                            <div class="tl-block-actions">
+                                                <form th:action="@{/tutor/disponibilidad/{id}/eliminar(id=${bloque.id})}" method="post" onsubmit="return confirm('Eliminar este bloque?')">
+                                                    <button type="submit" class="tl-block-delete" th:disabled="${bloque.estado.name() == 'RESERVADO'}" aria-label="Eliminar bloque" th:title="'Eliminar bloque ' + ${bloque.horaInicio} + ' - ' + ${bloque.horaFin}">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </th:block>
                                 </div>
                             </div>
                         </div>
@@ -83,6 +121,46 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            (function() {
+                var chips = document.querySelectorAll('.day-chip');
+                var hidden = document.getElementById('diaSemana');
+                var form = document.getElementById('tlForm');
+
+                chips.forEach(function(chip) {
+                    chip.addEventListener('click', function() {
+                        chips.forEach(function(c) { c.classList.remove('active'); });
+                        chip.classList.add('active');
+                        hidden.value = chip.getAttribute('data-value');
+                    });
+                });
+
+                form.addEventListener('submit', function(e) {
+                    if (!hidden.value) {
+                        e.preventDefault();
+                        chips[0].classList.add('active');
+                        hidden.value = chips[0].getAttribute('data-value');
+                    }
+                });
+
+                // Preselect first day
+                if (chips.length > 0) {
+                    chips[0].classList.add('active');
+                    hidden.value = chips[0].getAttribute('data-value');
+                }
+
+                // Validate inicio < fin
+                var inicio = document.getElementById('horaInicio');
+                var fin = document.getElementById('horaFin');
+                form.addEventListener('submit', function(e) {
+                    if (inicio.value && fin.value && inicio.value >= fin.value) {
+                        e.preventDefault();
+                        alert('La hora de inicio debe ser anterior a la hora de fin.');
+                    }
+                });
+            })();
+        </script>
     </th:block>
 </body>
 </html>
