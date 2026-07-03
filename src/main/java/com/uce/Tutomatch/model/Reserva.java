@@ -98,6 +98,11 @@ public class Reserva {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public int getCostoTokens() { return costoTokens; }
-    public void setCostoTokens(int costoTokens) { this.costoTokens = costoTokens; }
+    public int getCostoTokens() {
+        return costoTokens;
+    }
+
+    public void setCostoTokens(int costoTokens) {
+        this.costoTokens = costoTokens;
+    }
 }

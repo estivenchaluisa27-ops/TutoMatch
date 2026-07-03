@@ -17,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Controller
@@ -101,7 +103,7 @@ public class ReservaController {
             reservaService.crear(usuarioId, dto.getDisponibilidadId(), dto.getMateriaId());
             return "redirect:/reservas?success=reserva_creada";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + e.getMessage();
+            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -117,7 +119,7 @@ public class ReservaController {
             reservaService.confirmar(id, usuarioId);
             return "redirect:/reservas?success=reserva_confirmada";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + e.getMessage();
+            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -132,7 +134,7 @@ public class ReservaController {
             reservaService.finalizar(id, usuarioId);
             return "redirect:/reservas?success=tutoria_finalizada";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + e.getMessage();
+            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -148,7 +150,7 @@ public class ReservaController {
             reservaService.cancelar(id, usuarioId, false);
             return "redirect:/reservas?success=reserva_cancelada";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + e.getMessage();
+            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -164,7 +166,7 @@ public class ReservaController {
             reservaPagoService.marcarSesionImpartida(id, usuarioId);
             return "redirect:/reservas?success=sesion_marcada";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + e.getMessage();
+            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -180,7 +182,7 @@ public class ReservaController {
             reservaPagoService.pagarConToken(id, usuarioId);
             return "redirect:/reservas?success=pago_exitoso";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + e.getMessage();
+            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -196,7 +198,7 @@ public class ReservaController {
             reservaPagoService.cancelarEnPendientePago(id, usuarioId);
             return "redirect:/reservas?success=reserva_cancelada";
         } catch (Exception e) {
-            return "redirect:/reservas?error=" + e.getMessage();
+            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 }

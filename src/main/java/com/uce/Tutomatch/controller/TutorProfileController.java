@@ -21,6 +21,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -117,7 +119,7 @@ public class TutorProfileController {
             model.addAttribute("materiasPorCategoria", materiasPorCategoria);
             model.addAttribute("authenticated", true);
         } catch (IllegalArgumentException e) {
-            return "redirect:/?error=" + e.getMessage();
+            return "redirect:/?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
 
         return "perfil-tutor";
@@ -132,7 +134,7 @@ public class TutorProfileController {
             perfilTutorService.actualizarDescripcion(obtenerUsuarioId(auth), dto.getDescripcion());
             return "redirect:/tutor/perfil?success=descripcion";
         } catch (Exception e) {
-            return "redirect:/tutor/perfil?error=" + e.getMessage();
+            return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -145,7 +147,7 @@ public class TutorProfileController {
             perfilTutorService.actualizarSemestre(obtenerUsuarioId(auth), dto.getSemestre());
             return "redirect:/tutor/perfil?success=semestre";
         } catch (Exception e) {
-            return "redirect:/tutor/perfil?error=" + e.getMessage();
+            return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -158,7 +160,7 @@ public class TutorProfileController {
             perfilTutorService.agregarMateria(obtenerUsuarioId(auth), dto.getMateriaId());
             return "redirect:/tutor/perfil?success=materia";
         } catch (Exception e) {
-            return "redirect:/tutor/perfil?error=" + e.getMessage();
+            return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -169,7 +171,7 @@ public class TutorProfileController {
             perfilTutorService.eliminarMateria(obtenerUsuarioId(auth), materiaId);
             return "redirect:/tutor/perfil?success=materia_eliminada";
         } catch (Exception e) {
-            return "redirect:/tutor/perfil?error=" + e.getMessage();
+            return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -193,7 +195,7 @@ public class TutorProfileController {
             List<String> dias = List.of("Lunes", "Martes", "Mi\u00e9rcoles", "Jueves", "Viernes", "S\u00e1bado", "Domingo");
             model.addAttribute("dias", dias);
         } catch (IllegalArgumentException e) {
-            return "redirect:/tutor/perfil?error=" + e.getMessage();
+            return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
 
         return "configurar-disponibilidad";
@@ -212,7 +214,7 @@ public class TutorProfileController {
                     LocalTime.parse(dto.getHoraFin()));
             return "redirect:/tutor/disponibilidad?success=bloque";
         } catch (Exception e) {
-            return "redirect:/tutor/disponibilidad?error=" + e.getMessage();
+            return "redirect:/tutor/disponibilidad?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -223,7 +225,7 @@ public class TutorProfileController {
             disponibilidadService.eliminarBloque(obtenerUsuarioId(auth), id);
             return "redirect:/tutor/disponibilidad?success=bloque_eliminado";
         } catch (Exception e) {
-            return "redirect:/tutor/disponibilidad?error=" + e.getMessage();
+            return "redirect:/tutor/disponibilidad?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 }

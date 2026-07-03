@@ -334,23 +334,6 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         orbitAngles: [],
     };
 
-    // ── Hat coordinates — 22 pts (viewBox 24×24) ──
-    const HAT = [
-        { x: 12, y: 3 },     { x: 6.5, y: 6 },    { x: 1, y: 9 },
-        { x: 4.7, y: 11 },   { x: 8.3, y: 13 },   { x: 12, y: 15 },
-        { x: 16.5, y: 12.5 },{ x: 21, y: 10.09 }, { x: 21, y: 13.5 },
-        { x: 21, y: 17 },    { x: 22, y: 17 },    { x: 23, y: 17 },
-        { x: 23, y: 13 },    { x: 23, y: 9 },     { x: 5, y: 13.18 },
-        { x: 5, y: 17.18 },  { x: 8.5, y: 19.1 }, { x: 12, y: 21 },
-        { x: 15.5, y: 19.1 },{ x: 19, y: 17.18 }, { x: 19, y: 13.18 },
-        { x: 12, y: 17 },
-    ];
-
-    function mapHat(p, r) {
-        const s = Math.min(r.width, r.height) / 28;
-        return { x: r.width / 2 + (p.x - 12) * s, y: r.height * 0.45 + (p.y - 12) * s };
-    }
-
     function ensureCanvas(r) {
         if (S.canvas) return;
         const c = document.createElement('canvas');
@@ -380,7 +363,7 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         const pad = 15, w = r.width, h = r.height;
 
         iconEls.forEach(el => {
-            const sz = 22 + Math.random() * 32;
+            const sz = 14 + Math.random() * 30;
             el.style.cssText += `width:${sz}px;height:${sz}px;top:0;left:0;opacity:0;`;
             S.particles.push({
                 el, size: sz,
@@ -390,26 +373,7 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
                 vy: (Math.random() - 0.5) * 1.2,
                 rotation: Math.random() * 360,
                 vr: (Math.random() - 0.5) * 3,
-                glow: 0, isClone: false,
-            });
-        });
-
-        // 9 clones — smaller, for density in B & C
-        [0, 2, 4, 5, 7, 8, 9, 10, 11].forEach(si => {
-            const src = iconEls[si]; if (!src) return;
-            const clone = src.cloneNode(true);
-            const sz = 16 + Math.random() * 12;
-            clone.style.cssText = `width:${sz}px;height:${sz}px;top:0;left:0;opacity:0;`;
-            container.appendChild(clone);
-            S.particles.push({
-                el: clone, size: sz,
-                x: pad + Math.random() * (w - sz - pad * 2),
-                y: pad + Math.random() * (h - sz - pad * 2),
-                vx: (Math.random() - 0.5) * 1.2,
-                vy: (Math.random() - 0.5) * 1.2,
-                rotation: Math.random() * 360,
-                vr: (Math.random() - 0.5) * 3,
-                glow: 0, isClone: true,
+                glow: 0,
             });
         });
 
@@ -417,7 +381,7 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         const tl = gsap.timeline({ onComplete() {
             if (window.loadingOverlay && window.loadingOverlay.pageReady) window.loadingOverlay.pageReady();
         }});
-        S.particles.forEach(p => tl.to(p.el, { opacity: p.isClone ? 0.06 : 0.12, duration: 0.6, ease: "power2.out" }, 0));
+        S.particles.forEach(p => tl.to(p.el, { opacity: 0.08, duration: 0.6, ease: "power2.out" }, 0));
 
         ensureCanvas(r);
         S.orbitConfigs = buildOrbitConfigs(r);
@@ -437,9 +401,9 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         S.particles.forEach(p => {
             p.vx = (Math.random() - 0.5) * 1.2;
             p.vy = (Math.random() - 0.5) * 1.2;
-            const sz = p.isClone ? 16 + Math.random() * 12 : 22 + Math.random() * 32;
+            const sz = 14 + Math.random() * 30;
             p.size = sz;
-            p.el.style.cssText += `width:${sz}px;height:${sz}px;opacity:${p.isClone ? 0.06 : 0.12};filter:none;`;
+            p.el.style.cssText += `width:${sz}px;height:${sz}px;opacity:0.08;filter:none;`;
         });
 
         if (S.canvas) gsap.to(S.canvas, { opacity: 0, duration: 0.5 });
@@ -511,10 +475,11 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     function buildOrbitConfigs(r) {
         const cx = r.width / 2, cy = r.height * 0.45;
         return [
-            { rx: r.width * 0.12, ry: r.height * 0.08, speed: 0.008, count: 5 },
-            { rx: r.width * 0.22, ry: r.height * 0.15, speed: 0.006, count: 6 },
-            { rx: r.width * 0.32, ry: r.height * 0.22, speed: 0.0045, count: 6 },
-            { rx: r.width * 0.42, ry: r.height * 0.30, speed: 0.003, count: 5 },
+            { rx: r.width * 0.10, ry: r.height * 0.07, speed: 0.009, count: 6 },
+            { rx: r.width * 0.17, ry: r.height * 0.12, speed: 0.007, count: 6 },
+            { rx: r.width * 0.24, ry: r.height * 0.17, speed: 0.005, count: 6 },
+            { rx: r.width * 0.31, ry: r.height * 0.22, speed: 0.0035, count: 6 },
+            { rx: r.width * 0.38, ry: r.height * 0.27, speed: 0.0025, count: 6 },
         ];
     }
 
@@ -556,7 +521,7 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
                 x: tx, y: ty, duration: 2, ease: "power2.inOut",
                 onUpdate() { gsap.set(p.el, { x: p.x, y: p.y }); },
             });
-            p.el.style.opacity = '0.18';
+            gsap.to(p.el, { opacity: 0.18, duration: 1.2, ease: "power2.inOut", delay: 0.3 });
         });
 
         gsap.to(S.canvas, { opacity: 1, duration: 1, delay: 0.5 });
@@ -596,18 +561,20 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     }
 
     // ════════════════════════════════════════════════════════════
-    // Scheduler — A → B → C → A (full cycle)
+    // Scheduler — A → B → Cap Rain → A (full cycle)
     // ════════════════════════════════════════════════════════════
     function scheduleTransitions() {
         function loop() {
             S.timer = setTimeout(() => {
                 enterPhaseB();
                 S.timer = setTimeout(() => {
-                    enterPhaseC();
+                    enterCapRain();
                     S.timer = setTimeout(() => {
-                        resetToPhaseA();
-                        loop();
-                    }, 8000);
+                        exitCapRain(() => {
+                            resetToPhaseA();
+                            loop();
+                        });
+                    }, 10000);
                 }, 10000);
             }, 12000);
         }
@@ -615,71 +582,124 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     }
 
     // ════════════════════════════════════════════════════════════
-    // FASE C — Formación del sombrero + contorno
+    // FASE C — Lluvia de Birretes (4 estilos Iconify)
     // ════════════════════════════════════════════════════════════
-    function enterPhaseC() {
+    const CAP_PATHS = [
+        `M19 12.282V14a7 7 0 0 1-14 0v-1.718l6.359 3.007a1.5 1.5 0 0 0 1.282 0zm-6.359-9.57l9.08 4.294c.734.346.827 1.302.279 1.803V13a1 1 0 0 1-2 0V9.81l-7.359 3.48a1.5 1.5 0 0 1-1.282 0l-9.08-4.295a1.1 1.1 0 0 1 0-1.988l9.08-4.294a1.5 1.5 0 0 1 1.282 0Z`,
+        `M12 3L1 9l11 6l9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z`,
+        `M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9zm6.82 6L12 12.72L5.18 9L12 5.28zM17 16l-5 2.72L7 16v-3.73L12 15l5-2.73z`,
+        `M21 17v-6.9L12 15 1 9l11-6 11 6v8h-2zm-9 4-7-3.8v-5l7 3.8 7-3.8v5L12 21z`,
+    ];
+    const CAP_COLORS = ['#A78BFA', '#7C3AED', '#8B5CF6', '#C4B5FD', '#FBBF24', '#FFF'];
+    let capElements = [];
+
+    function createCapSVG(pathIdx) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.innerHTML = `<path fill="currentColor" d="${CAP_PATHS[pathIdx]}"/>`;
+        return svg;
+    }
+
+    function enterCapRain() {
         S.phase = 'C';
+        gsap.ticker.remove(orbitTick);
+        if (S.canvas) {
+            S.ctx && S.ctx.clearRect(0, 0, S.rect.width, S.rect.height);
+            gsap.to(S.canvas, { opacity: 0, duration: 0.3 });
+        }
+        S.particles.forEach(p => gsap.to(p.el, { opacity: 0, duration: 0.4, ease: "power2.inOut" }));
+
+        const r = S.rect;
+        const count = 120 + Math.floor(Math.random() * 60);
+        const perRow = 8;
+
+        for (let i = 0; i < count; i++) {
+            const row = Math.floor(i / perRow);
+            const sz = 14 + Math.random() * 30;
+            const styleIdx = Math.floor(Math.random() * CAP_PATHS.length);
+            const color = CAP_COLORS[Math.floor(Math.random() * CAP_COLORS.length)];
+            const x = Math.random() * (r.width - sz);
+            const startY = -80 - Math.random() * 120;
+            const fallDur = 1.2 + Math.random() * 1.2;
+            const rotation = (Math.random() - 0.5) * 540;
+            const delay = Math.random() * 2.5;
+            const driftX = (Math.random() - 0.5) * 25;
+            const bounce1 = 5 + Math.random() * 8;
+            const bounce2 = bounce1 * 0.3 + Math.random() * 3;
+
+            const el = createCapSVG(styleIdx);
+            el.style.cssText = `position:absolute;width:${sz}px;height:${sz}px;left:${x}px;top:${startY}px;opacity:0;pointer-events:none;z-index:2;color:${color};`;
+            container.appendChild(el);
+            capElements.push(el);
+
+            const landY = Math.max(r.height * 0.12, r.height - sz * 0.3 - row * (sz * 0.32));
+            const finalY = landY + (Math.random() - 0.5) * 2;
+            const finalX = x + driftX + (Math.random() - 0.5) * 10;
+
+            const tl = gsap.timeline({ delay });
+            tl.to(el, { opacity: 0.4 + Math.random() * 0.5, duration: 0.2, ease: "power2.out" })
+              .to(el, { top: finalY + 3, left: finalX, rotation, duration: fallDur, ease: "power3.in" })
+              .to(el, { top: finalY - bounce1, duration: 0.13, ease: "power2.out" })
+              .to(el, { top: finalY + 1, duration: 0.1, ease: "power1.in" })
+              .to(el, { top: finalY - bounce2, duration: 0.08, ease: "power2.out" })
+              .to(el, {
+                  top: finalY,
+                  left: parseFloat(el.style.left) + (Math.random() - 0.5) * 8,
+                  rotation: rotation + (Math.random() - 0.5) * 15,
+                  duration: 0.1, ease: "power1.out",
+              });
+        }
+    }
+
+    function exitCapRain(cb) {
+        if (!capElements.length) { cb && cb(); return; }
+        const r = S.rect;
+        const tl = gsap.timeline({
+            onComplete() { capElements.forEach(el => el.remove()); capElements = []; cb && cb(); }
+        });
+        capElements.forEach((el, i) => {
+            const drift = (Math.random() - 0.5) * 60;
+            tl.to(el, {
+                top: r.height + 40 + Math.random() * 60,
+                left: parseFloat(el.style.left) + drift,
+                opacity: 0,
+                rotation: (Math.random() - 0.5) * 360,
+                duration: 0.4 + Math.random() * 0.3,
+                ease: "power2.in",
+            }, i * 0.012);
+        });
+    }
+
+    function resetToPhaseA() {
         S.transitioning = true;
         gsap.ticker.remove(orbitTick);
 
-        S.particles.forEach((p, i) => {
-            const pos = mapHat(HAT[i], S.rect);
-            const tSize = i < 14 ? 16 + Math.random() * 6 : 12 + Math.random() * 4;
+        const pad = 15, w = S.rect.width, h = S.rect.height;
 
-            gsap.to(p, {
-                x: pos.x, y: pos.y,
-                duration: 1.5, ease: "power2.inOut",
-                onUpdate() { gsap.set(p.el, { x: p.x, y: p.y }); },
-                onComplete() {
-                    p.el.style.filter = 'drop-shadow(0 0 6px rgba(167,139,250,0.55))';
-                }
-            });
-
-            gsap.to(p.el, {
-                width: tSize, height: tSize,
-                opacity: 0.85,
-                duration: 1.2, ease: "power2.inOut",
-                delay: 0.3,
-            });
-            p.size = tSize;
-        });
-
-        setTimeout(drawHatContour, 1800);
-    }
-
-    function drawHatContour() {
-        const ctx = S.ctx, w = S.rect.width, h = S.rect.height;
-        ctx.clearRect(0, 0, w, h);
-
-        const pts = HAT.map(p => mapHat(p, S.rect));
-        ctx.strokeStyle = 'rgba(167,139,250,0.18)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 5]);
-
-        ctx.beginPath();
-        pts.forEach((pt, i) => {
-            const cx = pt.x + S.particles[i].size / 2;
-            const cy = pt.y + S.particles[i].size / 2;
-            i === 0 ? ctx.moveTo(cx, cy) : ctx.lineTo(cx, cy);
-        });
-        ctx.stroke();
-
-        ctx.setLineDash([]);
-    }
-    function resetToPhaseA() {
-        gsap.ticker.remove(orbitTick);
         S.particles.forEach(p => {
-            const pad = 15, w = S.rect.width, h = S.rect.height;
-            p.x = pad + Math.random() * (w - p.size - pad * 2);
-            p.y = pad + Math.random() * (h - p.size - pad * 2);
+            p._orb = null;
             p.vx = (Math.random() - 0.5) * 1.2;
             p.vy = (Math.random() - 0.5) * 1.2;
-            p.el.style.cssText += `opacity:${p.isClone ? 0.06 : 0.12};filter:none;`;
-            const sz = p.isClone ? 16 + Math.random() * 12 : 22 + Math.random() * 32;
+            p.el.style.filter = 'none';
+
+            const sz = 14 + Math.random() * 30;
+            const newX = pad + Math.random() * (w - sz - pad * 2);
+            const newY = pad + Math.random() * (h - sz - pad * 2);
+
+            gsap.to(p, {
+                x: newX, y: newY, duration: 1.5, ease: "power2.inOut",
+                onUpdate() { gsap.set(p.el, { x: p.x, y: p.y }); },
+            });
+            gsap.to(p.el, { opacity: 0.08, width: sz, height: sz, duration: 1.2, ease: "power2.inOut" });
             p.size = sz;
-            p.el.style.cssText += `width:${sz}px;height:${sz}px;`;
         });
-        enterPhaseA();
+
+        gsap.delayedCall(1.8, () => {
+            S.phase = 'A';
+            S.transitioning = false;
+            gsap.ticker.add(physicsTickA);
+            if (S.canvas) gsap.to(S.canvas, { opacity: 0, duration: 0.5 });
+        });
     }
 
     // ── Bootstrap ──

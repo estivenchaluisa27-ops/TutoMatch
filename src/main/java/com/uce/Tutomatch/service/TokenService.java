@@ -56,12 +56,21 @@ public class TokenService implements WalletConsultaService, WalletOperacionServi
                 .orElse(0);
     }
 
+    private WalletToken obtenerOCrearWallet(Long usuarioId) {
+        return walletRepo.findByUsuarioIdWithLock(usuarioId)
+                .orElseGet(() -> {
+                    Usuario usuario = usuarioRepo.findById(usuarioId)
+                            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                    WalletToken nueva = new WalletToken(usuario);
+                    return walletRepo.save(nueva);
+                });
+    }
+
     @Override
     @Transactional
     public void acreditar(Long usuarioId, int cantidad,
                           TipoTransaccion tipo, String descripcion, Long referenciaId) {
-        WalletToken wallet = walletRepo.findByUsuarioIdWithLock(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet no encontrada"));
+        WalletToken wallet = obtenerOCrearWallet(usuarioId);
 
         wallet.setSaldo(wallet.getSaldo() + cantidad);
         walletRepo.save(wallet);
@@ -76,8 +85,7 @@ public class TokenService implements WalletConsultaService, WalletOperacionServi
     @Transactional
     public void debitar(Long usuarioId, int cantidad,
                         TipoTransaccion tipo, String descripcion, Long referenciaId) {
-        WalletToken wallet = walletRepo.findByUsuarioIdWithLock(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet no encontrada"));
+        WalletToken wallet = obtenerOCrearWallet(usuarioId);
 
         if (wallet.getSaldo() < cantidad) {
             throw new SaldoInsuficienteException(wallet.getSaldo(), cantidad);
@@ -93,10 +101,9 @@ public class TokenService implements WalletConsultaService, WalletOperacionServi
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public WalletToken obtenerWallet(Long usuarioId) {
-        return walletRepo.findByUsuarioId(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet no encontrada"));
+        return obtenerOCrearWallet(usuarioId);
     }
 
     @Override

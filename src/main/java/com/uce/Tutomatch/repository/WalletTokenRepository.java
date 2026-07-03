@@ -5,9 +5,14 @@ import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WalletTokenRepository extends JpaRepository<WalletToken, Long> {
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<WalletToken> findByUsuarioId(Long usuarioId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT w FROM WalletToken w WHERE w.usuario.id = :usuarioId")
+    Optional<WalletToken> findByUsuarioIdWithLock(@Param("usuarioId") Long usuarioId);
 }

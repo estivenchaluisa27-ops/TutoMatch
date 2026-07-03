@@ -1,6 +1,7 @@
+(function() {
 gsap.registerPlugin(ScrollTrigger);
 
-let mm = gsap.matchMedia();
+const mm = gsap.matchMedia();
 
 mm.add("(prefers-reduced-motion: no-preference)", () => {
     gsap.from(".login-wrapper, .registro-wrapper", {
@@ -57,5 +58,6 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
         });
     });
 });
+})();
 
 

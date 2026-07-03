@@ -798,6 +798,7 @@ hr {
     border: 1px solid var(--border-card) !important;
     box-shadow: var(--shadow-lg) !important;
     right: 0;
+    left: auto;
 }
 
 .notif-header {

@@ -37,6 +37,22 @@
                         </a>
                     </li>
 
+                    <!-- Dark Mode Toggle -->
+                    <li class="nav-item">
+                        <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Alternar modo oscuro">
+                            <span class="toggle-indicator"></span>
+                            <svg class="toggle-icon toggle-moon" id="toggleMoon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="m15 8l-3-3l3-3l3 3z"/>
+                                <path d="m20 11l-2-2l2-2l2 2z"/>
+                                <path d="M12.075 22q-2.1 0-3.937-.8t-3.2-2.162t-2.163-3.2t-.8-3.938q0-3.65 2.325-6.437T10.225 2q-.45 2.475.275 4.838t2.5 4.137t4.138 2.5t4.837.275q-.65 3.6-3.45 5.925T12.075 22"/>
+                            </svg>
+                            <svg class="toggle-icon toggle-sun" id="toggleSun" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 12a6 6 0 1 1-12 0a6 6 0 0 1 12 0"/>
+                                <path fill-rule="evenodd" d="M12 1.25a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0V2a.75.75 0 0 1 .75-.75M4.399 4.399a.75.75 0 0 1 1.06 0l.393.392a.75.75 0 0 1-1.06 1.061l-.393-.393a.75.75 0 0 1 0-1.06m15.202 0a.75.75 0 0 1 0 1.06l-.393.393a.75.75 0 0 1-1.06-1.06l.393-.393a.75.75 0 0 1 1.06 0M1.25 12a.75.75 0 0 1 .75-.75h1a.75.75 0 0 1 0 1.5H2a.75.75 0 0 1-.75-.75m19 0a.75.75 0 0 1 .75-.75h1a.75.75 0 0 1 0 1.5h-1a.75.75 0 0 1-.75-.75m-2.102 6.148a.75.75 0 0 1 1.06 0l.393.393a.75.75 0 1 1-1.06 1.06l-.393-.393a.75.75 0 0 1 0-1.06m-12.296 0a.75.75 0 0 1 0 1.06l-.393.393a.75.75 0 1 1-1.06-1.06l.392-.393a.75.75 0 0 1 1.061 0M12 20.25a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0v-1a.75.75 0 0 1 .75-.75" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </li>
+
                     <!-- Campana de notificaciones (solo usuarios no admin) -->
                     <li th:if="${authenticated && !isAdmin}" class="nav-item position-relative">
                         <button class="notif-bell" id="notifBell" aria-label="Notificaciones">
@@ -58,22 +74,6 @@
                                 </div>
                             </div>
                         </div>
-                    </li>
-
-                    <!-- Dark Mode Toggle -->
-                    <li class="nav-item">
-                        <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Alternar modo oscuro">
-                            <span class="toggle-indicator"></span>
-                            <svg class="toggle-icon toggle-moon" id="toggleMoon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="m15 8l-3-3l3-3l3 3z"/>
-                                <path d="m20 11l-2-2l2-2l2 2z"/>
-                                <path d="M12.075 22q-2.1 0-3.937-.8t-3.2-2.162t-2.163-3.2t-.8-3.938q0-3.65 2.325-6.437T10.225 2q-.45 2.475.275 4.838t2.5 4.137t4.138 2.5t4.837.275q-.65 3.6-3.45 5.925T12.075 22"/>
-                            </svg>
-                            <svg class="toggle-icon toggle-sun" id="toggleSun" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M18 12a6 6 0 1 1-12 0a6 6 0 0 1 12 0"/>
-                                <path fill-rule="evenodd" d="M12 1.25a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0V2a.75.75 0 0 1 .75-.75M4.399 4.399a.75.75 0 0 1 1.06 0l.393.392a.75.75 0 0 1-1.06 1.061l-.393-.393a.75.75 0 0 1 0-1.06m15.202 0a.75.75 0 0 1 0 1.06l-.393.393a.75.75 0 0 1-1.06-1.06l.393-.393a.75.75 0 0 1 1.06 0M1.25 12a.75.75 0 0 1 .75-.75h1a.75.75 0 0 1 0 1.5H2a.75.75 0 0 1-.75-.75m19 0a.75.75 0 0 1 .75-.75h1a.75.75 0 0 1 0 1.5h-1a.75.75 0 0 1-.75-.75m-2.102 6.148a.75.75 0 0 1 1.06 0l.393.393a.75.75 0 1 1-1.06 1.06l-.393-.393a.75.75 0 0 1 0-1.06m-12.296 0a.75.75 0 0 1 0 1.06l-.393.393a.75.75 0 1 1-1.06-1.06l.392-.393a.75.75 0 0 1 1.061 0M12 20.25a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0v-1a.75.75 0 0 1 .75-.75" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
                     </li>
 
                     <!-- Usuario autenticado (NO admin) -->

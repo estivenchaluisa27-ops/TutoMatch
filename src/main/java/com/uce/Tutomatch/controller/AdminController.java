@@ -10,6 +10,8 @@ import com.uce.Tutomatch.repository.ResenaRepository;
 import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.PerfilTutorService;
 import jakarta.validation.Valid;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -121,7 +123,7 @@ public class AdminController {
             String msg = verificado ? "verificado" : "revocado";
             return "redirect:/admin/tutores?success=" + msg;
         } catch (Exception e) {
-            return "redirect:/admin/tutores?error=" + e.getMessage();
+            return "redirect:/admin/tutores?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -157,7 +159,7 @@ public class AdminController {
             materiaRepository.save(materia);
             return "redirect:/admin/materias?success=materia_creada";
         } catch (Exception e) {
-            return "redirect:/admin/materias?error=" + e.getMessage();
+            return "redirect:/admin/materias?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -182,7 +184,7 @@ public class AdminController {
             materiaRepository.save(materia);
             return "redirect:/admin/materias?success=materia_editada";
         } catch (Exception e) {
-            return "redirect:/admin/materias?error=" + e.getMessage();
+            return "redirect:/admin/materias?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -195,7 +197,7 @@ public class AdminController {
             materiaRepository.deleteById(id);
             return "redirect:/admin/materias?success=materia_eliminada";
         } catch (Exception e) {
-            return "redirect:/admin/materias?error=" + e.getMessage();
+            return "redirect:/admin/materias?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
@@ -225,7 +227,7 @@ public class AdminController {
             resenaRepository.deleteById(id);
             return "redirect:/admin/resenas?success=resena_eliminada";
         } catch (Exception e) {
-            return "redirect:/admin/resenas?error=" + e.getMessage();
+            return "redirect:/admin/resenas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 }
