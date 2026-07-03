@@ -83,6 +83,7 @@ public class ResenaService {
         return resenaRepository.findByReservaDisponibilidadPerfilTutorIdOrderByFechaDesc(perfilTutorId);
     }
 
+    @Transactional(readOnly = true)
     public boolean existeResena(Long reservaId) {
         return resenaRepository.findByReservaId(reservaId).isPresent();
     }

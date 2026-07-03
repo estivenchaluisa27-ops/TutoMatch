@@ -49,7 +49,7 @@ public class TokenService implements WalletConsultaService, WalletOperacionServi
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public int obtenerSaldo(Long usuarioId) {
         return walletRepo.findByUsuarioId(usuarioId)
                 .map(WalletToken::getSaldo)
@@ -60,7 +60,7 @@ public class TokenService implements WalletConsultaService, WalletOperacionServi
     @Transactional
     public void acreditar(Long usuarioId, int cantidad,
                           TipoTransaccion tipo, String descripcion, Long referenciaId) {
-        WalletToken wallet = walletRepo.findByUsuarioId(usuarioId)
+        WalletToken wallet = walletRepo.findByUsuarioIdWithLock(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Wallet no encontrada"));
 
         wallet.setSaldo(wallet.getSaldo() + cantidad);
@@ -76,7 +76,7 @@ public class TokenService implements WalletConsultaService, WalletOperacionServi
     @Transactional
     public void debitar(Long usuarioId, int cantidad,
                         TipoTransaccion tipo, String descripcion, Long referenciaId) {
-        WalletToken wallet = walletRepo.findByUsuarioId(usuarioId)
+        WalletToken wallet = walletRepo.findByUsuarioIdWithLock(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Wallet no encontrada"));
 
         if (wallet.getSaldo() < cantidad) {

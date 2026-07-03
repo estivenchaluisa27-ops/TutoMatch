@@ -14,12 +14,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -89,9 +92,10 @@ public class SearchController {
     }
 
     @GetMapping("/tutor/{id}")
+    @Transactional(readOnly = true)
     public String verPerfilPublico(@PathVariable Long id,
-                                   Authentication authentication,
-                                   Model model) {
+                                    Authentication authentication,
+                                    Model model) {
         model.addAttribute("authenticated", authentication != null && authentication.isAuthenticated());
 
         try {
@@ -144,7 +148,7 @@ public class SearchController {
             model.addAttribute("promedio", promedio);
         } catch (Exception e) {
             log.error("Error al cargar perfil público del tutor {}: {}", id, e.getMessage(), e);
-            return "redirect:/?error=" + e.getMessage();
+            return "redirect:/?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
 
         return "perfil-publico";
