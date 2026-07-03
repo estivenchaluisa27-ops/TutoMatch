@@ -121,6 +121,7 @@ public class ReservaService {
         return reserva;
     }
 
+    @Deprecated
     @Transactional
     public Reserva finalizar(Long reservaId, Long usuarioId) {
         Reserva reserva = reservaRepository.findById(reservaId)
@@ -176,6 +177,10 @@ public class ReservaService {
 
         if (esTutor && estado != Reserva.EstadoReserva.PENDIENTE) {
             throw new IllegalArgumentException("El tutor solo puede cancelar reservas pendientes");
+        }
+
+        if (estado == Reserva.EstadoReserva.PENDIENTE_PAGO && !esSolicitante) {
+            throw new IllegalArgumentException("Solo el estudiante puede cancelar una reserva pendiente de pago");
         }
 
         reserva.setEstado(Reserva.EstadoReserva.CANCELADA);

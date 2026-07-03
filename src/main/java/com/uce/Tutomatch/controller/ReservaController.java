@@ -5,6 +5,7 @@ import com.uce.Tutomatch.model.Reserva;
 import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.PerfilTutorService;
 import com.uce.Tutomatch.service.ResenaService;
+import com.uce.Tutomatch.service.ReservaPagoService;
 import com.uce.Tutomatch.service.ReservaService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -23,15 +24,18 @@ import java.util.*;
 public class ReservaController {
 
     private final ReservaService reservaService;
+    private final ReservaPagoService reservaPagoService;
     private final UsuarioRepository usuarioRepository;
     private final PerfilTutorService perfilTutorService;
     private final ResenaService resenaService;
 
     public ReservaController(ReservaService reservaService,
+                             ReservaPagoService reservaPagoService,
                              UsuarioRepository usuarioRepository,
                              PerfilTutorService perfilTutorService,
                              ResenaService resenaService) {
         this.reservaService = reservaService;
+        this.reservaPagoService = reservaPagoService;
         this.usuarioRepository = usuarioRepository;
         this.perfilTutorService = perfilTutorService;
         this.resenaService = resenaService;
@@ -148,5 +152,51 @@ public class ReservaController {
         }
     }
 
+    @PostMapping("/{id}/marcar-impartida")
+    public String marcarImpartida(Authentication auth,
+                                  @PathVariable Long id) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/auth/login";
+        }
 
+        try {
+            Long usuarioId = obtenerUsuarioId(auth);
+            reservaPagoService.marcarSesionImpartida(id, usuarioId);
+            return "redirect:/reservas?success=sesion_marcada";
+        } catch (Exception e) {
+            return "redirect:/reservas?error=" + e.getMessage();
+        }
+    }
+
+    @PostMapping("/{id}/pagar-token")
+    public String pagarConToken(Authentication auth,
+                                @PathVariable Long id) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            Long usuarioId = obtenerUsuarioId(auth);
+            reservaPagoService.pagarConToken(id, usuarioId);
+            return "redirect:/reservas?success=pago_exitoso";
+        } catch (Exception e) {
+            return "redirect:/reservas?error=" + e.getMessage();
+        }
+    }
+
+    @PostMapping("/{id}/cancelar-pago")
+    public String cancelarEnPendientePago(Authentication auth,
+                                          @PathVariable Long id) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            Long usuarioId = obtenerUsuarioId(auth);
+            reservaPagoService.cancelarEnPendientePago(id, usuarioId);
+            return "redirect:/reservas?success=reserva_cancelada";
+        } catch (Exception e) {
+            return "redirect:/reservas?error=" + e.getMessage();
+        }
+    }
 }

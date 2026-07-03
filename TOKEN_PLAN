@@ -713,12 +713,12 @@ public int saldoTokens(Authentication authentication) {
 
 | Tipo | Archivo | Plan |
 |------|---------|------|
-| 🆕 | `service/ReservaPagoService.java` | Fase 2 |
-| ✏️ | `model/Reserva.java` | Fase 2: nuevo estado `PENDIENTE_PAGO` + campo `costoTokens` |
-| ✏️ | `model/Notificacion.java` | Fase 2: nuevos tipos `PAGO_REALIZADO` / `PAGO_RECIBIDO` |
-| ✏️ | `service/ReservaService.java` | Fase 2: deprecar `finalizar()`, permitir cancelar en `PENDIENTE_PAGO` |
-| ✏️ | `controller/ReservaController.java` | Fase 2: endpoints pagar/marcar-impartida/cancelar-pago |
-| ✏️ | `templates/mis-tutorias.html` | Fase 2: botones por estado |
+| ✅ | `service/ReservaPagoService.java` | ✅ Completado Fase 2 |
+| ✅ | `model/Reserva.java` | ✅ Completado Fase 2 |
+| ✅ | `model/Notificacion.java` | ✅ Completado Fase 2 |
+| ✅ | `service/ReservaService.java` | ✅ Completado Fase 2 |
+| ✅ | `controller/ReservaController.java` | ✅ Completado Fase 2 |
+| ✅ | `templates/mis-tutorias.html` | ✅ Completado Fase 2 |
 | 🆕 | `test/TokenServiceTest.java` | Fase 1.5 |
 | 🆕 | `test/ReservaPagoServiceTest.java` | Fase 2 |
 
@@ -732,7 +732,7 @@ public int saldoTokens(Authentication authentication) {
 | **Fase 1** | Wallet, transacciones, repos, interfaces ISP, `TokenService`, `TokenController`, `mi-wallet.html`, integración `UsuarioService` + `GlobalControllerAdvice` + navbar | ✅ Completado | `d268c74` |
 | **Fase 1.5.a** | Reparar `UsuarioServiceTest` (constructor + verify inicializarWallet) | ✅ Completado | *(working)* |
 | **Fase 1.5.b** | Crear `TokenServiceTest` | ⏳ Pendiente | — |
-| **Fase 2** | `ReservaPagoService`, `PENDIENTE_PAGO`, `costoTokens`, endpoints, botones en `mis-tutorias.html` | ⏳ Pendiente | — |
+| **Fase 2** | `ReservaPagoService`, `PENDIENTE_PAGO`, `costoTokens`, endpoints, botones en `mis-tutorias.html` | ✅ Completado | *(working)* |
 | **Fase 3** | Masterclass, bonus primera tutoría, eliminar `finalizar()` | ⏳ Pendiente | — |
 
 ---

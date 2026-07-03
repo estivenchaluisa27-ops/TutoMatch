@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class Reserva {
 
     public enum EstadoReserva {
-        PENDIENTE, CONFIRMADA, FINALIZADA, CANCELADA
+        PENDIENTE, CONFIRMADA, PENDIENTE_PAGO, FINALIZADA, CANCELADA
     }
 
     @Id
@@ -34,9 +34,13 @@ public class Reserva {
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
+    @Column(name = "costo_tokens", nullable = false)
+    private int costoTokens = 1;
+
     public Reserva() {
         this.estado = EstadoReserva.PENDIENTE;
         this.fechaCreacion = LocalDateTime.now();
+        this.costoTokens = 1;
     }
 
     public Reserva(Usuario solicitante, Disponibilidad disponibilidad, Materia materia) {
@@ -93,4 +97,7 @@ public class Reserva {
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
+
+    public int getCostoTokens() { return costoTokens; }
+    public void setCostoTokens(int costoTokens) { this.costoTokens = costoTokens; }
 }

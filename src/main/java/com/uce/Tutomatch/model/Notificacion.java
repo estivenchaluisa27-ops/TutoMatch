@@ -12,7 +12,9 @@ public class Notificacion {
         RESERVA_CREADA,
         RESERVA_CONFIRMADA,
         RESERVA_CANCELADA,
-        RESERVA_FINALIZADA
+        RESERVA_FINALIZADA,
+        PAGO_REALIZADO,
+        PAGO_RECIBIDO
     }
 
     @Id
