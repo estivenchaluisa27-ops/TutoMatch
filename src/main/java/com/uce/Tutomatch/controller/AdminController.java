@@ -154,8 +154,11 @@ public class AdminController {
         if (result.hasErrors()) return "redirect:/admin/materias?error=verifica_los_campos";
 
         try {
-            Materia materia = new Materia(dto.getNombre(), dto.getCategoria(),
-                    dto.getSemestreReferencial(), dto.getDescripcion(), dto.getIcono());
+            Materia materia = new Materia();
+            materia.setNombre(dto.getNombre());
+            materia.setSemestreReferencial(dto.getSemestreReferencial());
+            materia.setDescripcion(dto.getDescripcion());
+            materia.setIcono(dto.getIcono());
             materiaRepository.save(materia);
             return "redirect:/admin/materias?success=materia_creada";
         } catch (Exception e) {
