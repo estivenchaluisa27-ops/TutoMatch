@@ -129,10 +129,28 @@ public class PerfilTutorService {
     }
 
     @Transactional(readOnly = true)
+    public List<PerfilTutor> buscarTutoresAdmin(String materia, String categoria,
+                                                BigDecimal minCalificacion,
+                                                Integer semestre) {
+        String pattern = materia != null ? "%" + materia.toLowerCase() + "%" : null;
+        return perfilTutorRepository.buscarTutoresAdmin(
+                pattern, categoria, minCalificacion, semestre);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PerfilTutor> buscarTutoresAdmin(String materia, String categoria,
+                                                BigDecimal minCalificacion,
+                                                Integer semestre, Pageable pageable) {
+        String pattern = materia != null ? "%" + materia.toLowerCase() + "%" : null;
+        return perfilTutorRepository.buscarTutoresAdmin(
+                pattern, categoria, minCalificacion, semestre, pageable);
+    }
+
+    @Transactional(readOnly = true)
     public List<PerfilTutor> obtenerRecomendados() {
         return perfilTutorRepository.findTop6ByVerificadoTrueAndVisibleTrueOrderByCalificacionPromedioDesc()
                 .stream()
-                .filter(pt -> !pt.getMaterias().isEmpty())
+                .filter(pt -> pt.getMaterias() != null && !pt.getMaterias().isEmpty())
                 .collect(java.util.stream.Collectors.toList());
     }
 

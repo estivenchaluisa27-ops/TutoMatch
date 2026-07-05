@@ -37,9 +37,9 @@
                                 <label for="minCalificacion" class="form-label fw-semibold">Calificaci&oacute;n m&iacute;nima</label>
                                 <select id="minCalificacion" name="minCalificacion" class="form-select">
                                     <option value="">Cualquiera</option>
-                                    <option value="4" th:selected="${minCalificacion == 4}">4+ estrellas</option>
-                                    <option value="3" th:selected="${minCalificacion == 3}">3+ estrellas</option>
-                                    <option value="2" th:selected="${minCalificacion == 2}">2+ estrellas</option>
+                                    <option value="4" th:selected="${minCalificacion != null && minCalificacion == 4}">4+ estrellas</option>
+                                    <option value="3" th:selected="${minCalificacion != null && minCalificacion == 3}">3+ estrellas</option>
+                                    <option value="2" th:selected="${minCalificacion != null && minCalificacion == 2}">2+ estrellas</option>
                                 </select>
                             </div>
                             <div class="mb-3">

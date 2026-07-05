@@ -136,9 +136,9 @@ public class DbSeed implements CommandLineRunner {
                     adminEmail,
                     passwordEncoder.encode(adminPassword),
                     adminNombre,
-                    false, // rolSolicitante
-                    false, // rolTutor
-                    true   // rolAdmin
+                    false,
+                    false,
+                    true
             );
             usuarioRepository.save(admin);
         }

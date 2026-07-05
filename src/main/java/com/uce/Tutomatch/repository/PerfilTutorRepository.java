@@ -54,10 +54,10 @@ public interface PerfilTutorRepository extends JpaRepository<PerfilTutor, Long> 
                                     @Param("semestre") Integer semestre,
                                     Pageable pageable);
 
-    @Query("SELECT pt FROM PerfilTutor pt JOIN FETCH pt.usuario WHERE pt.verificado = true AND pt.visible = true ORDER BY pt.calificacionPromedio DESC")
+    @Query("SELECT DISTINCT pt FROM PerfilTutor pt JOIN FETCH pt.usuario LEFT JOIN FETCH pt.materias WHERE pt.verificado = true AND pt.visible = true ORDER BY pt.calificacionPromedio DESC")
     List<PerfilTutor> findTop6ByVerificadoTrueAndVisibleTrueOrderByCalificacionPromedioDesc();
 
-    @Query(value = "SELECT pt FROM PerfilTutor pt JOIN FETCH pt.usuario WHERE pt.verificado = true AND pt.visible = true ORDER BY pt.calificacionPromedio DESC",
+    @Query(value = "SELECT DISTINCT pt FROM PerfilTutor pt JOIN FETCH pt.usuario LEFT JOIN FETCH pt.materias WHERE pt.verificado = true AND pt.visible = true ORDER BY pt.calificacionPromedio DESC",
            countQuery = "SELECT COUNT(pt) FROM PerfilTutor pt WHERE pt.verificado = true AND pt.visible = true")
     Page<PerfilTutor> findByVerificadoTrueAndVisibleTrueOrderByCalificacionPromedioDesc(Pageable pageable);
 
@@ -68,5 +68,32 @@ public interface PerfilTutorRepository extends JpaRepository<PerfilTutor, Long> 
     @Query(value = "SELECT pt FROM PerfilTutor pt JOIN FETCH pt.usuario WHERE pt.verificado = true AND pt.visible = true",
            countQuery = "SELECT COUNT(pt) FROM PerfilTutor pt WHERE pt.verificado = true AND pt.visible = true")
     Page<PerfilTutor> findByVerificadoTrueAndVisibleTrue(Pageable pageable);
+
+    @Query("SELECT DISTINCT pt FROM PerfilTutor pt " +
+           "JOIN FETCH pt.usuario " +
+           "LEFT JOIN pt.materias tm " +
+           "LEFT JOIN tm.materia m " +
+           "WHERE (:nombre IS NULL OR LOWER(m.nombre) LIKE :nombre OR LOWER(m.categoria) LIKE :nombre) " +
+           "AND (:categoria IS NULL OR m.categoria = :categoria) " +
+           "AND (:minCalificacion IS NULL OR pt.calificacionPromedio >= :minCalificacion) " +
+           "AND (:semestre IS NULL OR pt.semestre = :semestre)")
+    List<PerfilTutor> buscarTutoresAdmin(@Param("nombre") String nombre,
+                                    @Param("categoria") String categoria,
+                                    @Param("minCalificacion") BigDecimal minCalificacion,
+                                    @Param("semestre") Integer semestre);
+
+    @Query("SELECT DISTINCT pt FROM PerfilTutor pt " +
+           "JOIN FETCH pt.usuario " +
+           "LEFT JOIN pt.materias tm " +
+           "LEFT JOIN tm.materia m " +
+           "WHERE (:nombre IS NULL OR LOWER(m.nombre) LIKE :nombre OR LOWER(m.categoria) LIKE :nombre) " +
+           "AND (:categoria IS NULL OR m.categoria = :categoria) " +
+           "AND (:minCalificacion IS NULL OR pt.calificacionPromedio >= :minCalificacion) " +
+           "AND (:semestre IS NULL OR pt.semestre = :semestre)")
+    Page<PerfilTutor> buscarTutoresAdmin(@Param("nombre") String nombre,
+                                    @Param("categoria") String categoria,
+                                    @Param("minCalificacion") BigDecimal minCalificacion,
+                                    @Param("semestre") Integer semestre,
+                                    Pageable pageable);
 
 }

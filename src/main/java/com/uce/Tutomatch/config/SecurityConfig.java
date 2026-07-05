@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/favicon.ico", "/images/**", "/fonts/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/buscar").permitAll()
-                .requestMatchers("/tutor/{id}").permitAll()
+                .requestMatchers("/tutor/*").permitAll()
                 .requestMatchers("/tutor/mi-perfil").hasAnyRole("TUTOR", "SOLICITANTE")
                 .requestMatchers("/tutor/perfil", "/tutor/perfil/**", "/tutor/disponibilidad", "/tutor/disponibilidad/**").hasRole("TUTOR")
                 .requestMatchers("/reservas/**").hasAnyRole("SOLICITANTE", "TUTOR")

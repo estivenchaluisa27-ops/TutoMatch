@@ -17,6 +17,7 @@ import com.uce.Tutomatch.service.PerfilTutorService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -96,6 +97,7 @@ public class TutorProfileController {
     }
 
     @GetMapping("/perfil")
+    @Transactional(readOnly = true)
     public String verPerfil(Authentication auth, Model model) {
         if (auth == null || !auth.isAuthenticated()) {
             return "redirect:/auth/login";

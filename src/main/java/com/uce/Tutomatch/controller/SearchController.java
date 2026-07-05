@@ -75,7 +75,7 @@ public class SearchController {
         model.addAttribute("page", resultadosPage);
         model.addAttribute("materia", materiaFilter);
         model.addAttribute("categoria", categoriaFilter);
-        model.addAttribute("minCalificacion", calificacionFilter);
+        model.addAttribute("minCalificacion", calificacionFilter != null ? calificacionFilter.doubleValue() : null);
         model.addAttribute("semestre", semestreFilter);
 
         List<String> categorias = materiaRepository.findAllByOrderByCategoriaAscNombreAsc()

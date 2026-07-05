@@ -99,7 +99,7 @@ public class AdminController {
         Page<PerfilTutor> tutoresPage;
 
         if (filtro != null && !filtro.isBlank()) {
-            tutoresPage = perfilTutorService.buscarTutores(filtro, null, null, null, pageable);
+            tutoresPage = perfilTutorService.buscarTutoresAdmin(filtro, null, null, null, pageable);
         } else {
             tutoresPage = perfilTutorService.listarTodos(pageable);
         }
@@ -107,6 +107,7 @@ public class AdminController {
         model.addAttribute("tutores", tutoresPage.getContent());
         model.addAttribute("page", tutoresPage);
         model.addAttribute("filtro", filtro);
+        model.addAttribute("pendientes", perfilTutorRepository.countByVerificadoFalse());
         model.addAttribute("authenticated", true);
         model.addAttribute("isAdmin", true);
         return "admin-tutores";

@@ -79,7 +79,7 @@ public class ResenaController {
         try {
             Usuario user = usuarioRepository.findByCorreoInstitucional(auth.getName())
                     .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-            boolean esAdmin = "admin@uce.edu.ec".equals(user.getCorreoInstitucional());
+            boolean esAdmin = user.isRolAdmin();
             resenaService.eliminar(id, esAdmin);
             ra.addFlashAttribute("success", "Reseña eliminada correctamente");
         } catch (Exception e) {
