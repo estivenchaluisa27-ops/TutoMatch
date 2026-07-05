@@ -14,6 +14,7 @@ import com.uce.Tutomatch.repository.PerfilTutorRepository;
 import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.DisponibilidadService;
 import com.uce.Tutomatch.service.PerfilTutorService;
+import com.uce.Tutomatch.util.AuthUtil;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -39,17 +40,20 @@ public class TutorProfileController {
     private final MateriaRepository materiaRepository;
     private final UsuarioRepository usuarioRepository;
     private final PerfilTutorRepository perfilTutorRepository;
+    private final AuthUtil authUtil;
 
     public TutorProfileController(PerfilTutorService perfilTutorService,
                                   DisponibilidadService disponibilidadService,
                                   MateriaRepository materiaRepository,
                                   UsuarioRepository usuarioRepository,
-                                  PerfilTutorRepository perfilTutorRepository) {
+                                  PerfilTutorRepository perfilTutorRepository,
+                                  AuthUtil authUtil) {
         this.perfilTutorService = perfilTutorService;
         this.disponibilidadService = disponibilidadService;
         this.materiaRepository = materiaRepository;
         this.usuarioRepository = usuarioRepository;
         this.perfilTutorRepository = perfilTutorRepository;
+        this.authUtil = authUtil;
     }
 
     private PerfilTutor obtenerOCrearPerfilTutor(Long usuarioId) {
@@ -66,22 +70,13 @@ public class TutorProfileController {
         });
     }
 
-    private Long obtenerUsuarioId(Authentication auth) {
-        String email = auth.getName();
-        return usuarioRepository.findByCorreoInstitucional(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"))
-                .getId();
-    }
-
     @GetMapping("/mi-perfil")
     public String verMiPerfil(Authentication auth, Model model) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
 
-        String email = auth.getName();
-        Usuario usuario = usuarioRepository.findByCorreoInstitucional(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        Usuario usuario = authUtil.obtenerUsuario(auth);
 
         model.addAttribute("usuario", usuario);
         model.addAttribute("authenticated", true);
@@ -97,14 +92,14 @@ public class TutorProfileController {
     }
 
     @GetMapping("/perfil")
-    @Transactional(readOnly = true)
+    @Transactional
     public String verPerfil(Authentication auth, Model model) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
 
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             PerfilTutor perfil = obtenerOCrearPerfilTutor(usuarioId);
             List<TutorMateria> materias = perfil.getMaterias();
             List<Materia> todasMaterias = materiaRepository.findAllByOrderByCategoriaAscNombreAsc();
@@ -133,7 +128,7 @@ public class TutorProfileController {
                                          BindingResult result) {
         if (result.hasErrors()) return "redirect:/tutor/perfil?error=descripcion_invalida";
         try {
-            perfilTutorService.actualizarDescripcion(obtenerUsuarioId(auth), dto.getDescripcion());
+            perfilTutorService.actualizarDescripcion(authUtil.obtenerUsuarioId(auth), dto.getDescripcion());
             return "redirect:/tutor/perfil?success=descripcion";
         } catch (Exception e) {
             return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
@@ -146,7 +141,7 @@ public class TutorProfileController {
                                       BindingResult result) {
         if (result.hasErrors()) return "redirect:/tutor/perfil?error=semestre_invalido";
         try {
-            perfilTutorService.actualizarSemestre(obtenerUsuarioId(auth), dto.getSemestre());
+            perfilTutorService.actualizarSemestre(authUtil.obtenerUsuarioId(auth), dto.getSemestre());
             return "redirect:/tutor/perfil?success=semestre";
         } catch (Exception e) {
             return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
@@ -159,7 +154,7 @@ public class TutorProfileController {
                                   BindingResult result) {
         if (result.hasErrors()) return "redirect:/tutor/perfil?error=verifica_los_campos";
         try {
-            perfilTutorService.agregarMateria(obtenerUsuarioId(auth), dto.getMateriaId());
+            perfilTutorService.agregarMateria(authUtil.obtenerUsuarioId(auth), dto.getMateriaId());
             return "redirect:/tutor/perfil?success=materia";
         } catch (Exception e) {
             return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
@@ -170,7 +165,7 @@ public class TutorProfileController {
     public String eliminarMateria(Authentication auth,
                                   @PathVariable Long materiaId) {
         try {
-            perfilTutorService.eliminarMateria(obtenerUsuarioId(auth), materiaId);
+            perfilTutorService.eliminarMateria(authUtil.obtenerUsuarioId(auth), materiaId);
             return "redirect:/tutor/perfil?success=materia_eliminada";
         } catch (Exception e) {
             return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
@@ -189,7 +184,7 @@ public class TutorProfileController {
         if (result.hasErrors()) return "redirect:/tutor/disponibilidad?error=verifica_los_campos";
         try {
             disponibilidadService.agregarBloque(
-                    obtenerUsuarioId(auth),
+                    authUtil.obtenerUsuarioId(auth),
                     dto.getDiaSemana(),
                     LocalTime.parse(dto.getHoraInicio()),
                     LocalTime.parse(dto.getHoraFin()));
@@ -203,7 +198,7 @@ public class TutorProfileController {
     public String eliminarBloque(Authentication auth,
                                  @PathVariable Long id) {
         try {
-            disponibilidadService.eliminarBloque(obtenerUsuarioId(auth), id);
+            disponibilidadService.eliminarBloque(authUtil.obtenerUsuarioId(auth), id);
             return "redirect:/tutor/disponibilidad?success=bloque_eliminado";
         } catch (Exception e) {
             return "redirect:/tutor/disponibilidad?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);

@@ -1,7 +1,7 @@
 package com.uce.Tutomatch.controller;
 
-import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.WalletConsultaService;
+import com.uce.Tutomatch.util.AuthUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -12,27 +12,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class TokenController {
 
     private final WalletConsultaService walletConsulta;
-    private final UsuarioRepository usuarioRepository;
+    private final AuthUtil authUtil;
 
     public TokenController(WalletConsultaService walletConsulta,
-                           UsuarioRepository usuarioRepository) {
+                           AuthUtil authUtil) {
         this.walletConsulta = walletConsulta;
-        this.usuarioRepository = usuarioRepository;
-    }
-
-    private Long obtenerUsuarioId(Authentication auth) {
-        String email = auth.getName();
-        return usuarioRepository.findByCorreoInstitucional(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"))
-                .getId();
+        this.authUtil = authUtil;
     }
 
     @GetMapping("/wallet")
     public String verWallet(Authentication auth, Model model, Pageable pageable) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
-        Long usuarioId = obtenerUsuarioId(auth);
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
         model.addAttribute("saldo", walletConsulta.obtenerSaldo(usuarioId));
         model.addAttribute("transacciones", walletConsulta.obtenerHistorial(usuarioId, pageable));
         model.addAttribute("authenticated", true);

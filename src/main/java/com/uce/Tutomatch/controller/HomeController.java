@@ -4,6 +4,7 @@ import com.uce.Tutomatch.model.Materia;
 import com.uce.Tutomatch.model.PerfilTutor;
 import com.uce.Tutomatch.repository.MateriaRepository;
 import com.uce.Tutomatch.service.PerfilTutorService;
+import com.uce.Tutomatch.util.AuthUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,7 +29,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Authentication authentication, Model model) {
-        model.addAttribute("authenticated", authentication != null && authentication.isAuthenticated());
+        model.addAttribute("authenticated", AuthUtil.estaAutenticado(authentication));
 
         List<Materia> todasMaterias = materiaRepository.findAllByOrderByCategoriaAscNombreAsc();
         Map<String, List<Materia>> materiasPorCategoria = todasMaterias.stream()

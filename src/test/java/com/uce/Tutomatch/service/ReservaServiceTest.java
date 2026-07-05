@@ -187,7 +187,6 @@ class ReservaServiceTest {
         Reserva reserva = new Reserva(solicitante, bloque, materia);
         reserva.setId(1L);
         when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
-        when(reservaRepository.save(any(Reserva.class))).thenAnswer(i -> i.getArgument(0));
         when(disponibilidadRepository.save(any(Disponibilidad.class))).thenAnswer(i -> i.getArgument(0));
 
         Reserva result = reservaService.cancelar(1L, 1L, false);
@@ -201,7 +200,6 @@ class ReservaServiceTest {
         Reserva reserva = new Reserva(solicitante, bloque, materia);
         reserva.setId(1L);
         when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
-        when(reservaRepository.save(any(Reserva.class))).thenAnswer(i -> i.getArgument(0));
         when(disponibilidadRepository.save(any(Disponibilidad.class))).thenAnswer(i -> i.getArgument(0));
 
         Reserva result = reservaService.cancelar(1L, 2L, false);

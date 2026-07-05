@@ -1,16 +1,12 @@
 package com.uce.Tutomatch.service;
 
-import com.uce.Tutomatch.dto.LoginRequest;
 import com.uce.Tutomatch.dto.RegistroRequest;
 import com.uce.Tutomatch.dto.UsuarioResponse;
 import com.uce.Tutomatch.exception.EmailAlreadyExistsException;
-import com.uce.Tutomatch.exception.InvalidCredentialsException;
 import com.uce.Tutomatch.model.PerfilTutor;
 import com.uce.Tutomatch.model.Usuario;
 import com.uce.Tutomatch.repository.PerfilTutorRepository;
 import com.uce.Tutomatch.repository.UsuarioRepository;
-import com.uce.Tutomatch.security.JwtTokenProvider;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,16 +29,16 @@ class UsuarioServiceTest {
     @Mock private UsuarioRepository usuarioRepository;
     @Mock private PerfilTutorRepository perfilTutorRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtTokenProvider jwtTokenProvider;
     @Mock private WalletOperacionService walletOperacionService;
     @Mock private HttpServletResponse response;
+    @Mock private AuthService authService;
 
     private UsuarioService usuarioService;
 
     @BeforeEach
     void setUp() {
         usuarioService = new UsuarioService(usuarioRepository, perfilTutorRepository,
-                passwordEncoder, jwtTokenProvider, walletOperacionService, false);
+                passwordEncoder, walletOperacionService, authService);
     }
 
     @Test
@@ -56,7 +52,6 @@ class UsuarioServiceTest {
 
         when(usuarioRepository.existsByCorreoInstitucional("test@uce.edu.ec")).thenReturn(false);
         when(passwordEncoder.encode("password123")).thenReturn("encoded-pass");
-        when(jwtTokenProvider.generateToken(any(), eq(false), eq(false))).thenReturn("mock-jwt");
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(i -> {
             Usuario u = i.getArgument(0);
             if (u.getId() == null) u.setId(1L);
@@ -71,7 +66,7 @@ class UsuarioServiceTest {
         assertTrue(result.isRolSolicitante());
         assertFalse(result.isRolTutor());
         verify(walletOperacionService).inicializarWallet(1L);
-        verify(response).addCookie(any(Cookie.class));
+        verify(authService).setJwtCookie(eq(response), any());
     }
 
     @Test
@@ -98,7 +93,6 @@ class UsuarioServiceTest {
 
         when(usuarioRepository.existsByCorreoInstitucional("tutor@uce.edu.ec")).thenReturn(false);
         when(passwordEncoder.encode("pass123")).thenReturn("encoded");
-        when(jwtTokenProvider.generateToken(any(), eq(true), eq(false))).thenReturn("mock-jwt");
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(i -> {
             Usuario u = i.getArgument(0);
             if (u.getId() == null) u.setId(2L);
@@ -116,53 +110,6 @@ class UsuarioServiceTest {
         assertFalse(saved.getPerfilTutor().isVerificado());
         assertFalse(saved.getPerfilTutor().isVisible());
         verify(walletOperacionService).inicializarWallet(2L);
-    }
-
-    @Test
-    void login_exito() {
-        LoginRequest request = new LoginRequest();
-        request.setCorreoInstitucional("test@uce.edu.ec");
-        request.setPassword("password123");
-
-        Usuario usuario = new Usuario("test@uce.edu.ec", "encoded-pass", "Test User", true, false, false);
-        usuario.setId(1L);
-
-        when(usuarioRepository.findByCorreoInstitucional("test@uce.edu.ec"))
-                .thenReturn(Optional.of(usuario));
-        when(passwordEncoder.matches("password123", "encoded-pass")).thenReturn(true);
-        when(jwtTokenProvider.generateToken(any(), eq(false), eq(false))).thenReturn("mock-jwt");
-
-        UsuarioResponse result = usuarioService.login(request, response);
-
-        assertNotNull(result);
-        assertEquals("test@uce.edu.ec", result.getCorreoInstitucional());
-        verify(response).addCookie(any(Cookie.class));
-    }
-
-    @Test
-    void login_credencialesInvalidas_lanzaError() {
-        LoginRequest request = new LoginRequest();
-        request.setCorreoInstitucional("test@uce.edu.ec");
-        request.setPassword("wrong");
-
-        when(usuarioRepository.findByCorreoInstitucional("test@uce.edu.ec"))
-                .thenReturn(Optional.of(new Usuario("test@uce.edu.ec", "encoded", "T", true, false, false)));
-        when(passwordEncoder.matches("wrong", "encoded")).thenReturn(false);
-
-        assertThrows(InvalidCredentialsException.class, () -> usuarioService.login(request, response));
-    }
-
-    @Test
-    void logout_limpiaCookie() {
-        usuarioService.logout(response);
-
-        ArgumentCaptor<Cookie> captor = ArgumentCaptor.forClass(Cookie.class);
-        verify(response).addCookie(captor.capture());
-
-        Cookie cookie = captor.getValue();
-        assertEquals("jwt-token", cookie.getName());
-        assertEquals("", cookie.getValue());
-        assertEquals(0, cookie.getMaxAge());
     }
 
     @Test

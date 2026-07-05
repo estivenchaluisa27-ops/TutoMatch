@@ -1,19 +1,14 @@
 package com.uce.Tutomatch.service;
 
 import com.uce.Tutomatch.dto.RegistroRequest;
-import com.uce.Tutomatch.dto.LoginRequest;
 import com.uce.Tutomatch.dto.UsuarioResponse;
 import com.uce.Tutomatch.model.PerfilTutor;
 import com.uce.Tutomatch.model.Usuario;
 import com.uce.Tutomatch.repository.PerfilTutorRepository;
 import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.exception.EmailAlreadyExistsException;
-import com.uce.Tutomatch.exception.InvalidCredentialsException;
-import com.uce.Tutomatch.security.JwtTokenProvider;
 import com.uce.Tutomatch.service.WalletOperacionService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,22 +19,19 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PerfilTutorRepository perfilTutorRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
     private final WalletOperacionService walletOperaciones;
-    private final boolean cookieSecure;
+    private final AuthService authService;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           PerfilTutorRepository perfilTutorRepository,
                           PasswordEncoder passwordEncoder,
-                          JwtTokenProvider jwtTokenProvider,
                           WalletOperacionService walletOperaciones,
-                          @Value("${cookie.secure:true}") boolean cookieSecure) {
+                          AuthService authService) {
         this.usuarioRepository = usuarioRepository;
         this.perfilTutorRepository = perfilTutorRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtTokenProvider = jwtTokenProvider;
         this.walletOperaciones = walletOperaciones;
-        this.cookieSecure = cookieSecure;
+        this.authService = authService;
     }
 
     @Transactional
@@ -72,30 +64,8 @@ public class UsuarioService {
 
         Usuario saved = usuarioRepository.save(usuario);
         walletOperaciones.inicializarWallet(saved.getId());
-        setJwtCookie(response, saved);
+        authService.setJwtCookie(response, saved);
         return UsuarioResponse.from(saved);
-    }
-
-    public UsuarioResponse login(LoginRequest request, HttpServletResponse response) {
-        Usuario usuario = usuarioRepository.findByCorreoInstitucional(request.getCorreoInstitucional())
-                .orElseThrow(() -> new InvalidCredentialsException("Credenciales inválidas"));
-
-        if (!passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash())) {
-            throw new InvalidCredentialsException("Credenciales inválidas");
-        }
-
-        setJwtCookie(response, usuario);
-        return UsuarioResponse.from(usuario);
-    }
-
-    public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt-token", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // expira inmediatamente
-        cookie.setAttribute("SameSite", "Strict");
-        response.addCookie(cookie);
     }
 
     public UsuarioResponse obtenerPerfil(Long usuarioId) {
@@ -109,23 +79,4 @@ public class UsuarioService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
 
-    private void setJwtCookie(HttpServletResponse response, Usuario usuario) {
-        String token = jwtTokenProvider.generateToken(
-                new org.springframework.security.core.userdetails.User(
-                        usuario.getCorreoInstitucional(),
-                        "",
-                        new java.util.ArrayList<>()
-                ),
-                usuario.isRolTutor(),
-                usuario.isRolAdmin()
-        );
-
-        Cookie cookie = new Cookie("jwt-token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (1800000 / 1000)); // 30 min en segundos
-        cookie.setAttribute("SameSite", "Strict");
-        response.addCookie(cookie);
-    }
 }

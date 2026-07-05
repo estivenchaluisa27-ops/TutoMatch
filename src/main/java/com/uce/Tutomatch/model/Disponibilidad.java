@@ -1,5 +1,6 @@
 package com.uce.Tutomatch.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalTime;
 
@@ -15,6 +16,7 @@ public class Disponibilidad {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "perfil_tutor_id", nullable = false)
     private PerfilTutor perfilTutor;

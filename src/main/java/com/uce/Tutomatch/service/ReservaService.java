@@ -19,6 +19,8 @@ public class ReservaService {
     private final UsuarioRepository usuarioRepository;
     private final NotificacionService notificacionService;
 
+    private static final List<String> DIAS = List.of("Lunes", "Martes", "Mi\u00e9rcoles", "Jueves", "Viernes", "S\u00e1bado", "Domingo");
+
     public ReservaService(ReservaRepository reservaRepository,
                           DisponibilidadRepository disponibilidadRepository,
                           MateriaRepository materiaRepository,
@@ -34,7 +36,15 @@ public class ReservaService {
     }
 
     private String diaSemanaNombre(Integer dia) {
-        return List.of("Lunes", "Martes", "Mi\u00e9rcoles", "Jueves", "Viernes", "S\u00e1bado", "Domingo").get(dia - 1);
+        return DIAS.get(dia - 1);
+    }
+
+    private String horarioBloque(Disponibilidad bloque) {
+        return diaSemanaNombre(bloque.getDiaSemana()) + " " + bloque.getHoraInicio() + "-" + bloque.getHoraFin();
+    }
+
+    private void notificar(Usuario usuario, Notificacion.TipoNotificacion tipo, String mensaje) {
+        notificacionService.crear(usuario, tipo, mensaje);
     }
 
     @Transactional
@@ -43,7 +53,7 @@ public class ReservaService {
                 .orElseThrow(() -> new IllegalArgumentException("Bloque no encontrado"));
 
         if (bloque.getEstado() != Disponibilidad.EstadoDisponibilidad.LIBRE) {
-            throw new IllegalArgumentException("El bloque no está disponible");
+            throw new IllegalArgumentException("El bloque no est\u00e1 disponible");
         }
 
         if (reservaRepository.existsByDisponibilidadIdAndEstadoNot(disponibilidadId, Reserva.EstadoReserva.CANCELADA)) {
@@ -52,7 +62,7 @@ public class ReservaService {
 
         PerfilTutor perfilTutor = bloque.getPerfilTutor();
         if (!perfilTutor.isVerificado() || !perfilTutor.isVisible()) {
-            throw new IllegalArgumentException("El tutor no está disponible actualmente");
+            throw new IllegalArgumentException("El tutor no est\u00e1 disponible actualmente");
         }
 
         Materia materia = materiaRepository.findById(materiaId)
@@ -77,18 +87,12 @@ public class ReservaService {
         Reserva reserva = new Reserva(solicitante, bloque, materia);
         reserva = reservaRepository.save(reserva);
 
-        notificacionService.crear(solicitante,
-                Notificacion.TipoNotificacion.RESERVA_CREADA,
-                "Solicitaste una tutor\u00eda de " + materia.getNombre()
-                        + " para el " + diaSemanaNombre(bloque.getDiaSemana())
-                        + " " + bloque.getHoraInicio() + "-" + bloque.getHoraFin());
+        notificar(solicitante, Notificacion.TipoNotificacion.RESERVA_CREADA,
+                "Solicitaste una tutor\u00eda de " + materia.getNombre() + " para el " + horarioBloque(bloque));
 
-        notificacionService.crear(perfilTutor.getUsuario(),
-                Notificacion.TipoNotificacion.RESERVA_CREADA,
-                solicitante.getNombreCompleto() + " solicit\u00f3 una tutor\u00eda de "
-                        + materia.getNombre()
-                        + " para el " + diaSemanaNombre(bloque.getDiaSemana())
-                        + " " + bloque.getHoraInicio() + "-" + bloque.getHoraFin());
+        notificar(perfilTutor.getUsuario(), Notificacion.TipoNotificacion.RESERVA_CREADA,
+                solicitante.getNombreCompleto() + " solicit\u00f3 una tutor\u00eda de " + materia.getNombre()
+                        + " para el " + horarioBloque(bloque));
 
         return reserva;
     }
@@ -110,13 +114,10 @@ public class ReservaService {
         reserva.setEstado(Reserva.EstadoReserva.CONFIRMADA);
         reserva = reservaRepository.save(reserva);
 
-        notificacionService.crear(reserva.getSolicitante(),
-                Notificacion.TipoNotificacion.RESERVA_CONFIRMADA,
+        notificar(reserva.getSolicitante(), Notificacion.TipoNotificacion.RESERVA_CONFIRMADA,
                 "Tu tutor\u00eda de " + reserva.getMateria().getNombre()
                         + " con " + reserva.getDisponibilidad().getPerfilTutor().getUsuario().getNombreCompleto()
-                        + " ha sido confirmada para el "
-                        + diaSemanaNombre(reserva.getDisponibilidad().getDiaSemana())
-                        + " " + reserva.getDisponibilidad().getHoraInicio() + "-" + reserva.getDisponibilidad().getHoraFin());
+                        + " ha sido confirmada para el " + horarioBloque(reserva.getDisponibilidad()));
 
         return reserva;
     }
@@ -139,17 +140,15 @@ public class ReservaService {
         reserva.setEstado(Reserva.EstadoReserva.FINALIZADA);
         reserva = reservaRepository.save(reserva);
 
-        notificacionService.crear(reserva.getSolicitante(),
-                Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
+        notificar(reserva.getSolicitante(), Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
                 "Tu tutor\u00eda de " + reserva.getMateria().getNombre()
                         + " con " + reserva.getDisponibilidad().getPerfilTutor().getUsuario().getNombreCompleto()
                         + " ha finalizado.");
 
-        notificacionService.crear(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
+        notificar(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
                 Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
                 "La tutor\u00eda de " + reserva.getMateria().getNombre()
-                        + " con " + reserva.getSolicitante().getNombreCompleto()
-                        + " ha finalizado.");
+                        + " con " + reserva.getSolicitante().getNombreCompleto() + " ha finalizado.");
 
         return reserva;
     }
@@ -162,39 +161,33 @@ public class ReservaService {
         Reserva.EstadoReserva estado = reserva.getEstado();
 
         if (estado == Reserva.EstadoReserva.FINALIZADA || estado == Reserva.EstadoReserva.CANCELADA) {
-            throw new IllegalArgumentException("La reserva ya está " + estado.name().toLowerCase());
+            throw new IllegalArgumentException("La reserva ya est\u00e1 " + estado.name().toLowerCase());
         }
 
         Long tutorId = reserva.getDisponibilidad().getPerfilTutor().getUsuario().getId();
         Long solicitanteId = reserva.getSolicitante().getId();
 
-        boolean esSolicitante = solicitanteId.equals(usuarioId);
-        boolean esTutor = tutorId.equals(usuarioId);
-
-        if (!esAdmin && !esSolicitante && !esTutor) {
+        if (!esAdmin && !solicitanteId.equals(usuarioId) && !tutorId.equals(usuarioId)) {
             throw new IllegalArgumentException("No tienes permiso para cancelar esta reserva");
         }
 
-        if (esTutor && estado != Reserva.EstadoReserva.PENDIENTE) {
+        if (tutorId.equals(usuarioId) && estado != Reserva.EstadoReserva.PENDIENTE) {
             throw new IllegalArgumentException("El tutor solo puede cancelar reservas pendientes");
         }
 
-        if (estado == Reserva.EstadoReserva.PENDIENTE_PAGO && !esSolicitante) {
+        if (estado == Reserva.EstadoReserva.PENDIENTE_PAGO && !solicitanteId.equals(usuarioId)) {
             throw new IllegalArgumentException("Solo el estudiante puede cancelar una reserva pendiente de pago");
         }
 
         reserva.setEstado(Reserva.EstadoReserva.CANCELADA);
-        reservaRepository.save(reserva);
-
         Disponibilidad bloque = reserva.getDisponibilidad();
         bloque.setEstado(Disponibilidad.EstadoDisponibilidad.LIBRE);
         disponibilidadRepository.save(bloque);
 
-        notificacionService.crear(reserva.getSolicitante(),
-                Notificacion.TipoNotificacion.RESERVA_CANCELADA,
+        notificar(reserva.getSolicitante(), Notificacion.TipoNotificacion.RESERVA_CANCELADA,
                 "Tu tutor\u00eda de " + reserva.getMateria().getNombre() + " fue cancelada.");
 
-        notificacionService.crear(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
+        notificar(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
                 Notificacion.TipoNotificacion.RESERVA_CANCELADA,
                 "La tutor\u00eda de " + reserva.getMateria().getNombre()
                         + " con " + reserva.getSolicitante().getNombreCompleto() + " fue cancelada.");

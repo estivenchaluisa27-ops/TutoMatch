@@ -2,11 +2,11 @@ package com.uce.Tutomatch.controller;
 
 import com.uce.Tutomatch.dto.CrearReservaDTO;
 import com.uce.Tutomatch.model.Reserva;
-import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.PerfilTutorService;
 import com.uce.Tutomatch.service.ResenaService;
 import com.uce.Tutomatch.service.ReservaPagoService;
 import com.uce.Tutomatch.service.ReservaService;
+import com.uce.Tutomatch.util.AuthUtil;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,27 +27,20 @@ public class ReservaController {
 
     private final ReservaService reservaService;
     private final ReservaPagoService reservaPagoService;
-    private final UsuarioRepository usuarioRepository;
     private final PerfilTutorService perfilTutorService;
     private final ResenaService resenaService;
+    private final AuthUtil authUtil;
 
     public ReservaController(ReservaService reservaService,
                              ReservaPagoService reservaPagoService,
-                             UsuarioRepository usuarioRepository,
                              PerfilTutorService perfilTutorService,
-                             ResenaService resenaService) {
+                             ResenaService resenaService,
+                             AuthUtil authUtil) {
         this.reservaService = reservaService;
         this.reservaPagoService = reservaPagoService;
-        this.usuarioRepository = usuarioRepository;
         this.perfilTutorService = perfilTutorService;
         this.resenaService = resenaService;
-    }
-
-    private Long obtenerUsuarioId(Authentication auth) {
-        String email = auth.getName();
-        return usuarioRepository.findByCorreoInstitucional(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"))
-                .getId();
+        this.authUtil = authUtil;
     }
 
     @GetMapping
@@ -56,11 +49,11 @@ public class ReservaController {
                                   @RequestParam(defaultValue = "10") int size,
                                   @RequestParam(defaultValue = "solicitante") String tab,
                                   Model model) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
 
-        Long usuarioId = obtenerUsuarioId(auth);
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Reserva> comoSolicitantePage = reservaService.obtenerComoSolicitante(usuarioId, pageable);
@@ -95,13 +88,13 @@ public class ReservaController {
     public String crearReserva(Authentication auth,
                                 @Valid @ModelAttribute CrearReservaDTO dto,
                                 BindingResult result) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
         if (result.hasErrors()) return "redirect:/reservas?error=verifica_los_campos";
 
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             reservaService.crear(usuarioId, dto.getDisponibilidadId(), dto.getMateriaId());
             return "redirect:/reservas?success=reserva_creada";
         } catch (Exception e) {
@@ -112,12 +105,12 @@ public class ReservaController {
     @PostMapping("/{id}/confirmar")
     public String confirmarReserva(Authentication auth,
                                    @PathVariable Long id) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
 
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             reservaService.confirmar(id, usuarioId);
             return "redirect:/reservas?tab=tutor&success=reserva_confirmada";
         } catch (Exception e) {
@@ -128,11 +121,11 @@ public class ReservaController {
     @PostMapping("/{id}/finalizar")
     public String finalizarReserva(Authentication auth,
                                     @PathVariable Long id) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             reservaService.finalizar(id, usuarioId);
             return "redirect:/reservas?success=tutoria_finalizada";
         } catch (Exception e) {
@@ -143,12 +136,12 @@ public class ReservaController {
     @PostMapping("/{id}/cancelar")
     public String cancelarReserva(Authentication auth,
                                   @PathVariable Long id) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
 
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             reservaService.cancelar(id, usuarioId, false);
             return "redirect:/reservas?success=reserva_cancelada";
         } catch (Exception e) {
@@ -159,12 +152,12 @@ public class ReservaController {
     @PostMapping("/{id}/marcar-impartida")
     public String marcarImpartida(Authentication auth,
                                   @PathVariable Long id) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
 
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             reservaPagoService.marcarSesionImpartida(id, usuarioId);
             return "redirect:/reservas?tab=tutor&success=sesion_marcada";
         } catch (Exception e) {
@@ -175,12 +168,12 @@ public class ReservaController {
     @PostMapping("/{id}/pagar-token")
     public String pagarConToken(Authentication auth,
                                 @PathVariable Long id) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
 
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             reservaPagoService.pagarConToken(id, usuarioId);
             return "redirect:/reservas?success=pago_exitoso";
         } catch (Exception e) {
@@ -191,12 +184,12 @@ public class ReservaController {
     @PostMapping("/{id}/cancelar-pago")
     public String cancelarEnPendientePago(Authentication auth,
                                           @PathVariable Long id) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
 
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             reservaPagoService.cancelarEnPendientePago(id, usuarioId);
             return "redirect:/reservas?success=reserva_cancelada";
         } catch (Exception e) {

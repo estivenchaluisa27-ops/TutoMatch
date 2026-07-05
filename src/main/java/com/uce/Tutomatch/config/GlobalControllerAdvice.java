@@ -3,6 +3,7 @@ package com.uce.Tutomatch.config;
 import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.NotificacionService;
 import com.uce.Tutomatch.service.WalletConsultaService;
+import com.uce.Tutomatch.util.AuthUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -28,14 +29,14 @@ public class GlobalControllerAdvice {
 
     @ModelAttribute("isAdmin")
     public boolean isAdmin(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) return false;
+        if (!AuthUtil.estaAutenticado(authentication)) return false;
         return authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 
     @ModelAttribute("notificacionesNoLeidas")
     public long notificacionesNoLeidas(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) return 0;
+        if (!AuthUtil.estaAutenticado(authentication)) return 0;
         return usuarioRepository.findByCorreoInstitucional(authentication.getName())
                 .map(u -> notificacionService.contarNoLeidas(u.getId()))
                 .orElse(0L);
@@ -43,7 +44,7 @@ public class GlobalControllerAdvice {
 
     @ModelAttribute("saldoTokens")
     public int saldoTokens(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) return 0;
+        if (!AuthUtil.estaAutenticado(authentication)) return 0;
         try {
             return usuarioRepository.findByCorreoInstitucional(authentication.getName())
                     .map(u -> walletConsulta.obtenerSaldo(u.getId()))

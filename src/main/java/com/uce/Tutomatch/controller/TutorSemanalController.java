@@ -2,8 +2,8 @@ package com.uce.Tutomatch.controller;
 
 import com.uce.Tutomatch.dto.GuardarBloquesDTO;
 import com.uce.Tutomatch.model.TutorMateria;
-import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.SemanalDisponibilidadService;
+import com.uce.Tutomatch.util.AuthUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,29 +32,22 @@ public class TutorSemanalController {
             .boxed().collect(Collectors.toList());
 
     private final SemanalDisponibilidadService semanalService;
-    private final UsuarioRepository usuarioRepository;
+    private final AuthUtil authUtil;
 
     public TutorSemanalController(SemanalDisponibilidadService semanalService,
-                                   UsuarioRepository usuarioRepository) {
+                                   AuthUtil authUtil) {
         this.semanalService = semanalService;
-        this.usuarioRepository = usuarioRepository;
-    }
-
-    private Long obtenerUsuarioId(Authentication auth) {
-        String email = auth.getName();
-        return usuarioRepository.findByCorreoInstitucional(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"))
-                .getId();
+        this.authUtil = authUtil;
     }
 
     @GetMapping("/disponibilidad/semanal")
     public String verSemana(Authentication auth, Model model,
                             @RequestParam(required = false) String semana) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (!AuthUtil.estaAutenticado(auth)) {
             return "redirect:/auth/login";
         }
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             semanalService.obtenerPerfilPorUsuarioId(usuarioId);
 
             LocalDate hoy = LocalDate.now();
@@ -110,7 +103,7 @@ public class TutorSemanalController {
     public Map<String, Object> guardarSemana(Authentication auth, @RequestBody GuardarBloquesDTO dto) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             LocalDate semanaInicio = LocalDate.parse(dto.getSemanaInicio());
 
             Map<Integer, Map<Integer, List<Long>>> celdas = new HashMap<>();
@@ -131,7 +124,7 @@ public class TutorSemanalController {
     @PostMapping("/disponibilidad/semanal/limpiar")
     public String limpiarSemana(Authentication auth, @RequestParam String semana) {
         try {
-            Long usuarioId = obtenerUsuarioId(auth);
+            Long usuarioId = authUtil.obtenerUsuarioId(auth);
             LocalDate semanaInicio = LocalDate.parse(semana);
             semanalService.limpiarSemana(usuarioId, semanaInicio);
             return "redirect:/tutor/disponibilidad/semanal?s=" + URLEncoder.encode(semana, StandardCharsets.UTF_8) + "&success=semana_limpiada";
