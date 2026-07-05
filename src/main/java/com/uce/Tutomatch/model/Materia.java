@@ -5,19 +5,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "materias")
+@Table(name = "materia")
 public class Materia {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String facultad;
+
+    private String carrera;
+
+    @Column(name = "nivelDesercion")
+    private String nivelDesercion;
+
+    private String transversalidad;
+
     @Column(nullable = false)
     private String nombre;
 
     private String categoria;
 
-    @Column(name = "semestre_referencial")
+    @Column(name = "semestreReferencial")
     private Integer semestreReferencial;
 
     @Column(columnDefinition = "TEXT")
@@ -38,12 +47,16 @@ public class Materia {
         this.semestreReferencial = semestreReferencial;
     }
 
-    public Materia(String nombre, String categoria, Integer semestreReferencial, String descripcion, String icono) {
+    public Materia(String nombre, String categoria, Integer semestreReferencial, String descripcion, String icono, String facultad, String carrera, String nivelDesercion, String transversalidad) {
         this.nombre = nombre;
         this.categoria = categoria;
         this.semestreReferencial = semestreReferencial;
         this.descripcion = descripcion;
         this.icono = icono;
+        this.facultad = facultad;
+        this.carrera = carrera;
+        this.nivelDesercion = nivelDesercion;
+        this.transversalidad = transversalidad;
     }
 
     public Long getId() {
@@ -52,6 +65,38 @@ public class Materia {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getFacultad() {
+        return facultad;
+    }
+
+    public void setFacultad(String facultad) {
+        this.facultad = facultad;
+    }
+
+    public String getCarrera() {
+        return carrera;
+    }
+
+    public void setCarrera(String carrera) {
+        this.carrera = carrera;
+    }
+
+    public String getNivelDesercion() {
+        return nivelDesercion;
+    }
+
+    public void setNivelDesercion(String nivelDesercion) {
+        this.nivelDesercion = nivelDesercion;
+    }
+
+    public String getTransversalidad() {
+        return transversalidad;
+    }
+
+    public void setTransversalidad(String transversalidad) {
+        this.transversalidad = transversalidad;
     }
 
     public String getNombre() {
@@ -106,6 +151,8 @@ public class Materia {
     public String toString() {
         return "Materia{" +
                 "id=" + id +
+                ", facultad='" + facultad + '\'' +
+                ", carrera='" + carrera + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", categoria='" + categoria + '\'' +
                 ", semestreReferencial=" + semestreReferencial +
