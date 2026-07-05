@@ -1,15 +1,18 @@
 package com.uce.Tutomatch.service;
 
 import com.uce.Tutomatch.model.BloqueSemanal;
+import com.uce.Tutomatch.model.Disponibilidad;
 import com.uce.Tutomatch.model.PerfilTutor;
 import com.uce.Tutomatch.model.TutorMateria;
 import com.uce.Tutomatch.repository.BloqueSemanalRepository;
+import com.uce.Tutomatch.repository.DisponibilidadRepository;
 import com.uce.Tutomatch.repository.PerfilTutorRepository;
 import com.uce.Tutomatch.repository.TutorMateriaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,15 +20,33 @@ import java.util.stream.Collectors;
 public class SemanalDisponibilidadService {
 
     private final BloqueSemanalRepository bloqueSemanalRepository;
+    private final DisponibilidadRepository disponibilidadRepository;
     private final PerfilTutorRepository perfilTutorRepository;
     private final TutorMateriaRepository tutorMateriaRepository;
 
     public SemanalDisponibilidadService(BloqueSemanalRepository bloqueSemanalRepository,
+                                        DisponibilidadRepository disponibilidadRepository,
                                         PerfilTutorRepository perfilTutorRepository,
                                         TutorMateriaRepository tutorMateriaRepository) {
         this.bloqueSemanalRepository = bloqueSemanalRepository;
+        this.disponibilidadRepository = disponibilidadRepository;
         this.perfilTutorRepository = perfilTutorRepository;
         this.tutorMateriaRepository = tutorMateriaRepository;
+    }
+
+    private void sincronizarDisponibilidad(Long perfilTutorId, List<BloqueSemanal> bloques) {
+        disponibilidadRepository.deleteByPerfilTutorIdAndEstado(
+                perfilTutorId, Disponibilidad.EstadoDisponibilidad.LIBRE);
+        for (BloqueSemanal b : bloques) {
+            if (b.getEstado() != BloqueSemanal.EstadoBloque.DISPONIBLE) continue;
+            Disponibilidad d = new Disponibilidad(
+                    b.getPerfilTutor(),
+                    b.getDiaSemana(),
+                    LocalTime.of(b.getHora(), 0),
+                    LocalTime.of(b.getHora() + 1, 0)
+            );
+            disponibilidadRepository.save(d);
+        }
     }
 
     public PerfilTutor obtenerPerfilPorUsuarioId(Long usuarioId) {
@@ -72,6 +93,7 @@ public class SemanalDisponibilidadService {
 
         bloqueSemanalRepository.deleteByPerfilTutorIdAndSemanaInicio(perfilId, semanaInicio);
 
+        List<BloqueSemanal> nuevosBloques = new ArrayList<>();
         for (Map.Entry<Integer, Map<Integer, List<Long>>> entryDia : celdasActivas.entrySet()) {
             Integer diaSemana = entryDia.getKey();
             for (Map.Entry<Integer, List<Long>> entryHora : entryDia.getValue().entrySet()) {
@@ -84,13 +106,18 @@ public class SemanalDisponibilidadService {
                     bloque.setMaterias(materias);
                 }
                 bloqueSemanalRepository.save(bloque);
+                nuevosBloques.add(bloque);
             }
         }
+
+        sincronizarDisponibilidad(perfilId, nuevosBloques);
     }
 
     @Transactional
     public void limpiarSemana(Long usuarioId, LocalDate semanaInicio) {
         PerfilTutor perfil = obtenerPerfilPorUsuarioId(usuarioId);
         bloqueSemanalRepository.deleteByPerfilTutorIdAndSemanaInicio(perfil.getId(), semanaInicio);
+        disponibilidadRepository.deleteByPerfilTutorIdAndEstado(
+                perfil.getId(), Disponibilidad.EstadoDisponibilidad.LIBRE);
     }
 }

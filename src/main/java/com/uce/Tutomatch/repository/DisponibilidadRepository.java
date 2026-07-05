@@ -13,6 +13,8 @@ public interface DisponibilidadRepository extends JpaRepository<Disponibilidad, 
 
     List<Disponibilidad> findByPerfilTutorIdOrderByDiaSemanaAscHoraInicioAsc(Long perfilTutorId);
 
+    void deleteByPerfilTutorIdAndEstado(Long perfilTutorId, Disponibilidad.EstadoDisponibilidad estado);
+
     Page<Disponibilidad> findByPerfilTutorIdOrderByDiaSemanaAscHoraInicioAsc(Long perfilTutorId, Pageable pageable);
 
     List<Disponibilidad> findByPerfilTutorIdAndEstado(Long perfilTutorId, Disponibilidad.EstadoDisponibilidad estado);

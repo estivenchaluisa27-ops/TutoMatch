@@ -27,6 +27,11 @@ public class GlobalControllerAdvice {
         this.walletConsulta = walletConsulta;
     }
 
+    @ModelAttribute("authenticated")
+    public boolean authenticated(Authentication authentication) {
+        return AuthUtil.estaAutenticado(authentication);
+    }
+
     @ModelAttribute("isAdmin")
     public boolean isAdmin(Authentication authentication) {
         if (!AuthUtil.estaAutenticado(authentication)) return false;
