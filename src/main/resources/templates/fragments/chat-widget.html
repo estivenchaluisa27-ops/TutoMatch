@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" lang="es">
+<head><meta charset="UTF-8"></head>
+<body>
+    <th:block th:fragment="chat-widget">
+        <div id="chatWidget" class="chat-widget" th:if="${authenticated}">
+            <button id="chatToggle" class="chat-toggle" title="Chat">
+                <i class="bi bi-chat-dots"></i>
+                <span id="chatBadge" class="chat-badge d-none">0</span>
+            </button>
+
+            <div id="chatPanel" class="chat-panel d-none">
+                <div class="chat-header">
+                    <h6 class="mb-0">Mensajes</h6>
+                    <button id="chatClose" class="btn-close btn-close-white"></button>
+                </div>
+
+                <div id="chatConversaciones" class="chat-conversaciones">
+                    <div class="chat-loading text-center py-4 text-muted small">
+                        <i class="bi bi-hourglass-split"></i> Cargando...
+                    </div>
+                </div>
+
+                <div id="chatConversacion" class="chat-conversacion d-none">
+                    <div class="chat-conv-header">
+                        <button id="chatBack" class="btn btn-sm btn-link text-white p-0 me-2">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                        <span id="chatConvNombre" class="fw-semibold small"></span>
+                    </div>
+                    <div id="chatMensajes" class="chat-mensajes"></div>
+                    <div class="chat-input-area">
+                        <input id="chatInput" type="text" class="chat-input" placeholder="Escribe un mensaje..." maxlength="500">
+                        <button id="chatSend" class="chat-send" disabled>
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

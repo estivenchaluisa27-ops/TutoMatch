@@ -117,26 +117,26 @@
         </div>
     </section>
     <!-- MÓVIL: Versión Adaptada (< lg) -->
-    <section class="mb-5 d-lg-none">
+    <section th:if="${not #lists.isEmpty(recomendados)}" class="py-4 d-lg-none" style="background: var(--bg-light-utility);">
         <div class="container">
-            <h2 class="text-center mb-4 fw-bold">Materias por Categor&iacute;a</h2>
-
-            <div class="mb-4">
-                <h4 class="fw-semibold text-secondary pb-2 mb-3 border-bottom">Especialidad</h4>
-                <div id="contenedor-especialidad-movil" class="row row-cols-1 row-cols-md-2 g-3"></div>
-            </div>
-
-            <div class="mb-4">
-                <h4 class="fw-semibold text-secondary pb-2 mb-3 border-bottom">Tronco Com&uacute;n</h4>
-                <div id="contenedor-tronco-movil" class="row row-cols-1 row-cols-md-2 g-3"></div>
-            </div>
+            <h2 class="text-center fw-bold mb-3">Tutores Recomendados</h2>
+            <th:block th:replace="~{fragments/tutor-cards :: tutor-cards(columnClass='row row-cols-1 g-3', avatarClass='avatar-circle avatar-circle-mobile me-3', descLen=80)}"/>
         </div>
     </section>
 
-    <section th:if="${not #lists.isEmpty(recomendados)}" class="py-5 d-lg-none" style="background: var(--bg-light-utility);">
+    <section class="mb-5 d-lg-none">
         <div class="container">
-            <h2 class="text-center fw-bold mb-4">Tutores Recomendados</h2>
-            <th:block th:replace="~{fragments/tutor-cards :: tutor-cards(columnClass='row row-cols-1 row-cols-md-2 g-4', avatarClass='avatar-circle me-3', descLen=100)}"/>
+            <h2 class="text-center mb-3 fw-bold">Materias por Categor&iacute;a</h2>
+
+            <div class="mb-3">
+                <h4 class="fw-semibold text-secondary pb-2 mb-3 border-bottom">Especialidad</h4>
+                <div id="contenedor-especialidad-movil" class="row row-cols-1 row-cols-sm-2 g-3"></div>
+            </div>
+
+            <div class="mb-3">
+                <h4 class="fw-semibold text-secondary pb-2 mb-3 border-bottom">Tronco Com&uacute;n</h4>
+                <div id="contenedor-tronco-movil" class="row row-cols-1 row-cols-sm-2 g-3"></div>
+            </div>
         </div>
     </section>
 </th:block>

@@ -32,7 +32,7 @@ public class SecurityConfig {
                     response.sendRedirect("/auth/login"))
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/favicon.ico", "/images/**", "/fonts/**").permitAll()
+                .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/favicon.ico", "/images/**", "/fonts/**", "/ws/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/buscar").permitAll()
                 .requestMatchers("/tutor/*").permitAll()

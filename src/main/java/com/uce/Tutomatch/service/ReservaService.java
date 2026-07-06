@@ -18,6 +18,7 @@ public class ReservaService {
     private final PerfilTutorRepository perfilTutorRepository;
     private final UsuarioRepository usuarioRepository;
     private final NotificacionService notificacionService;
+    private final ChatService chatService;
 
     private static final List<String> DIAS = List.of("Lunes", "Martes", "Mi\u00e9rcoles", "Jueves", "Viernes", "S\u00e1bado", "Domingo");
 
@@ -26,13 +27,15 @@ public class ReservaService {
                           MateriaRepository materiaRepository,
                           PerfilTutorRepository perfilTutorRepository,
                           UsuarioRepository usuarioRepository,
-                          NotificacionService notificacionService) {
+                          NotificacionService notificacionService,
+                          ChatService chatService) {
         this.reservaRepository = reservaRepository;
         this.disponibilidadRepository = disponibilidadRepository;
         this.materiaRepository = materiaRepository;
         this.perfilTutorRepository = perfilTutorRepository;
         this.usuarioRepository = usuarioRepository;
         this.notificacionService = notificacionService;
+        this.chatService = chatService;
     }
 
     private String diaSemanaNombre(Integer dia) {
@@ -113,6 +116,8 @@ public class ReservaService {
 
         reserva.setEstado(Reserva.EstadoReserva.CONFIRMADA);
         reserva = reservaRepository.save(reserva);
+
+        chatService.obtenerOCrear(reserva.getSolicitante(), reserva.getDisponibilidad().getPerfilTutor().getUsuario());
 
         notificar(reserva.getSolicitante(), Notificacion.TipoNotificacion.RESERVA_CONFIRMADA,
                 "Tu tutor\u00eda de " + reserva.getMateria().getNombre()
