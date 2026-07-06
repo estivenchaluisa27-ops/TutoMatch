@@ -30,16 +30,14 @@ public class ExcelImportService {
 
                 Materia materia = new Materia();
 
+                materia.setFacultad(getCellValue(row.getCell(0)));
+                materia.setCarrera(getCellValue(row.getCell(1)));
+                materia.setSemestreReferencial((int) getNumericCellValue(row.getCell(2), 1));
                 materia.setNombre(getCellValue(row.getCell(3)));
-                materia.setCategoria(getCellValue(row.getCell(5)));
                 materia.setDescripcion(getCellValue(row.getCell(4)));
-
-                Cell semestreCell = row.getCell(2);
-                if (semestreCell != null && semestreCell.getCellType() == CellType.NUMERIC) {
-                    materia.setSemestreReferencial((int) semestreCell.getNumericCellValue());
-                } else {
-                    materia.setSemestreReferencial(1);
-                }
+                materia.setCategoria(getCellValue(row.getCell(5)));
+                materia.setNivelDesercion(getCellValue(row.getCell(6)));
+                materia.setTransversalidad(getCellValue(row.getCell(7)));
 
                 materia.setIcono("");
 
@@ -55,5 +53,10 @@ public class ExcelImportService {
     private String getCellValue(Cell cell) {
         if (cell == null) return "";
         return cell.getCellType() == CellType.STRING ? cell.getStringCellValue().trim() : cell.toString().trim();
+    }
+
+    private int getNumericCellValue(Cell cell, int defaultValue) {
+        if (cell == null) return defaultValue;
+        return cell.getCellType() == CellType.NUMERIC ? (int) cell.getNumericCellValue() : defaultValue;
     }
 }

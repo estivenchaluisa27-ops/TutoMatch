@@ -7,24 +7,13 @@ import com.uce.Tutomatch.util.AuthUtil;
 import jakarta.validation.Valid;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/admin")
@@ -41,18 +30,37 @@ public class AdminMateriaController {
 
     @GetMapping("/materias")
     public String listarMaterias(Authentication auth,
-                                  @RequestParam(defaultValue = "0") int page,
-                                  @RequestParam(defaultValue = "10") int size,
+                                  @RequestParam(required = false) String filtro,
+                                  @RequestParam(required = false) String facultad,
                                   Model model) {
         if (!authUtil.esAdmin(auth)) return "redirect:/auth/login?error=credenciales";
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("categoria").ascending().and(Sort.by("nombre").ascending()));
-        Page<Materia> materiasPage = materiaRepository.findAllByOrderByCategoriaAscNombreAsc(pageable);
-        Map<String, List<Materia>> materiasPorCategoria = materiasPage.getContent().stream()
+        List<Materia> todas;
+
+        if (filtro != null && !filtro.isBlank() && facultad != null && !facultad.isBlank()) {
+            todas = materiaRepository.findByNombreContainingIgnoreCaseAndFacultadContainingIgnoreCaseOrderByCategoriaAscNombreAsc(filtro, facultad);
+        } else if (filtro != null && !filtro.isBlank()) {
+            todas = materiaRepository.findByNombreContainingIgnoreCaseOrderByCategoriaAscNombreAsc(filtro);
+        } else if (facultad != null && !facultad.isBlank()) {
+            todas = materiaRepository.findByFacultadContainingIgnoreCaseOrderByCategoriaAscNombreAsc(facultad);
+        } else {
+            todas = materiaRepository.findAllByOrderByCategoriaAscNombreAsc();
+        }
+
+        Map<String, List<Materia>> materiasPorCategoria = todas.stream()
                 .collect(Collectors.groupingBy(Materia::getCategoria, LinkedHashMap::new, Collectors.toList()));
 
+        List<String> facultades = materiaRepository.findAll().stream()
+                .map(Materia::getFacultad)
+                .filter(f -> f != null && !f.isBlank())
+                .distinct()
+                .sorted()
+                .toList();
+
         model.addAttribute("materiasPorCategoria", materiasPorCategoria);
-        model.addAttribute("page", materiasPage);
+        model.addAttribute("facultades", facultades);
+        model.addAttribute("filtro", filtro);
+        model.addAttribute("facultad", facultad);
         model.addAttribute("authenticated", true);
         model.addAttribute("isAdmin", true);
         return "admin-materias";

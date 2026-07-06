@@ -80,6 +80,32 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Pagination -->
+            <div class="col-12" th:if="${page != null and page.totalPages > 1}">
+                <nav aria-label="Paginaci\u00f3n de rese\u00f1as">
+                    <ul class="pagination justify-content-center mt-4">
+                        <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/resenas(page=0, size=${page.size})}" aria-label="Primera">««</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/resenas(page=${page.number - 1}, size=${page.size})}" aria-label="Anterior">«</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}" th:classappend="${page.number == i} ? 'active' : ''">
+                            <a class="page-link" th:href="@{/admin/resenas(page=${i}, size=${page.size})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/resenas(page=${page.number + 1}, size=${page.size})}" aria-label="Siguiente">»</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/resenas(page=${page.totalPages - 1}, size=${page.size})}" aria-label="Última">»»</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center text-muted small mt-2">
+                    <span th:text="'P\u00e1gina ' + (page.number + 1) + ' de ' + page.totalPages + ' (' + page.totalElements + ' totales)'">P\u00e1gina 1 de 1</span>
+                </div>
+            </div>
         </div>
     </th:block>
 </body>

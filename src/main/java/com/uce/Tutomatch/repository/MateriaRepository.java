@@ -1,8 +1,7 @@
 package com.uce.Tutomatch.repository;
 
 import com.uce.Tutomatch.model.Materia;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,9 +15,13 @@ public interface MateriaRepository extends JpaRepository<Materia, Long> {
 
     List<Materia> findAllByOrderByCategoriaAscNombreAsc();
 
-    Page<Materia> findAllByOrderByCategoriaAscNombreAsc(Pageable pageable);
-
     List<Materia> findByCategoriaOrderByNombreAsc(String categoria);
 
-    Page<Materia> findByCategoriaOrderByNombreAsc(String categoria, Pageable pageable);
+    List<Materia> findByNombreContainingIgnoreCaseOrderByCategoriaAscNombreAsc(String nombre);
+
+    List<Materia> findByNombreContainingIgnoreCaseAndFacultadContainingIgnoreCaseOrderByCategoriaAscNombreAsc(String nombre, String facultad);
+
+    List<Materia> findByFacultadContainingIgnoreCaseOrderByCategoriaAscNombreAsc(String facultad);
+
+    List<Materia> findByNombreContainingIgnoreCaseAndCategoriaOrderByCategoriaAscNombreAsc(String nombre, String categoria);
 }

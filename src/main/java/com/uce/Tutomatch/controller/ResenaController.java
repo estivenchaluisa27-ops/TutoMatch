@@ -5,8 +5,6 @@ import com.uce.Tutomatch.model.Usuario;
 import com.uce.Tutomatch.service.ResenaService;
 import com.uce.Tutomatch.util.AuthUtil;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,8 +15,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/resenas")
 public class ResenaController {
-
-    private static final Logger log = LoggerFactory.getLogger(ResenaController.class);
 
     private final ResenaService resenaService;
     private final AuthUtil authUtil;
@@ -51,14 +47,9 @@ public class ResenaController {
             return "redirect:/reservas";
         }
 
-        try {
-            Long usuarioId = authUtil.obtenerUsuarioId(auth);
-            resenaService.crear(dto.getReservaId(), usuarioId, dto.getCalificacion(), dto.getComentario());
-            ra.addFlashAttribute("success", "Calificación guardada correctamente");
-        } catch (Exception e) {
-            log.error("Error al guardar reseña: {}", e.getMessage(), e);
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
+        resenaService.crear(dto.getReservaId(), usuarioId, dto.getCalificacion(), dto.getComentario());
+        ra.addFlashAttribute("success", "Calificación guardada correctamente");
 
         return "redirect:/reservas";
     }
@@ -69,15 +60,9 @@ public class ResenaController {
                            RedirectAttributes ra) {
         if (!AuthUtil.estaAutenticado(auth)) return "redirect:/auth/login";
 
-        try {
-            Usuario user = authUtil.obtenerUsuario(auth);
-            boolean esAdmin = user.isRolAdmin();
-            resenaService.eliminar(id, esAdmin);
-            ra.addFlashAttribute("success", "Reseña eliminada correctamente");
-        } catch (Exception e) {
-            log.error("Error al eliminar reseña: {}", e.getMessage(), e);
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        Usuario user = authUtil.obtenerUsuario(auth);
+        resenaService.eliminar(id, user.isRolAdmin());
+        ra.addFlashAttribute("success", "Reseña eliminada correctamente");
 
         return "redirect:/reservas";
     }

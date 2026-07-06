@@ -7,14 +7,18 @@ import com.uce.Tutomatch.repository.ConfiguracionSistemaRepository;
 import com.uce.Tutomatch.repository.MateriaRepository;
 import com.uce.Tutomatch.repository.UsuarioRepository;
 import com.uce.Tutomatch.service.ExcelImportService;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.util.List;
 
 @Component
@@ -86,6 +90,8 @@ public class DbSeed implements CommandLineRunner {
         }
 
         if (materiaRepository.count() > 0) {
+            logger.info("Actualizando facultad y carrera desde Excel...");
+            seedFacultadesYCarreras();
             logger.info("Aplicando mapeo inteligente de iconos vectoriales...");
             seedIconosMateriasMasivas();
         }
@@ -111,6 +117,38 @@ public class DbSeed implements CommandLineRunner {
         }
 
         logger.info("Seed complementario y mapeo estético finalizado con éxito.");
+    }
+
+    private void seedFacultadesYCarreras() {
+        try {
+            InputStream is = new ClassPathResource("Base_TutoMatch.xlsx").getInputStream();
+            Workbook workbook = new XSSFWorkbook(is);
+            Sheet sheet = workbook.getSheetAt(0);
+            List<Materia> todas = materiaRepository.findAll();
+            boolean huboCambios = false;
+
+            for (Materia m : todas) {
+                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                    Row row = sheet.getRow(i);
+                    if (row == null) continue;
+                    String nombreExcel = row.getCell(3) != null ? row.getCell(3).getStringCellValue().trim() : "";
+                    if (nombreExcel.equalsIgnoreCase(m.getNombre())) {
+                        m.setFacultad(row.getCell(0) != null ? row.getCell(0).getStringCellValue().trim() : "");
+                        m.setCarrera(row.getCell(1) != null ? row.getCell(1).getStringCellValue().trim() : "");
+                        huboCambios = true;
+                        break;
+                    }
+                }
+            }
+
+            if (huboCambios) {
+                materiaRepository.saveAll(todas);
+                logger.info("Facultad y carrera actualizadas desde Excel.");
+            }
+            workbook.close();
+        } catch (Exception e) {
+            logger.warn("No se pudo actualizar facultad/carrera: {}", e.getMessage());
+        }
     }
 
     private void seedIconosMateriasMasivas() {

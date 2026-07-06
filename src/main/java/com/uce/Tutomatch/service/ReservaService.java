@@ -127,37 +127,6 @@ public class ReservaService {
         return reserva;
     }
 
-    @Deprecated
-    @Transactional
-    public Reserva finalizar(Long reservaId, Long usuarioId) {
-        Reserva reserva = reservaRepository.findById(reservaId)
-                .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada"));
-
-        if (reserva.getEstado() != Reserva.EstadoReserva.CONFIRMADA) {
-            throw new IllegalArgumentException("Solo se pueden finalizar reservas confirmadas");
-        }
-
-        Long tutorId = reserva.getDisponibilidad().getPerfilTutor().getUsuario().getId();
-        if (!tutorId.equals(usuarioId)) {
-            throw new IllegalArgumentException("Solo el tutor puede finalizar la reserva");
-        }
-
-        reserva.setEstado(Reserva.EstadoReserva.FINALIZADA);
-        reserva = reservaRepository.save(reserva);
-
-        notificar(reserva.getSolicitante(), Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
-                "Tu tutor\u00eda de " + reserva.getMateria().getNombre()
-                        + " con " + reserva.getDisponibilidad().getPerfilTutor().getUsuario().getNombreCompleto()
-                        + " ha finalizado.");
-
-        notificar(reserva.getDisponibilidad().getPerfilTutor().getUsuario(),
-                Notificacion.TipoNotificacion.RESERVA_FINALIZADA,
-                "La tutor\u00eda de " + reserva.getMateria().getNombre()
-                        + " con " + reserva.getSolicitante().getNombreCompleto() + " ha finalizado.");
-
-        return reserva;
-    }
-
     @Transactional
     public Reserva cancelar(Long reservaId, Long usuarioId, boolean esAdmin) {
         Reserva reserva = reservaRepository.findById(reservaId)

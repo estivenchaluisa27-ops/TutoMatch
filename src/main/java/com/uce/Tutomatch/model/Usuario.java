@@ -6,9 +6,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
 import java.time.LocalDateTime;
 
 @Entity
@@ -39,9 +36,6 @@ public class Usuario {
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
-
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private PerfilTutor perfilTutor;
 
     public Usuario() {
         this.fechaCreacion = LocalDateTime.now();
@@ -123,17 +117,6 @@ public class Usuario {
 
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
-    }
-
-    public PerfilTutor getPerfilTutor() {
-        return perfilTutor;
-    }
-
-    public void setPerfilTutor(PerfilTutor perfilTutor) {
-        this.perfilTutor = perfilTutor;
-        if (perfilTutor != null) {
-            perfilTutor.setUsuario(this);
-        }
     }
 
     @Override

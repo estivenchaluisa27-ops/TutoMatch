@@ -15,7 +15,7 @@
                         <li class="breadcrumb-item active">Materias</li>
                     </ol>
                 </nav>
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                         <h1 class="fw-bold mb-0">
                             <i class="bi bi-book me-2"></i>Cat&aacute;logo de Materias
@@ -31,6 +31,35 @@
 
         <div class="row stagger-fade stagger-fade-2">
             <div class="col-12">
+                <!-- Filtros -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <form method="get" action="/admin/materias" class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label for="filtro" class="form-label small fw-semibold">Buscar materia</label>
+                                <input type="text" id="filtro" name="filtro" class="form-control"
+                                       placeholder="Buscar por nombre..." th:value="${filtro}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="facultad" class="form-label small fw-semibold">Facultad</label>
+                                <select id="facultad" name="facultad" class="form-select">
+                                    <option value="">Todas las facultades</option>
+                                    <option th:each="f : ${facultades}" th:value="${f}" th:text="${f}"
+                                            th:selected="${facultad == f}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-fill">
+                                    <i class="bi bi-search me-1"></i>Filtrar
+                                </button>
+                                <a href="/admin/materias" class="btn btn-outline-secondary flex-fill">
+                                    <i class="bi bi-x-lg me-1"></i>Limpiar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-body p-0">
                         <div th:if="${materiasPorCategoria.isEmpty()}" class="text-center text-muted py-5">
@@ -46,6 +75,7 @@
                                         <th>Icono</th>
                                         <th>Nombre</th>
                                         <th>Categor&iacute;a</th>
+                                        <th>Facultad</th>
                                         <th>Descripci&oacute;n</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -53,25 +83,27 @@
                                 <tbody>
                                     <th:block th:each="entry : ${materiasPorCategoria}">
                                         <tr style="background: var(--bg-light-utility);">
-                                            <td colspan="6" class="fw-bold small">
+                                            <td colspan="7" class="fw-bold small">
                                                 <i class="bi bi-folder me-1"></i>
                                                 <span th:text="${entry.key}">Categor&iacute;a</span>
+                                                <span class="badge bg-secondary ms-2" th:text="${#lists.size(entry.value)}">0</span>
                                             </td>
                                         </tr>
                                         <tr th:each="m : ${entry.value}">
                                             <td th:text="${m.id}">1</td>
                                             <td>
                                                 <div class="card-icon" th:attr="data-categoria=${m.categoria}">
-                                                    <th:block th:if="${m.icono != null}">
+                                                    <th:block th:if="${m.icono != null and !m.icono.isEmpty()}">
                                                         <span th:utext="${m.icono}"></span>
                                                     </th:block>
-                                                    <i th:if="${m.icono == null}" class="bi bi-book fs-5"></i>
+                                                    <i th:if="${m.icono == null or m.icono.isEmpty()}" class="bi bi-book fs-5"></i>
                                                 </div>
                                             </td>
                                             <td th:text="${m.nombre}">Matem&aacute;ticas</td>
                                             <td>
                                                 <span class="badge bg-info" th:text="${m.categoria}">Categor&iacute;a</span>
                                             </td>
+                                            <td th:text="${m.facultad ?: '-'}">Facultad</td>
                                             <td class="small" th:text="${m.descripcion}">Descripci&oacute;n</td>
                                             <td>
                                                 <button type="button" class="btn btn-outline-primary btn-sm"

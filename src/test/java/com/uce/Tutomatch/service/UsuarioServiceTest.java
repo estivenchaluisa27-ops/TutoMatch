@@ -100,15 +100,19 @@ class UsuarioServiceTest {
         });
 
         ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+        ArgumentCaptor<PerfilTutor> perfilCaptor = ArgumentCaptor.forClass(PerfilTutor.class);
         usuarioService.registrar(request, response);
         verify(usuarioRepository).save(captor.capture());
+        verify(perfilTutorRepository).save(perfilCaptor.capture());
 
         Usuario saved = captor.getValue();
         assertTrue(saved.isRolTutor());
-        assertNotNull(saved.getPerfilTutor());
-        assertEquals(Integer.valueOf(1), saved.getPerfilTutor().getSemestre());
-        assertFalse(saved.getPerfilTutor().isVerificado());
-        assertFalse(saved.getPerfilTutor().isVisible());
+        PerfilTutor savedPerfil = perfilCaptor.getValue();
+        assertNotNull(savedPerfil);
+        assertEquals(Integer.valueOf(1), savedPerfil.getSemestre());
+        assertFalse(savedPerfil.isVerificado());
+        assertFalse(savedPerfil.isVisible());
+        assertEquals(saved, savedPerfil.getUsuario());
         verify(walletOperacionService).inicializarWallet(2L);
     }
 

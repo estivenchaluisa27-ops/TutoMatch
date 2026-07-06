@@ -2,7 +2,6 @@ package com.uce.Tutomatch.controller;
 
 import com.uce.Tutomatch.dto.CrearReservaDTO;
 import com.uce.Tutomatch.model.Reserva;
-import com.uce.Tutomatch.service.PerfilTutorService;
 import com.uce.Tutomatch.service.ResenaService;
 import com.uce.Tutomatch.service.ReservaPagoService;
 import com.uce.Tutomatch.service.ReservaService;
@@ -17,8 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Controller
@@ -27,18 +24,15 @@ public class ReservaController {
 
     private final ReservaService reservaService;
     private final ReservaPagoService reservaPagoService;
-    private final PerfilTutorService perfilTutorService;
     private final ResenaService resenaService;
     private final AuthUtil authUtil;
 
     public ReservaController(ReservaService reservaService,
                              ReservaPagoService reservaPagoService,
-                             PerfilTutorService perfilTutorService,
                              ResenaService resenaService,
                              AuthUtil authUtil) {
         this.reservaService = reservaService;
         this.reservaPagoService = reservaPagoService;
-        this.perfilTutorService = perfilTutorService;
         this.resenaService = resenaService;
         this.authUtil = authUtil;
     }
@@ -93,13 +87,9 @@ public class ReservaController {
         }
         if (result.hasErrors()) return "redirect:/reservas?error=verifica_los_campos";
 
-        try {
-            Long usuarioId = authUtil.obtenerUsuarioId(auth);
-            reservaService.crear(usuarioId, dto.getDisponibilidadId(), dto.getMateriaId());
-            return "redirect:/reservas?success=reserva_creada";
-        } catch (Exception e) {
-            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
+        reservaService.crear(usuarioId, dto.getDisponibilidadId(), dto.getMateriaId());
+        return "redirect:/reservas?success=reserva_creada";
     }
 
     @PostMapping("/{id}/confirmar")
@@ -109,28 +99,9 @@ public class ReservaController {
             return "redirect:/auth/login";
         }
 
-        try {
-            Long usuarioId = authUtil.obtenerUsuarioId(auth);
-            reservaService.confirmar(id, usuarioId);
-            return "redirect:/reservas?tab=tutor&success=reserva_confirmada";
-        } catch (Exception e) {
-            return "redirect:/reservas?tab=tutor&error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
-    }
-
-    @PostMapping("/{id}/finalizar")
-    public String finalizarReserva(Authentication auth,
-                                    @PathVariable Long id) {
-        if (!AuthUtil.estaAutenticado(auth)) {
-            return "redirect:/auth/login";
-        }
-        try {
-            Long usuarioId = authUtil.obtenerUsuarioId(auth);
-            reservaService.finalizar(id, usuarioId);
-            return "redirect:/reservas?success=tutoria_finalizada";
-        } catch (Exception e) {
-            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
+        reservaService.confirmar(id, usuarioId);
+        return "redirect:/reservas?tab=tutor&success=reserva_confirmada";
     }
 
     @PostMapping("/{id}/cancelar")
@@ -140,13 +111,9 @@ public class ReservaController {
             return "redirect:/auth/login";
         }
 
-        try {
-            Long usuarioId = authUtil.obtenerUsuarioId(auth);
-            reservaService.cancelar(id, usuarioId, false);
-            return "redirect:/reservas?success=reserva_cancelada";
-        } catch (Exception e) {
-            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
+        reservaService.cancelar(id, usuarioId, false);
+        return "redirect:/reservas?success=reserva_cancelada";
     }
 
     @PostMapping("/{id}/marcar-impartida")
@@ -156,13 +123,9 @@ public class ReservaController {
             return "redirect:/auth/login";
         }
 
-        try {
-            Long usuarioId = authUtil.obtenerUsuarioId(auth);
-            reservaPagoService.marcarSesionImpartida(id, usuarioId);
-            return "redirect:/reservas?tab=tutor&success=sesion_marcada";
-        } catch (Exception e) {
-            return "redirect:/reservas?tab=tutor&error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
+        reservaPagoService.marcarSesionImpartida(id, usuarioId);
+        return "redirect:/reservas?tab=tutor&success=sesion_marcada";
     }
 
     @PostMapping("/{id}/pagar-token")
@@ -172,13 +135,9 @@ public class ReservaController {
             return "redirect:/auth/login";
         }
 
-        try {
-            Long usuarioId = authUtil.obtenerUsuarioId(auth);
-            reservaPagoService.pagarConToken(id, usuarioId);
-            return "redirect:/reservas?success=pago_exitoso";
-        } catch (Exception e) {
-            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
+        reservaPagoService.pagarConToken(id, usuarioId);
+        return "redirect:/reservas?success=pago_exitoso";
     }
 
     @PostMapping("/{id}/cancelar-pago")
@@ -188,12 +147,8 @@ public class ReservaController {
             return "redirect:/auth/login";
         }
 
-        try {
-            Long usuarioId = authUtil.obtenerUsuarioId(auth);
-            reservaPagoService.cancelarEnPendientePago(id, usuarioId);
-            return "redirect:/reservas?success=reserva_cancelada";
-        } catch (Exception e) {
-            return "redirect:/reservas?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
+        Long usuarioId = authUtil.obtenerUsuarioId(auth);
+        reservaPagoService.cancelarEnPendientePago(id, usuarioId);
+        return "redirect:/reservas?success=reserva_cancelada";
     }
 }

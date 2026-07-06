@@ -40,34 +40,7 @@
                     <div class="card-body text-center">
                         <i class="bi bi-clock fs-1 text-warning"></i>
                         <h2 class="fw-bold mt-2 mb-0" th:text="${tutoresPendientes}">0</h2>
-                        <p class="text-muted small mb-0">Pendientes Verif.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-3">
-                <div class="card border-info shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-calendar-check fs-1 text-info"></i>
-                        <h2 class="fw-bold mt-2 mb-0" th:text="${reservasHoy}">0</h2>
-                        <p class="text-muted small mb-0">Reservas Hoy</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-3">
-                <div class="card border-secondary shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-hourglass-split fs-1 text-secondary"></i>
-                        <h2 class="fw-bold mt-2 mb-0" th:text="${reservasPendientes}">0</h2>
-                        <p class="text-muted small mb-0">Pendientes</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-3">
-                <div class="card border-dark shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-activity fs-1 text-dark"></i>
-                        <h2 class="fw-bold mt-2 mb-0" th:text="${reservasActivas}">0</h2>
-                        <p class="text-muted small mb-0">Activas</p>
+                        <p class="text-muted small mb-0">Pendientes de Verificar</p>
                     </div>
                 </div>
             </div>
@@ -81,22 +54,17 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-2">
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4">
                                 <a href="/admin/tutores" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-people me-1"></i>Tutores
                                 </a>
                             </div>
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4">
                                 <a href="/admin/materias" class="btn btn-outline-success w-100">
                                     <i class="bi bi-book me-1"></i>Materias
                                 </a>
                             </div>
-                            <div class="col-6 col-md-3">
-                                <a href="/admin/configuracion" class="btn btn-outline-secondary w-100">
-                                    <i class="bi bi-sliders me-1"></i>Configuración
-                                </a>
-                            </div>
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4">
                                 <a href="/admin/resenas" class="btn btn-outline-info w-100">
                                     <i class="bi bi-chat-dots me-1"></i>Reseñas
                                 </a>

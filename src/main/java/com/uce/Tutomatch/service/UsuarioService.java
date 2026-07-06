@@ -51,18 +51,18 @@ public class UsuarioService {
                 false // rolAdmin siempre false en registro público
         );
 
+        Usuario saved = usuarioRepository.save(usuario);
+
         // Si se registra como tutor, crear perfil de tutor vacío
         if (request.isRolTutor()) {
             PerfilTutor perfil = new PerfilTutor();
-            perfil.setUsuario(usuario);
-            perfil.setSemestre(1); // valor por defecto
+            perfil.setUsuario(saved);
+            perfil.setSemestre(1);
             perfil.setDescripcion("");
             perfil.setVerificado(false);
-            perfil.setVisible(false); // no visible hasta verificación
-            usuario.setPerfilTutor(perfil);
+            perfil.setVisible(false);
+            perfilTutorRepository.save(perfil);
         }
-
-        Usuario saved = usuarioRepository.save(usuario);
         walletOperaciones.inicializarWallet(saved.getId());
         authService.setJwtCookie(response, saved);
         return UsuarioResponse.from(saved);
