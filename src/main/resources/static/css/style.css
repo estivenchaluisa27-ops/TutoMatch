@@ -184,14 +184,21 @@ h6 { font-size: 0.875rem; }
 }
 
 /* ---------- Buttons ---------- */
-.btn {
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    padding: 0.6rem 1.5rem;
-    transition: all 0.25s var(--ease-smooth);
-    position: relative;
-    overflow: hidden;
-}
+    .btn {
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        padding: 0.6rem 1.5rem;
+        transition: all 0.25s var(--ease-smooth);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ---------- Botones compactos para tablas ---------- */
+    .btn-compact {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
 
 .btn-primary {
     background-color: var(--brand);
@@ -609,6 +616,19 @@ h6 { font-size: 0.875rem; }
     background: var(--brand) !important;
     transform: translateY(-1px);
 }
+
+/* ---------- Simple status colors (no badge) ---------- */
+.status-pendiente { color: #ffc107; }
+.status-confirmada { color: #0dcaf0; }
+.status-pendiente-pago { color: #0d6efd; }
+.status-finalizada { color: #6c757d; }
+.status-cancelada { color: #dc3545; }
+
+[data-theme="dark"] .status-pendiente { color: #ffca28; }
+[data-theme="dark"] .status-confirmada { color: #0dd9ff; }
+[data-theme="dark"] .status-pendiente-pago { color: #339aff; }
+[data-theme="dark"] .status-finalizada { color: #adb5bd; }
+[data-theme="dark"] .status-cancelada { color: #ff6b6b; }
 
 /* ---------- List Group ---------- */
 .list-group-item {

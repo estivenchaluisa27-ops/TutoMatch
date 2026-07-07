@@ -52,17 +52,17 @@
                                         <td th:text="${#strings.substring(r.disponibilidad.horaInicio.toString(), 0, 5)} + ' - ' + ${#strings.substring(r.disponibilidad.horaFin.toString(), 0, 5)}">08:00 - 10:00</td>
                                         <td>
                                             <th:block th:switch="${r.estado.name()}">
-                                                <span th:case="'PENDIENTE'" class="badge bg-warning text-dark">Pendiente</span>
-                                                <span th:case="'CONFIRMADA'" class="badge bg-info">Confirmada</span>
-                                                <span th:case="'PENDIENTE_PAGO'" class="badge bg-primary">Pendiente de pago</span>
-                                                <span th:case="'FINALIZADA'" class="badge bg-secondary">Finalizada</span>
-                                                <span th:case="'CANCELADA'" class="badge bg-danger">Cancelada</span>
+                                                <span th:case="'PENDIENTE'" class="status-pendiente">Pendiente</span>
+                                                <span th:case="'CONFIRMADA'" class="status-confirmada">Confirmada</span>
+                                                <span th:case="'PENDIENTE_PAGO'" class="status-pendiente-pago">Pendiente de pago</span>
+                                                <span th:case="'FINALIZADA'" class="status-finalizada">Finalizada</span>
+                                                <span th:case="'CANCELADA'" class="status-cancelada">Cancelada</span>
                                             </th:block>
                                         </td>
                                         <td>
                                             <a th:if="${r.estado.name() == 'FINALIZADA' and not yaCalificadas.contains(r.id)}"
                                                th:href="@{'/resenas/nueva/' + ${r.id}}"
-                                               class="btn btn-warning btn-sm me-1">
+                                               class="btn btn-warning btn-compact me-1">
                                                  <i class="bi bi-pencil me-1"></i>Calificar
                                             </a>
                                             <span th:if="${r.estado.name() == 'FINALIZADA' and yaCalificadas.contains(r.id)}"
@@ -74,7 +74,7 @@
                                                   th:action="@{'/reservas/' + ${r.id} + '/pagar-token'}"
                                                   method="post"
                                                   class="d-inline me-1">
-                                                <button type="submit" class="btn btn-success btn-sm">
+                                                <button type="submit" class="btn btn-success btn-compact">
                                                     <i class="bi bi-coin me-1"></i>Pagar con <span th:text="${r.costoTokens}">1</span> Token(s)
                                                 </button>
                                             </form>
@@ -84,7 +84,7 @@
                                                   method="post"
                                                   class="d-inline"
                                                   onsubmit="return confirm('¿Cancelar esta tutoría? No se moverán tokens.')">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <button type="submit" class="btn btn-outline-danger btn-compact">
                                                     <i class="bi bi-x-circle me-1"></i>Cancelar
                                                 </button>
                                             </form>
@@ -94,7 +94,7 @@
                                                   method="post"
                                                   class="d-inline"
                                                   onsubmit="return confirm('¿Cancelar esta tutoría?')">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <button type="submit" class="btn btn-outline-danger btn-compact">
                                                     <i class="bi bi-x-circle me-1"></i>Cancelar
                                                 </button>
                                             </form>
@@ -129,11 +129,11 @@
                                         <td th:text="${#strings.substring(r.disponibilidad.horaInicio.toString(), 0, 5)} + ' - ' + ${#strings.substring(r.disponibilidad.horaFin.toString(), 0, 5)}">08:00 - 10:00</td>
                                         <td>
                                             <th:block th:switch="${r.estado.name()}">
-                                                <span th:case="'PENDIENTE'" class="badge bg-warning text-dark">Pendiente</span>
-                                                <span th:case="'CONFIRMADA'" class="badge bg-info">Confirmada</span>
-                                                <span th:case="'PENDIENTE_PAGO'" class="badge bg-primary">Pendiente de pago</span>
-                                                <span th:case="'FINALIZADA'" class="badge bg-secondary">Finalizada</span>
-                                                <span th:case="'CANCELADA'" class="badge bg-danger">Cancelada</span>
+                                                <span th:case="'PENDIENTE'" class="status-pendiente">Pendiente</span>
+                                                <span th:case="'CONFIRMADA'" class="status-confirmada">Confirmada</span>
+                                                <span th:case="'PENDIENTE_PAGO'" class="status-pendiente-pago">Pendiente de pago</span>
+                                                <span th:case="'FINALIZADA'" class="status-finalizada">Finalizada</span>
+                                                <span th:case="'CANCELADA'" class="status-cancelada">Cancelada</span>
                                             </th:block>
                                         </td>
                                         <td>
@@ -141,7 +141,7 @@
                                                   th:action="@{'/reservas/' + ${r.id} + '/confirmar'}"
                                                   method="post"
                                                   class="d-inline me-1">
-                                                <button type="submit" class="btn btn-outline-success btn-sm">
+                                                <button type="submit" class="btn btn-outline-success btn-compact">
                                                     <i class="bi bi-check-circle me-1"></i>Aceptar
                                                 </button>
                                             </form>
@@ -150,7 +150,7 @@
                                                   th:action="@{'/reservas/' + ${r.id} + '/marcar-impartida'}"
                                                   method="post"
                                                   class="d-inline me-1">
-                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                <button type="submit" class="btn btn-primary btn-compact">
                                                     <i class="bi bi-check2-circle me-1"></i>Marcar sesión impartida
                                                 </button>
                                             </form>
@@ -165,7 +165,7 @@
                                                   method="post"
                                                   class="d-inline"
                                                   onsubmit="return confirm('¿Cancelar esta tutoría?')">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <button type="submit" class="btn btn-outline-danger btn-compact">
                                                     <i class="bi bi-x-circle me-1"></i>Cancelar
                                                 </button>
                                             </form>
