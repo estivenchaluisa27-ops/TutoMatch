@@ -68,6 +68,7 @@ public class SearchController {
     }
 
     @GetMapping("/buscar")
+    @Transactional(readOnly = true)
     public String buscarTutores(@RequestParam(required = false) String materia,
                                 @RequestParam(required = false) String categoria,
                                 @RequestParam(required = false) String minCalificacion,
@@ -86,7 +87,15 @@ public class SearchController {
         Pageable pageable = PageRequest.of(page, size);
         Page<PerfilTutor> resultadosPage = perfilTutorService.buscarTutores(
                 materiaFilter, categoriaFilter, calificacionFilter, semestreFilter, pageable);
-        model.addAttribute("resultados", resultadosPage.getContent());
+        List<PerfilTutor> content = resultadosPage.getContent();
+        log.debug("=== DEBUG buscarTutores ===");
+        log.debug("totalElements={}, pageSize={}, content.size={}",
+                resultadosPage.getTotalElements(), resultadosPage.getSize(), content.size());
+        for (PerfilTutor t : content) {
+            log.debug("  tutor id={}, usuario={}, semestre={}, descripcion={}",
+                    t.getId(), t.getUsuario(), t.getSemestre(), t.getDescripcion());
+        }
+        model.addAttribute("resultados", content);
         model.addAttribute("page", resultadosPage);
         model.addAttribute("materia", materiaFilter);
         model.addAttribute("categoria", categoriaFilter);
