@@ -76,27 +76,27 @@
                         <i class="bi bi-people me-1"></i>
                         <span th:text="${#lists.size(resultados)}">0</span> tutor(es) encontrado(s)
                     </p>
-                    <div class="row row-cols-1 row-cols-md-2 g-3">
+                    <div class="row row-cols-1 g-4">
                         <div th:each="t : ${resultados}" class="col card-fade-in" th:style="'animation-delay: ' + (${t.id} * 0.04) + 's'">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="avatar-circle me-3">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="avatar-circle avatar-circle-lg me-3">
                                             <span th:text="${#strings.substring(t.usuario.nombreCompleto, 0, 1)}">I</span>
                                         </div>
                                         <div>
-                                            <h6 class="fw-bold mb-0" th:text="${t.usuario.nombreCompleto}">Nombre</h6>
-                                            <small class="text-muted" th:text="'Semestre ' + ${t.semestre}">Semestre</small>
+                                            <h5 class="fw-bold mb-0" th:text="${t.usuario.nombreCompleto}">Nombre</h5>
+                                            <span class="text-muted" th:text="'Semestre ' + ${t.semestre}">Semestre</span>
                                         </div>
                                     </div>
-                                    <p class="card-text small text-muted mb-2" th:text="${#strings.abbreviate(t.descripcion, 80)}">Descripción</p>
-                                    <div class="d-flex align-items-center mb-2 star-rating">
+                                    <p class="card-text text-muted mb-3" th:text="${#strings.abbreviate(t.descripcion, 120)}">Descripción</p>
+                                    <div class="d-flex align-items-center mb-3 star-rating">
                                         <span>
                                             <i class="bi bi-star-fill text-warning"></i>
-                                            <span class="fw-semibold ms-1" th:text="${t.calificacionPromedio}">5.0</span>
+                                            <span class="fw-bold ms-1 fs-5" th:text="${t.calificacionPromedio}">5.0</span>
                                         </span>
                                     </div>
-                                    <a th:href="@{/tutor/{id}(id=${t.id})}" class="btn btn-outline-primary btn-sm w-100">
+                                    <a th:href="@{/tutor/{id}(id=${t.id})}" class="btn btn-outline-primary w-100">
                                         Ver perfil completo
                                     </a>
                                 </div>
