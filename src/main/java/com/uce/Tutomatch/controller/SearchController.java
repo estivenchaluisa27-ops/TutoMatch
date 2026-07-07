@@ -173,7 +173,9 @@ public class SearchController {
                     && tutor.getUsuario().getCorreoInstitucional().equals(authentication.getName());
 
             List<Resena> resenas = resenaService.obtenerPorTutor(id);
-            Double promedio = tutor.getCalificacionPromedio().doubleValue();
+            Double promedio = tutor.getCalificacionPromedio() != null
+                    ? tutor.getCalificacionPromedio().doubleValue()
+                    : 0.0;
 
             model.addAttribute("tutor", tutor);
             model.addAttribute("bloquesPorDia", bloquesPorDia);
@@ -185,6 +187,9 @@ public class SearchController {
             model.addAttribute("promedio", promedio);
         } catch (IllegalArgumentException e) {
             return "redirect:/?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.error("Error al cargar perfil tutor id={}", id, e);
+            return "redirect:/?error=error_interno";
         }
 
         return "perfil-publico";

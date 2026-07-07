@@ -102,7 +102,7 @@ public class PerfilTutor {
     }
 
     public BigDecimal getCalificacionPromedio() {
-        return calificacionPromedio;
+        return calificacionPromedio != null ? calificacionPromedio : BigDecimal.ZERO;
     }
 
     public void setCalificacionPromedio(BigDecimal calificacionPromedio) {
