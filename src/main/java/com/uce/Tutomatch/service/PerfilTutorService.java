@@ -52,7 +52,7 @@ public class PerfilTutorService {
     }
 
     @Transactional
-    public TutorMateria agregarMateria(Long usuarioId, Long materiaId) {
+    public TutorMateria agregarMateria(Long usuarioId, Long materiaId, int tarifaHora) {
         PerfilTutor perfil = obtenerPorUsuarioId(usuarioId);
         Materia materia = materiaRepository.findById(materiaId)
                 .orElseThrow(() -> new IllegalArgumentException("Materia no encontrada"));
@@ -63,7 +63,7 @@ public class PerfilTutorService {
             throw new IllegalArgumentException("Ya tienes registrada esta materia");
         }
 
-        TutorMateria tutorMateria = new TutorMateria(perfil, materia);
+        TutorMateria tutorMateria = new TutorMateria(perfil, materia, tarifaHora);
         perfil.getMaterias().add(tutorMateria);
         perfilTutorRepository.save(perfil);
         return tutorMateria;

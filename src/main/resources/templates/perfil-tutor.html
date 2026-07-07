@@ -83,6 +83,11 @@
                                     </th:block>
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label for="tarifaHora" class="form-label fw-semibold">Tarifa por hora (tokens)</label>
+                                <input type="number" id="tarifaHora" name="tarifaHora" class="form-control"
+                                       step="1" min="0" placeholder="0" required>
+                            </div>
                             <button type="submit" class="btn btn-success w-100">
                                 <i class="bi bi-plus-circle me-1"></i>Agregar Materia
                             </button>
@@ -107,6 +112,8 @@
                                         <i th:if="${tm.materia.icono == null}" class="bi bi-book fs-5"></i>
                                     </span>
                                     <span class="fw-semibold" th:text="${tm.materia.nombre}">Materia</span>
+                                    <span class="badge text-bg-success ms-2"
+                                          th:text="${tm.tarifaHora} + ' tokens'">0 tokens</span>
                                 </div>
                                 <form th:action="@{/tutor/perfil/materias/{id}/eliminar(id=${tm.materia.id})}" method="post" style="display:inline;" onsubmit="return confirm('Eliminar esta materia?')">
                                     <button type="submit" class="btn btn-outline-danger btn-sm" aria-label="Eliminar materia">

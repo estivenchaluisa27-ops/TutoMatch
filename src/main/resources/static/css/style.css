@@ -1536,6 +1536,10 @@ hr {
     box-shadow: none;
     background: transparent;
 }
+[data-theme="dark"] .form-select option {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
 [data-theme="dark"] .form-control::placeholder {
     color: var(--text-muted);
     opacity: 1;

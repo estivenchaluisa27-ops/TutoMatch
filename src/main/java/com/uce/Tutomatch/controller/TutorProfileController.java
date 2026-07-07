@@ -154,7 +154,7 @@ public class TutorProfileController {
                                   BindingResult result) {
         if (result.hasErrors()) return "redirect:/tutor/perfil?error=verifica_los_campos";
         try {
-            perfilTutorService.agregarMateria(authUtil.obtenerUsuarioId(auth), dto.getMateriaId());
+            perfilTutorService.agregarMateria(authUtil.obtenerUsuarioId(auth), dto.getMateriaId(), dto.getTarifaHora());
             return "redirect:/tutor/perfil?success=materia";
         } catch (Exception e) {
             return "redirect:/tutor/perfil?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
