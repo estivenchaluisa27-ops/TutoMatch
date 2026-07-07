@@ -140,20 +140,9 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
     // ====================================================================
 
     // --- 7. Search results cards scroll reveal (resultados.html) ---
-    let resultCards = document.querySelectorAll('.col-lg-9 .card-fade-in');
-    if (resultCards.length) {
-        ScrollTrigger.batch(resultCards, {
-            onEnter: batch => gsap.from(batch, {
-                autoAlpha: 0,
-                y: 30,
-                duration: 0.5,
-                stagger: 0.06,
-                ease: "back.out(1.1)",
-                overwrite: true
-            }),
-            start: "top 88%"
-        });
-    }
+    // (handled by CSS card-fade-in animation — GSAP ScrollTrigger
+    //  conflicts with CSS animation-fill-mode:both, causing
+    //  visibility: hidden to persist)
 
     // --- 8. Profile page cards scroll reveal ---
     let profileCards = document.querySelectorAll(
