@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class SearchController {
@@ -46,6 +47,24 @@ public class SearchController {
         this.perfilTutorService = perfilTutorService;
         this.materiaRepository = materiaRepository;
         this.resenaService = resenaService;
+    }
+
+    @GetMapping("/api/buscar/sugerencias")
+    @ResponseBody
+    public List<Map<String, Object>> sugerencias(@RequestParam(required = false) String q) {
+        if (q == null || q.trim().length() < 2) {
+            return List.of();
+        }
+        String pattern = "%" + q.trim() + "%";
+        List<Materia> materias = materiaRepository.buscarSugerencias(pattern, 10);
+        return materias.stream()
+                .map(m -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("nombre", m.getNombre());
+                    item.put("categoria", m.getCategoria());
+                    return item;
+                })
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/buscar")

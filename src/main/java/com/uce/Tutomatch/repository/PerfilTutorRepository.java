@@ -25,29 +25,63 @@ public interface PerfilTutorRepository extends JpaRepository<PerfilTutor, Long> 
            countQuery = "SELECT COUNT(pt) FROM PerfilTutor pt WHERE pt.verificado = false")
     Page<PerfilTutor> findByVerificadoFalse(Pageable pageable);
 
-    @Query("SELECT DISTINCT pt FROM PerfilTutor pt " +
-           "JOIN FETCH pt.usuario " +
-           "JOIN pt.materias tm " +
-           "JOIN tm.materia m " +
-           "WHERE pt.verificado = true AND pt.visible = true " +
-           "AND (:nombre IS NULL OR LOWER(m.nombre) LIKE :nombre OR LOWER(m.categoria) LIKE :nombre) " +
-           "AND (:categoria IS NULL OR m.categoria = :categoria) " +
-           "AND (:minCalificacion IS NULL OR pt.calificacionPromedio >= :minCalificacion) " +
-           "AND (:semestre IS NULL OR pt.semestre = :semestre)")
-    List<PerfilTutor> buscarTutores(@Param("nombre") String nombre,
-                                    @Param("categoria") String categoria,
-                                    @Param("minCalificacion") BigDecimal minCalificacion,
-                                    @Param("semestre") Integer semestre);
+    // ════════════════════════════════════════════════════════════
+    // Búsqueda pública — native SQL con unaccent() + ILIKE
+    // Requiere: CREATE EXTENSION IF NOT EXISTS unaccent;
+    // Busca en: materia.nombre, materia.categoria, usuario.nombre_completo
+    // ════════════════════════════════════════════════════════════
 
-    @Query("SELECT DISTINCT pt FROM PerfilTutor pt " +
-           "JOIN FETCH pt.usuario " +
-           "JOIN pt.materias tm " +
-           "JOIN tm.materia m " +
-           "WHERE pt.verificado = true AND pt.visible = true " +
-           "AND (:nombre IS NULL OR LOWER(m.nombre) LIKE :nombre OR LOWER(m.categoria) LIKE :nombre) " +
-           "AND (:categoria IS NULL OR m.categoria = :categoria) " +
-           "AND (:minCalificacion IS NULL OR pt.calificacionPromedio >= :minCalificacion) " +
-           "AND (:semestre IS NULL OR pt.semestre = :semestre)")
+    @Query(value = """
+        SELECT DISTINCT pt.* FROM perfiles_tutor pt
+        JOIN usuarios u ON pt.usuario_id = u.id
+        JOIN tutor_materias tm ON tm.perfil_tutor_id = pt.id
+        JOIN materia m ON tm.materia_id = m.id
+        WHERE pt.verificado = true AND pt.visible = true
+        AND (:nombre IS NULL
+             OR unaccent(m.nombre) ILIKE unaccent(:nombre)
+             OR unaccent(m.categoria) ILIKE unaccent(:nombre)
+             OR unaccent(u.nombre_completo) ILIKE unaccent(:nombre))
+        AND (:categoria IS NULL OR unaccent(m.categoria) = unaccent(:categoria))
+        AND (:minCalificacion IS NULL OR pt.calificacion_promedio >= :minCalificacion)
+        AND (:semestre IS NULL OR pt.semestre = :semestre)
+        ORDER BY pt.calificacion_promedio DESC
+        """,
+            nativeQuery = true)
+    List<PerfilTutor> buscarTutores(@Param("nombre") String nombre,
+                                   @Param("categoria") String categoria,
+                                   @Param("minCalificacion") BigDecimal minCalificacion,
+                                   @Param("semestre") Integer semestre);
+
+    @Query(value = """
+        SELECT DISTINCT pt.* FROM perfiles_tutor pt
+        JOIN usuarios u ON pt.usuario_id = u.id
+        JOIN tutor_materias tm ON tm.perfil_tutor_id = pt.id
+        JOIN materia m ON tm.materia_id = m.id
+        WHERE pt.verificado = true AND pt.visible = true
+        AND (:nombre IS NULL
+             OR unaccent(m.nombre) ILIKE unaccent(:nombre)
+             OR unaccent(m.categoria) ILIKE unaccent(:nombre)
+             OR unaccent(u.nombre_completo) ILIKE unaccent(:nombre))
+        AND (:categoria IS NULL OR unaccent(m.categoria) = unaccent(:categoria))
+        AND (:minCalificacion IS NULL OR pt.calificacion_promedio >= :minCalificacion)
+        AND (:semestre IS NULL OR pt.semestre = :semestre)
+        ORDER BY pt.calificacion_promedio DESC
+        """,
+            countQuery = """
+        SELECT COUNT(DISTINCT pt.id) FROM perfiles_tutor pt
+        JOIN usuarios u ON pt.usuario_id = u.id
+        JOIN tutor_materias tm ON tm.perfil_tutor_id = pt.id
+        JOIN materia m ON tm.materia_id = m.id
+        WHERE pt.verificado = true AND pt.visible = true
+        AND (:nombre IS NULL
+             OR unaccent(m.nombre) ILIKE unaccent(:nombre)
+             OR unaccent(m.categoria) ILIKE unaccent(:nombre)
+             OR unaccent(u.nombre_completo) ILIKE unaccent(:nombre))
+        AND (:categoria IS NULL OR unaccent(m.categoria) = unaccent(:categoria))
+        AND (:minCalificacion IS NULL OR pt.calificacion_promedio >= :minCalificacion)
+        AND (:semestre IS NULL OR pt.semestre = :semestre)
+        """,
+            nativeQuery = true)
     Page<PerfilTutor> buscarTutores(@Param("nombre") String nombre,
                                     @Param("categoria") String categoria,
                                     @Param("minCalificacion") BigDecimal minCalificacion,
@@ -69,31 +103,61 @@ public interface PerfilTutorRepository extends JpaRepository<PerfilTutor, Long> 
            countQuery = "SELECT COUNT(pt) FROM PerfilTutor pt WHERE pt.verificado = true AND pt.visible = true")
     Page<PerfilTutor> findByVerificadoTrueAndVisibleTrue(Pageable pageable);
 
-    @Query("SELECT DISTINCT pt FROM PerfilTutor pt " +
-           "JOIN FETCH pt.usuario " +
-           "LEFT JOIN pt.materias tm " +
-           "LEFT JOIN tm.materia m " +
-           "WHERE (:nombre IS NULL OR LOWER(m.nombre) LIKE :nombre OR LOWER(m.categoria) LIKE :nombre) " +
-           "AND (:categoria IS NULL OR m.categoria = :categoria) " +
-           "AND (:minCalificacion IS NULL OR pt.calificacionPromedio >= :minCalificacion) " +
-           "AND (:semestre IS NULL OR pt.semestre = :semestre)")
+    // ════════════════════════════════════════════════════════════
+    // Búsqueda admin — LEFT JOIN, sin filtro verificado/visible
+    // ════════════════════════════════════════════════════════════
+
+    @Query(value = """
+        SELECT DISTINCT pt.* FROM perfiles_tutor pt
+        JOIN usuarios u ON pt.usuario_id = u.id
+        LEFT JOIN tutor_materias tm ON tm.perfil_tutor_id = pt.id
+        LEFT JOIN materia m ON tm.materia_id = m.id
+        WHERE (:nombre IS NULL
+             OR unaccent(m.nombre) ILIKE unaccent(:nombre)
+             OR unaccent(m.categoria) ILIKE unaccent(:nombre)
+             OR unaccent(u.nombre_completo) ILIKE unaccent(:nombre))
+        AND (:categoria IS NULL OR unaccent(m.categoria) = unaccent(:categoria))
+        AND (:minCalificacion IS NULL OR pt.calificacion_promedio >= :minCalificacion)
+        AND (:semestre IS NULL OR pt.semestre = :semestre)
+        ORDER BY u.nombre_completo ASC
+        """,
+            nativeQuery = true)
     List<PerfilTutor> buscarTutoresAdmin(@Param("nombre") String nombre,
-                                    @Param("categoria") String categoria,
-                                    @Param("minCalificacion") BigDecimal minCalificacion,
-                                    @Param("semestre") Integer semestre);
+                                         @Param("categoria") String categoria,
+                                         @Param("minCalificacion") BigDecimal minCalificacion,
+                                         @Param("semestre") Integer semestre);
 
-    @Query("SELECT DISTINCT pt FROM PerfilTutor pt " +
-           "JOIN FETCH pt.usuario " +
-           "LEFT JOIN pt.materias tm " +
-           "LEFT JOIN tm.materia m " +
-           "WHERE (:nombre IS NULL OR LOWER(m.nombre) LIKE :nombre OR LOWER(m.categoria) LIKE :nombre) " +
-           "AND (:categoria IS NULL OR m.categoria = :categoria) " +
-           "AND (:minCalificacion IS NULL OR pt.calificacionPromedio >= :minCalificacion) " +
-           "AND (:semestre IS NULL OR pt.semestre = :semestre)")
+    @Query(value = """
+        SELECT DISTINCT pt.* FROM perfiles_tutor pt
+        JOIN usuarios u ON pt.usuario_id = u.id
+        LEFT JOIN tutor_materias tm ON tm.perfil_tutor_id = pt.id
+        LEFT JOIN materia m ON tm.materia_id = m.id
+        WHERE (:nombre IS NULL
+             OR unaccent(m.nombre) ILIKE unaccent(:nombre)
+             OR unaccent(m.categoria) ILIKE unaccent(:nombre)
+             OR unaccent(u.nombre_completo) ILIKE unaccent(:nombre))
+        AND (:categoria IS NULL OR unaccent(m.categoria) = unaccent(:categoria))
+        AND (:minCalificacion IS NULL OR pt.calificacion_promedio >= :minCalificacion)
+        AND (:semestre IS NULL OR pt.semestre = :semestre)
+        ORDER BY u.nombre_completo ASC
+        """,
+            countQuery = """
+        SELECT COUNT(DISTINCT pt.id) FROM perfiles_tutor pt
+        JOIN usuarios u ON pt.usuario_id = u.id
+        LEFT JOIN tutor_materias tm ON tm.perfil_tutor_id = pt.id
+        LEFT JOIN materia m ON tm.materia_id = m.id
+        WHERE (:nombre IS NULL
+             OR unaccent(m.nombre) ILIKE unaccent(:nombre)
+             OR unaccent(m.categoria) ILIKE unaccent(:nombre)
+             OR unaccent(u.nombre_completo) ILIKE unaccent(:nombre))
+        AND (:categoria IS NULL OR unaccent(m.categoria) = unaccent(:categoria))
+        AND (:minCalificacion IS NULL OR pt.calificacion_promedio >= :minCalificacion)
+        AND (:semestre IS NULL OR pt.semestre = :semestre)
+        """,
+            nativeQuery = true)
     Page<PerfilTutor> buscarTutoresAdmin(@Param("nombre") String nombre,
-                                    @Param("categoria") String categoria,
-                                    @Param("minCalificacion") BigDecimal minCalificacion,
-                                    @Param("semestre") Integer semestre,
-                                    Pageable pageable);
-
+                                         @Param("categoria") String categoria,
+                                         @Param("minCalificacion") BigDecimal minCalificacion,
+                                         @Param("semestre") Integer semestre,
+                                         Pageable pageable);
 }

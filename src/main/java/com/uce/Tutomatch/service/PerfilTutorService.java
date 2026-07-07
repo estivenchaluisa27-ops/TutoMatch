@@ -114,7 +114,7 @@ public class PerfilTutorService {
     public List<PerfilTutor> buscarTutores(String materia, String categoria,
                                            BigDecimal minCalificacion,
                                            Integer semestre) {
-        String pattern = materia != null ? "%" + materia.toLowerCase() + "%" : null;
+        String pattern = materia != null ? "%" + materia + "%" : null;
         return perfilTutorRepository.buscarTutores(
                 pattern, categoria, minCalificacion, semestre);
     }
@@ -123,7 +123,7 @@ public class PerfilTutorService {
     public Page<PerfilTutor> buscarTutores(String materia, String categoria,
                                            BigDecimal minCalificacion,
                                            Integer semestre, Pageable pageable) {
-        String pattern = materia != null ? "%" + materia.toLowerCase() + "%" : null;
+        String pattern = materia != null ? "%" + materia + "%" : null;
         return perfilTutorRepository.buscarTutores(
                 pattern, categoria, minCalificacion, semestre, pageable);
     }
@@ -132,7 +132,7 @@ public class PerfilTutorService {
     public List<PerfilTutor> buscarTutoresAdmin(String materia, String categoria,
                                                 BigDecimal minCalificacion,
                                                 Integer semestre) {
-        String pattern = materia != null ? "%" + materia.toLowerCase() + "%" : null;
+        String pattern = materia != null ? "%" + materia + "%" : null;
         return perfilTutorRepository.buscarTutoresAdmin(
                 pattern, categoria, minCalificacion, semestre);
     }
@@ -141,7 +141,7 @@ public class PerfilTutorService {
     public Page<PerfilTutor> buscarTutoresAdmin(String materia, String categoria,
                                                 BigDecimal minCalificacion,
                                                 Integer semestre, Pageable pageable) {
-        String pattern = materia != null ? "%" + materia.toLowerCase() + "%" : null;
+        String pattern = materia != null ? "%" + materia + "%" : null;
         return perfilTutorRepository.buscarTutoresAdmin(
                 pattern, categoria, minCalificacion, semestre, pageable);
     }

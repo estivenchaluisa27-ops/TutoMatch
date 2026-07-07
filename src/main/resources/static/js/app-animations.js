@@ -600,9 +600,9 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
                             resetToPhaseA();
                             loop();
                         });
-                    }, 10000);
-                }, 10000);
-            }, 12000);
+                    }, 14000);
+                }, 14000);
+            }, 28000);
         }
         loop();
     }
