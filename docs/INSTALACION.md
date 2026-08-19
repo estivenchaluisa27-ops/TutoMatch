@@ -11,9 +11,12 @@
 
 ```sql
 CREATE DATABASE tutomatch;
+CREATE EXTENSION IF NOT EXISTS unaccent;  -- requerida por búsqueda y autocompletado
 ```
 
 El esquema se crea solo (`spring.jpa.hibernate.ddl-auto=update`).
+
+> ⚠️ **Sin la extensión `unaccent`, la búsqueda de tutores y el autocompletado de materias fallan.**
 
 ## 2. Configurar credenciales
 
@@ -25,7 +28,7 @@ spring.datasource.username=<TU_USUARIO>
 spring.datasource.password=<TU_PASSWORD>
 ```
 
-> ⚠️ El archivo contiene valores de desarrollo local. No subas credenciales reales a GitHub.
+> ⚠️ El archivo contiene valores de desarrollo local. No subas credenciales reales a GitHub; en dev local puedes externalizarlas igual que en prod (variables de entorno `DB_USERNAME`/`DB_PASSWORD`).
 
 ## 3. Ejecutar
 

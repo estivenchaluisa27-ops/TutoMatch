@@ -1,17 +1,18 @@
 # TutoMatch — API y rutas
 
-Aplicación SSR con Thymeleaf: la mayoría de rutas devuelven páginas HTML. Las de `/api/` son JSON (chat y utilidades). Autenticación vía cookie JWT.
+Aplicación SSR con Thymeleaf: la mayoría de rutas devuelven páginas HTML. Las de `/api/` y los POST de `/auth` son JSON. Autenticación vía cookie JWT.
 
 ## Páginas (SSR)
 
-### Autenticación — `AuthController` (`/auth`)
+### Autenticación
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET/POST | `/auth/registro` | Registro de usuario (estudiante o tutor) |
-| GET/POST | `/auth/login` | Inicio de sesión |
-| POST | `/auth/logout` | Cerrar sesión |
-| GET | `/auth/perfil` | Redirige a perfil propio |
+| GET | `/auth/registro` · `/auth/login` | Formularios (páginas SSR) |
+| POST | `/auth/registro` | Registrar usuario (estudiante o tutor) — JSON |
+| POST | `/auth/login` | Iniciar sesión — JSON |
+| POST | `/auth/logout` | Cerrar sesión — JSON |
+| GET | `/auth/perfil` | Datos del usuario autenticado — JSON |
 
 ### Home y búsqueda
 
@@ -27,7 +28,7 @@ Aplicación SSR con Thymeleaf: la mayoría de rutas devuelven páginas HTML. Las
 |---|---|---|
 | GET | `/reservas` | Listado de mis reservas |
 | POST | `/reservas/crear` | Crear reserva de un bloque |
-| POST | `/reservas/{id}/confirmar` | Tutor confirma (fija costo) |
+| POST | `/reservas/{id}/confirmar` | Tutor confirma la reserva (costo fijo: 1 token) |
 | POST | `/reservas/{id}/cancelar` | Cancelar reserva |
 | POST | `/reservas/{id}/marcar-impartida` | Tutor marca la sesión como impartida → `PENDIENTE_PAGO` |
 | POST | `/reservas/{id}/pagar-token` | Estudiante paga con tokens → `FINALIZADA` |
@@ -45,15 +46,17 @@ Aplicación SSR con Thymeleaf: la mayoría de rutas devuelven páginas HTML. Las
 | POST | `/tutor/perfil/materias/{materiaId}/eliminar` | Quitar materia |
 | GET/POST | `/tutor/disponibilidad` | Gestión de bloques semanales |
 | POST | `/tutor/disponibilidad/{id}/eliminar` | Eliminar bloque |
+| GET | `/tutor/disponibilidad/semanal` | Disponibilidad semanal |
+| POST | `/tutor/disponibilidad/semanal/guardar` | Guardar disponibilidad semanal |
+| POST | `/tutor/disponibilidad/semanal/limpiar` | Limpiar disponibilidad semanal |
 
 ### Reseñas — `ResenaController` (`/resenas`)
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/resenas` | Mis reseñas |
 | GET | `/resenas/nueva/{reservaId}` | Formulario de reseña (solo reserva `FINALIZADA`) |
 | POST | `/resenas/guardar` | Guardar reseña |
-| POST | `/resenas/eliminar/{id}` | Eliminar reseña propia |
+| POST | `/resenas/eliminar/{id}` | Eliminar reseña (solo administradores) |
 
 ### Wallet — `TokenController`
 
@@ -61,12 +64,17 @@ Aplicación SSR con Thymeleaf: la mayoría de rutas devuelven páginas HTML. Las
 |---|---|---|
 | GET | `/wallet` | Saldo e historial de transacciones (paginado) |
 
-### Admin — `AdminController` (`/admin`)
+### Admin
 
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/admin` | Dashboard de administración |
-| — | `/admin/tutores` · `/admin/materias` · `/admin/resenas` · `/admin/configuracion` | Gestión de tutores, materias, reseñas y parámetros |
+| GET | `/admin/tutores` | Listado de tutores |
+| POST | `/admin/tutores/{id}/verificar` | Verificar tutor |
+| GET | `/admin/materias` | Gestión de materias |
+| POST | `/admin/materias/agregar` · `/admin/materias/{id}/editar` · `/admin/materias/{id}/eliminar` | CRUD de materias |
+| GET | `/admin/resenas` | Gestión de reseñas |
+| POST | `/admin/resenas/{id}/eliminar` | Eliminar reseña (admin) |
 
 ## API JSON
 

@@ -17,8 +17,8 @@ Plataforma universitaria (UCE) que conecta estudiantes con tutores por materia: 
 
 | Paquete | Responsabilidad |
 |---|---|
-| `config/` | Beans de configuración, seed de admin (`DbSeed`), advice global |
-| `security/` | JWT (provider, filter, handshake WS), `SecurityConfig`, `CustomUserDetailsService` |
+| `security/` | JWT (provider, filter, handshake WS), `CustomUserDetailsService` |
+| `config/` | `SecurityConfig`, beans de configuración, seed de admin (`DbSeed`), advice global |
 | `controller/` | 17 controllers: páginas (SSR), REST de chat, WS |
 | `service/` | 14 servicios: lógica de dominio y orquestación |
 | `repository/` | Repositorios Spring Data JPA |
@@ -30,7 +30,7 @@ Plataforma universitaria (UCE) que conecta estudiantes con tutores por materia: 
 
 | Entidad | Rol |
 |---|---|
-| `Usuario` | Estudiante o tutor; relación circular con `PerfilTutor` (deuda técnica conocida) |
+| `Usuario` | Estudiante o tutor; relación unidireccional `PerfilTutor → Usuario` (LAZY) |
 | `PerfilTutor` | Datos de tutoría: bio, materias, calificación promedio |
 | `Materia` / `TutorMateria` | Catálogo de materias y relación tutor↔materia |
 | `Disponibilidad` / `BloqueSemanal` | Bloques de tiempo ofertados por el tutor (semanal) |
@@ -52,9 +52,10 @@ PENDIENTE ──(tutor confirma)──> CONFIRMADA ──(tutor marca impartida)
                                                                       FINALIZADA
 ```
 
-- Al **confirmar** el tutor se fija el costo en tokens.
-- Al **pagar**, `ReservaPagoService` debita de la wallet y acredita la reserva.
+- Al **confirmar**, el tutor confirma la reserva; el costo queda fijo en **1 token** (sin mecanismo actual para cambiarlo).
+- Al **pagar**, `ReservaPagoService` debita la wallet del **estudiante** y acredita a la del **tutor**.
 - `FINALIZADA` habilita la reseña.
+- **Cancelación**: el tutor solo puede cancelar reservas `PENDIENTES`; en `PENDIENTE_PAGO` solo el estudiante puede cancelar.
 
 ## Economía de tokens (Fase 2.1)
 
@@ -70,13 +71,13 @@ PENDIENTE ──(tutor confirma)──> CONFIRMADA ──(tutor marca impartida)
 
 ## Búsqueda
 
-- `SearchController`: autocompletado de materias/tutores con `unaccent` + `ILIKE` (insensible a acentos y mayúsculas en PostgreSQL).
+- `SearchController`: autocompletado de **materias** con `unaccent` + `ILIKE`; búsqueda de tutores por materia, categoría o nombre (también `unaccent` + `ILIKE`).
 
 ## Decisiones y deudas técnicas
 
 | Tema | Estado |
 |---|---|
-| Dependencia circular `Usuario` ↔ `PerfilTutor` | **ALTA** — riesgo de `LazyInitializationException`; requiere refactor (eliminar bidireccionalidad) |
+| Relación `PerfilTutor → Usuario` LAZY unidireccional | Riesgo de `LazyInitializationException` al acceder fuera de transacción (mitigado con `JOIN FETCH` en repositorios) |
 | Fase 3 (masterclass) | Pendiente |
 | `TokenServiceTest` y `ReservaPagoServiceTest` | Pendientes (cobertura de la economía de tokens) |
 | Seed de admin | `DbSeed` crea el admin inicial con credenciales de `application-{profile}.properties` |
